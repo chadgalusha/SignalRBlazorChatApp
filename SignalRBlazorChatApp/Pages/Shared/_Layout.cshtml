@@ -9,6 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ChatApplication</title>
 
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+
     <environment include="Development">
         <link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/Identity/css/site.css" />
@@ -88,6 +91,7 @@
         </script>
         <script src="~/Identity/js/site.js" asp-append-version="true"></script>
     </environment>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
 using SignalRBlazorChatApp.Areas.Identity;
 using SignalRBlazorChatApp.Data;
 using SignalRBlazorChatApp.Models;
@@ -26,6 +27,8 @@ namespace SignalRBlazorChatApp
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
             builder.Services.AddSingleton<WeatherForecastService>();
+
+            builder.Services.AddMudServices();
 
             var app = builder.Build();
 
