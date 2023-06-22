@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRBlazorChatApp", "SignalRBlazorChatApp\SignalRBlazorChatApp.csproj", "{3ED3A9EF-3874-4065-B679-BEE3FF0395A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRBlazorChatApp", "SignalRBlazorChatApp\SignalRBlazorChatApp.csproj", "{3ED3A9EF-3874-4065-B679-BEE3FF0395A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApplicationModels", "ChatApplicationModels\ChatApplicationModels.csproj", "{6EE0264A-485A-4D4A-ABFF-332159BF3955}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatApplicationModels", "ChatApplicationModels\ChatApplicationModels.csproj", "{6EE0264A-485A-4D4A-ABFF-332159BF3955}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRBlazorGroupsMessages.API", "SignalRBlazorGroupsMessages.API\SignalRBlazorGroupsMessages.API.csproj", "{1E0B3235-1EF7-4D12-B0EE-0780A5CC1D20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRBlazorGroupsMessages.API", "SignalRBlazorGroupsMessages.API\SignalRBlazorGroupsMessages.API.csproj", "{1E0B3235-1EF7-4D12-B0EE-0780A5CC1D20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRBlazorRequestsInvitations.API", "SignalRBlazorRequestInvitation.API\SignalRBlazorRequestsInvitations.API.csproj", "{8B2421FE-D857-4A8E-96DF-9F9F6442E6CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{1E0B3235-1EF7-4D12-B0EE-0780A5CC1D20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E0B3235-1EF7-4D12-B0EE-0780A5CC1D20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E0B3235-1EF7-4D12-B0EE-0780A5CC1D20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B2421FE-D857-4A8E-96DF-9F9F6442E6CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B2421FE-D857-4A8E-96DF-9F9F6442E6CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B2421FE-D857-4A8E-96DF-9F9F6442E6CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B2421FE-D857-4A8E-96DF-9F9F6442E6CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
