@@ -32,4 +32,8 @@
     <ProjectReference Include="..\ChatApplicationModels\ChatApplicationModels.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Logs\" />
+  </ItemGroup>
+
 </Project>

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using Serilog;
 using SignalRBlazorChatApp.Areas.Identity;
 using SignalRBlazorChatApp.Data;
 using SignalRBlazorChatApp.Models;
@@ -12,6 +13,12 @@ namespace SignalRBlazorChatApp
     {
         public static void Main(string[] args)
         {
+            // Add Serilog
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File("Logs/SignalBlazorChatApp.txt", rollingInterval: RollingInterval.Month)
+                .CreateLogger();
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.

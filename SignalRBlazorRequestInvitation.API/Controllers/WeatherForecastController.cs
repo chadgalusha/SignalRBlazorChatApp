@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace SignalRBlazorRequestInvitation.API.Controllers
+namespace SignalRBlazorRequestsInvitations.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

@@ -1,4 +1,4 @@
-namespace SignalRBlazorRequestInvitation.API
+namespace SignalRBlazorRequestsInvitations.API
 {
     public class WeatherForecast
     {

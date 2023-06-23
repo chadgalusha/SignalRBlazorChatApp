@@ -1,9 +1,9 @@
 ﻿using ChatApplicationModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using SignalRBlazorChatApp.Models;
+using SignalRBlazorGroupsMessages.API.Models;
 
-namespace SignalRBlazorChatApp.Data
+namespace SignalRBlazorGroupsMessages.API.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
