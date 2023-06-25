@@ -13,7 +13,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             _context = context ?? throw new Exception(nameof(context));
         }
 
-        public async Task<List<PublicMessages>> GetMessagesByGroupAsync(int groupId)
+        public async Task<List<PublicMessages>> GetMessagesByGroupIdAsync(int groupId)
         {
             List<PublicMessages> messages = new();
             messages = await _context.PublicMessages
@@ -42,6 +42,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         public async Task AddMessageAsync(PublicMessages message)
         {
             await _context.PublicMessages.AddAsync(message);
+            await _context.SaveChangesAsync();
         }
 
         public async Task ModifyMessageAsync(PublicMessages message)

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using SignalRBlazorGroupsMessages.API.Data;
+using SignalRBlazorGroupsMessages.API.DataAccess;
 using System.Text;
 
 namespace SignalRBlazorGroupsMessages.API
@@ -21,6 +22,10 @@ namespace SignalRBlazorGroupsMessages.API
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            // Interface to implementation
+            builder.Services.AddTransient<IPublicMessagesDataAccess, PublicMessagesDataAccess>();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

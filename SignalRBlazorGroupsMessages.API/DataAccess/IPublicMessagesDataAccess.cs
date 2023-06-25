@@ -6,7 +6,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
     {
         Task AddMessageAsync(PublicMessages message);
         Task DeleteMessage(PublicMessages message);
-        Task<List<PublicMessages>> GetMessagesByGroupAsync(int groupId);
+        Task<List<PublicMessages>> GetMessagesByGroupIdAsync(int groupId);
         Task<PublicMessages> GetPublicMessageByIdAsync(string messageId);
         Task ModifyMessageAsync(PublicMessages message);
         Task<bool> PublicMessageExists(string messageId);
