@@ -18,7 +18,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task GetPublicMessages_ReturnsMessagesAsync()
+        public async Task GetPublicMessagesByGroupId_ReturnsMessages()
         {
             List<PublicMessages> listMessages = await _dataAccess.GetMessagesByGroupIdAsync(2);
 
@@ -30,6 +30,16 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
             Assert.Equal(2, listMessages.Count);
             Assert.Equal(expectedPublicMessageId, actualPublicMessageId);
+        }
+
+        [Fact]
+        public async Task GetPublicMessagesByUserId_ReturnsMessages()
+        {
+            string userId = "e1b9cf9a-ff86-4607-8765-9e47a305062a";
+
+            List<PublicMessages> listMessages = await _dataAccess.GetMessagesByUserIdAsync(userId);
+
+            Assert.True(listMessages.Count > 0);
         }
 
         [Fact]
@@ -83,15 +93,17 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task DeleteMessage_IsSuccess()
         {
-            _context.Database.BeginTransaction();
-
             string publicMessageId = "e8ee70b6-678a-4b86-934e-da7f404a33a3";
             PublicMessages publicMessageToDelete = await _dataAccess.GetPublicMessageByIdAsync(publicMessageId);
+
+            _context.Database.BeginTransaction();
+            
             await _dataAccess.DeleteMessage(publicMessageToDelete);
 
             _context.ChangeTracker.Clear();
 
-            Assert.False(await _dataAccess.PublicMessageExists(publicMessageId));
+            bool messageExists = await _dataAccess.PublicMessageExists(publicMessageId);
+            Assert.False(messageExists);
         }
 
         #region PRIVATE METHODS

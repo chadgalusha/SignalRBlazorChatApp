@@ -15,14 +15,20 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<List<PublicMessages>> GetMessagesByGroupIdAsync(int groupId)
         {
-            List<PublicMessages> messages = new();
-            messages = await _context.PublicMessages
+            return await _context.PublicMessages
                 .Where(g => g.ChatGroupId == groupId)
                 .OrderByDescending(o => o.MessageDateTime)
                 .Take(50)
                 .ToListAsync();
+        }
 
-            return messages;
+        public async Task<List<PublicMessages>> GetMessagesByUserIdAsync(string userId)
+        {
+            return await _context.PublicMessages
+                .Where(u => u.UserId == userId)
+                .OrderByDescending(o => o.MessageDateTime)
+                .Take(50)
+                .ToListAsync();
         }
 
         public async Task<PublicMessages> GetPublicMessageByIdAsync(string messageId)

@@ -25,6 +25,7 @@ namespace SignalRBlazorGroupsMessages.API
 
             // Interface to implementation
             builder.Services.AddTransient<IPublicMessagesDataAccess, PublicMessagesDataAccess>();
+            builder.Services.AddTransient<IChatGroupsDataAccess, ChatGroupsDataAccess>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
