@@ -1,17 +1,12 @@
 ﻿using ChatApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
     public class TestChatGroupsDatabaseFixture
     {
-        private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=EFTestSample;Trusted_Connection=True";
+        private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=ChatGroupsTestSample;Trusted_Connection=True";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
@@ -27,8 +22,13 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
 
+                        context.AddRange(GetListChatGroups());
+                        context.AddRange(GetListPrivateGroupMembers());
+
                         context.SaveChanges();
                     }
+
+                    _databaseInitialized = true;
                 }
             }
         }
@@ -43,7 +43,38 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             List<ChatGroups> chatGroupList = new()
             {
-
+                new()
+                {
+                    //ChatGroupId      = 1,
+                    ChatGroupName    = "TestPublicGroup1",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
+                    PrivateGroup     = false
+                },
+                new()
+                {
+                    //ChatGroupId      = 2,
+                    ChatGroupName    = "TestPublicGroup2",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
+                    PrivateGroup     = false
+                },
+                new()
+                {
+                    //ChatGroupId      = 3,
+                    ChatGroupName    = "TestPrivateGroup1",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
+                    PrivateGroup     = true
+                },
+                new()
+                {
+                    //ChatGroupId      = 4,
+                    ChatGroupName    = "TestPrivateGroup2",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
+                    PrivateGroup     = true
+                }
             };
             return chatGroupList;
         }
@@ -52,7 +83,24 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             List<PrivateGroupMembers> privateGroupMembersList = new()
             {
-
+                new()
+                {
+                    //PrivateGroupMemberId = 1,
+                    PrivateChatGroupId   = 3,
+                    UserId               = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
+                },
+                new()
+                {
+                    //PrivateGroupMemberId = 2,
+                    PrivateChatGroupId   = 4,
+                    UserId               = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
+                },
+                new()
+                {
+                    //PrivateGroupMemberId = 3,
+                    PrivateChatGroupId   = 3,
+                    UserId               = "e08b0077-3c15-477e-84bb-bf9d41196455"
+                }
             };
             return privateGroupMembersList;
         }

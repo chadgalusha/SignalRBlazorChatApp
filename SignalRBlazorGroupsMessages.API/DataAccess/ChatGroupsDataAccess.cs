@@ -20,10 +20,23 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .ToListAsync();
         }
 
+        public async Task<ChatGroups> GetChatGroupByIdAsync(int id)
+        {
+            return await _context.ChatGroups
+                .SingleAsync(c => c.ChatGroupId == id);
+        }
+
         public List<ChatGroups> GetPrivateChatGroupsByUserId(string userId)
         {
-            List<PrivateGroupMembers> privateGroupMemberList = GetListPrivateGroupMembersForUser(userId);
-            List<ChatGroups> privateGroupList = GetListPrivateChatGroups(privateGroupMemberList);
+            //List<PrivateGroupMembers> privateGroupMemberList = GetListPrivateGroupMembersForUser(userId);
+            //List<ChatGroups> privateGroupList = GetListPrivateChatGroups(privateGroupMemberList);
+            //List<ChatGroups> privateGroupList = _context.Database
+            //    .SqlQueryRaw<ChatGroups>("exec sp_getPrivateChatGroupsForUser @UserId", userId)
+            //    .ToList();
+
+            List<ChatGroups> privateGroupList = _context.ChatGroups
+                .FromSql($"exec sp_getPrivateChatGroupsForUser @UserId={userId}")
+                .ToList();
 
             return privateGroupList;
         }
@@ -68,9 +81,8 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         public async Task RemoveUserFromPrivateChatGroup(int chatGroupid, string userId)
         {
             PrivateGroupMembers privateGroupMember = _context.PrivateGroupsMembers
-                .Where(p => p.PrivateChatGroupId == chatGroupid)
-                .Where(p => p.UserId == userId)
-                .First();
+                .Single(p => p.PrivateChatGroupId == chatGroupid 
+                    && p.UserId == userId);
 
             if (privateGroupMember != null)
             {

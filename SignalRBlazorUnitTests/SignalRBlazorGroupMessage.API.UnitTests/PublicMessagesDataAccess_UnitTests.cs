@@ -45,13 +45,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task AddPublicMessages_IsSuccess()
         {
-            _context.Database.BeginTransaction();
-
             PublicMessages newMessage = NewPublicMessage();
             string expectedPublicMessageId = newMessage.PublicMessageId;
 
+            _context.Database.BeginTransaction();
             await _dataAccess.AddMessageAsync(newMessage);
-
             _context.ChangeTracker.Clear();
 
             List<PublicMessages> listMessages = await _dataAccess.GetMessagesByGroupIdAsync(3);
@@ -76,12 +74,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task ModifyMessageAsync_IsSuccess()
         {
             string newMessage = "Modified message";
-
-            _context.Database.BeginTransaction();
-
             PublicMessages publicMessageToModify = await _dataAccess.GetPublicMessageByIdAsync("e8ee70b6-678a-4b86-934e-da7f404a33a3");
             publicMessageToModify.Text = newMessage;
 
+            _context.Database.BeginTransaction();
             await _dataAccess.ModifyMessageAsync(publicMessageToModify);
             _context.ChangeTracker.Clear();
 
@@ -97,9 +93,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             PublicMessages publicMessageToDelete = await _dataAccess.GetPublicMessageByIdAsync(publicMessageId);
 
             _context.Database.BeginTransaction();
-            
             await _dataAccess.DeleteMessage(publicMessageToDelete);
-
             _context.ChangeTracker.Clear();
 
             bool messageExists = await _dataAccess.PublicMessageExists(publicMessageId);

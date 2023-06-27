@@ -34,8 +34,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         public async Task<PublicMessages> GetPublicMessageByIdAsync(string messageId)
         {
             return await _context.PublicMessages
-                .Where(p => p.PublicMessageId == messageId)
-                .FirstAsync();
+                .SingleAsync(p => p.PublicMessageId == messageId);
         }
 
         public async Task<bool> PublicMessageExists(string messageId)
