@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
+using SignalRBlazorGroupsMessages.API.Helpers;
 using System.Text;
 
 namespace SignalRBlazorGroupsMessages.API
@@ -26,6 +27,7 @@ namespace SignalRBlazorGroupsMessages.API
             // Interface to implementation
             builder.Services.AddTransient<IPublicMessagesDataAccess, PublicMessagesDataAccess>();
             builder.Services.AddTransient<IChatGroupsDataAccess, ChatGroupsDataAccess>();
+            builder.Services.AddTransient<ISerilogger, Serilogger>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

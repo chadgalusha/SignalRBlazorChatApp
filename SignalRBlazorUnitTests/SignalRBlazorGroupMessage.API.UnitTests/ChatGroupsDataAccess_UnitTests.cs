@@ -2,6 +2,7 @@
 using Moq;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
+using SignalRBlazorGroupsMessages.API.Helpers;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
@@ -15,7 +16,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
-            _dataAccess = new ChatGroupsDataAccess(_context);
+            ISerilogger serilogger = new Serilogger();
+            _dataAccess = new ChatGroupsDataAccess(_context, serilogger);
         }
 
         [Fact]

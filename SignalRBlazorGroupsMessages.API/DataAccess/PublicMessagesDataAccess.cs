@@ -1,16 +1,19 @@
 ﻿using ChatApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
+using SignalRBlazorGroupsMessages.API.Helpers;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
     public class PublicMessagesDataAccess : IPublicMessagesDataAccess
     {
         private readonly ApplicationDbContext _context;
+        private readonly ISerilogger _serilogger;
 
-        public PublicMessagesDataAccess(ApplicationDbContext context)
+        public PublicMessagesDataAccess(ApplicationDbContext context, ISerilogger serilogger)
         {
             _context = context ?? throw new Exception(nameof(context));
+            _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
         }
 
         public async Task<List<PublicMessages>> GetMessagesByGroupIdAsync(int groupId)
@@ -54,12 +57,14 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         {
             _context.PublicMessages.Update(message);
             await _context.SaveChangesAsync();
+            _serilogger.LogPublicMessageModified(message);
         }
 
         public async Task DeleteMessage(PublicMessages message)
         {
             _context.PublicMessages.Remove(message);
             await _context.SaveChangesAsync();
+            _serilogger.LogPublicMessageDeleted(message);
         }
     }
 }
