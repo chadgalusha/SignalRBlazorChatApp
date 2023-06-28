@@ -1,5 +1,5 @@
 ﻿using ChatApplicationModels;
-using Microsoft.Extensions.Configuration.UserSecrets;
+using Moq;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 
@@ -155,6 +155,22 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             Assert.False(recordExists);
         }
 
+        [Fact]
+        public void GetPrivateChatGroupsByUserId_ReturnsCorrectList()
+        {
+            string userId = "e08b0077-3c15-477e-84bb-bf9d41196455";
+            List<ChatGroups> listPrivateChatGroups = GetListPrivateChatGroups(userId);
+
+            Mock<IChatGroupsDataAccess> _mockDataAccess = new();
+            _mockDataAccess.Setup(x => x.GetPrivateChatGroupsByUserId(userId))
+                .Returns(listPrivateChatGroups);
+
+            var mockedDataAccessObject = _mockDataAccess.Object;
+            var result = mockedDataAccessObject.GetPrivateChatGroupsByUserId(userId);
+
+            Assert.Equal(listPrivateChatGroups, result);
+        }
+
         #region PRIVATE METHODS
 
         private ChatGroups GetNewPublicChatGroup()
@@ -168,6 +184,27 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
+        // Mock of stored procedure sp_getPrivateChatGroupsForUser @UserId
+        private List<ChatGroups> GetListPrivateChatGroups(string userId)
+        {
+            List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
+                .Where(p => p.UserId == userId)
+                .ToList();
+
+            List<ChatGroups> listPrivateChatGroups = new();
+            foreach (var listItem in listPrivateGroupMembers)
+            {
+                ChatGroups chatGroup = _context.ChatGroups
+                    .Single(c => c.ChatGroupId == listItem.PrivateChatGroupId);
+
+                if (chatGroup != null)
+                {
+                    listPrivateChatGroups.Add(chatGroup);
+                }
+            }
+
+            return listPrivateChatGroups;
+        }
         #endregion
     }
 }

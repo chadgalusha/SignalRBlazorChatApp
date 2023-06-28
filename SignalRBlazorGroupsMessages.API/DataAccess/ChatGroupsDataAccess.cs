@@ -28,12 +28,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public List<ChatGroups> GetPrivateChatGroupsByUserId(string userId)
         {
-            //List<PrivateGroupMembers> privateGroupMemberList = GetListPrivateGroupMembersForUser(userId);
-            //List<ChatGroups> privateGroupList = GetListPrivateChatGroups(privateGroupMemberList);
-            //List<ChatGroups> privateGroupList = _context.Database
-            //    .SqlQueryRaw<ChatGroups>("exec sp_getPrivateChatGroupsForUser @UserId", userId)
-            //    .ToList();
-
             List<ChatGroups> privateGroupList = _context.ChatGroups
                 .FromSql($"exec sp_getPrivateChatGroupsForUser @UserId={userId}")
                 .ToList();
@@ -90,34 +84,5 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 await _context.SaveChangesAsync();
             }
         }
-
-        #region PRIVATE METHODS
-
-        private List<PrivateGroupMembers> GetListPrivateGroupMembersForUser(string userid)
-        {
-            return _context.PrivateGroupsMembers
-                .Where(p => p.UserId == userid)
-                .ToList();
-        }
-
-        private List<ChatGroups> GetListPrivateChatGroups(List<PrivateGroupMembers> privateGroupMemberList)
-        {
-            List<ChatGroups> chatGroupsList = new();
-
-            foreach (var item in privateGroupMemberList)
-            {
-                ChatGroups group = _context.ChatGroups
-                    .Where(c => c.ChatGroupId == item.PrivateChatGroupId)
-                    .First();
-
-                if (group != null)
-                {
-                    chatGroupsList.Add(group);
-                }
-            }
-
-            return chatGroupsList;
-        }
-        #endregion
     }
 }
