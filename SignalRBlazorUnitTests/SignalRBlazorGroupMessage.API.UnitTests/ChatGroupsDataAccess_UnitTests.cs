@@ -50,10 +50,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task ChatGroupExists_ReturnsCorrectResult()
+        public void ChatGroupExists_ReturnsCorrectResult()
         {
-            bool shouldBeTrue = await _dataAccess.ChatGroupexists(1);
-            bool shouldBeFalse = await _dataAccess.ChatGroupexists(999);
+            bool shouldBeTrue = _dataAccess.ChatGroupexists(1);
+            bool shouldBeFalse = _dataAccess.ChatGroupexists(999);
 
             Assert.Multiple(() =>
             {
@@ -109,7 +109,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             await _dataAccess.DeleteChatGroupAsync(chatGroupToDelete);
             _context.ChangeTracker.Clear();
 
-            bool chatGroupExists = await _dataAccess.ChatGroupexists(chatGroupToDeleteId);
+            bool chatGroupExists = _dataAccess.ChatGroupexists(chatGroupToDeleteId);
             Assert.False(chatGroupExists);
         }
 

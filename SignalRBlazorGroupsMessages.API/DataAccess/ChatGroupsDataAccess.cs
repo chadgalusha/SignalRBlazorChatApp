@@ -38,11 +38,11 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return privateGroupList;
         }
 
-        public async Task<bool> ChatGroupexists(int groupId)
+        public bool ChatGroupexists(int groupId)
         {
-            return await _context.ChatGroups
+            return _context.ChatGroups
                 .Where(c => c.ChatGroupId == groupId)
-                .AnyAsync();
+                .Any();
         }
 
         public async Task AddChatGroupAsync(ChatGroups chatGroup)

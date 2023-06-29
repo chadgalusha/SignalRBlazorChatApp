@@ -5,7 +5,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
     public interface IChatGroupsDataAccess
     {
         Task AddChatGroupAsync(ChatGroups chatGroup);
-        Task<bool> ChatGroupexists(int groupId);
+        bool ChatGroupexists(int groupId);
         Task DeleteChatGroupAsync(ChatGroups chatGroup);
         Task<ChatGroups> GetChatGroupByIdAsync(int id);
         List<ChatGroups> GetPrivateChatGroupsByUserId(string userId);
