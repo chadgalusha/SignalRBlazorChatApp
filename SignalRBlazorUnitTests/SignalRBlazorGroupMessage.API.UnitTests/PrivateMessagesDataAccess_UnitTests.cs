@@ -56,15 +56,20 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public void GetPrivateMessage_ReturnsCorrectResult()
         {
             int validMessageId = 1;
-            int invalidMessageId = 999;
 
             PrivateMessages validPrivateMessage = _dataAccess.GetPrivateMessage(validMessageId);
-            PrivateMessages invalidPrivateMessage = _dataAccess.GetPrivateMessage(invalidMessageId);
 
-            Assert.Multiple(() =>
+            Assert.Equal("Test Message 1", validPrivateMessage.MessageText);
+        }
+
+        [Fact]
+        public void GetPrivateMessage_InvalidIdThrowsError()
+        {
+            int invalidMessageId = 999;
+
+            Assert.Throws<GroupsMessagesExceptions>(() =>
             {
-                Assert.Equal("Test Message 1", validPrivateMessage.MessageText);
-                Assert.Equal(-1, invalidPrivateMessage.PrivateMessageId);
+                PrivateMessages message = _dataAccess.GetPrivateMessage(invalidMessageId);
             });
         }
 

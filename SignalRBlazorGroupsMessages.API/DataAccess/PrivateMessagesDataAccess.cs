@@ -34,13 +34,10 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public PrivateMessages GetPrivateMessage(int privateMessageId)
         {
-            bool messageExists = _context.PrivateMessages.Any(p => p.PrivateMessageId == privateMessageId);
+            PrivateMessages? message = _context.PrivateMessages.SingleOrDefault(p => p.PrivateMessageId == privateMessageId);
 
-            if (!messageExists)
-            {
-                return new() { PrivateMessageId = -1 };
-            }
-            return _context.PrivateMessages.Single(p => p.PrivateMessageId == privateMessageId);
+            return message ?? 
+                throw new GroupsMessagesExceptions($"Private message with id of {privateMessageId} not found.");
         }
 
         public async Task AddPrivateMessageAsync(PrivateMessages privateMessage)
