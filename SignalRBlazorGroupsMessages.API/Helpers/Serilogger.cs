@@ -7,6 +7,11 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
     {
         #region CHAT GROUP LOGGING
 
+        public void LogChatGroupError(string errorAtMethod, Exception ex)
+        {
+            Log.Error($"Error with Chat Group Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
+        }
+
         public void LogNewChatGroupCreated(ChatGroups chatGroup)
         {
             Log.Information($"New chat group created. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName} - IsPrivate {chatGroup.PrivateGroup}.");
@@ -40,6 +45,11 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
         #endregion
         #region PUBLIC MESSAGE LOGGING
 
+        public void LogPublicMessageError(string errorAtMethod, Exception ex)
+        {
+            Log.Error($"Error with Public Message Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
+        }
+
         public void LogPublicMessageModified(PublicMessages message)
         {
             Log.Information($"Public message modified. Id: {message.PublicMessageId} - UserId: {message.UserId} - Chat Group: {message.ChatGroupId}.");
@@ -52,6 +62,11 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
 
         #endregion
         #region PRIVATE MESSAGE LOGGING
+
+        public void LogPrivateMessageError(string errorAtMethod, Exception ex)
+        {
+            Log.Error($"Error with Private Message Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
+        }
 
         public void LogPrivateMessageModified(PrivateMessages message)
         {

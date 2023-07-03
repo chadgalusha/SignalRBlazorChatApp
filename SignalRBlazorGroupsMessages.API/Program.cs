@@ -4,6 +4,7 @@ using Serilog;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
+using SignalRBlazorGroupsMessages.API.Models;
 using System.Text;
 
 namespace SignalRBlazorGroupsMessages.API
@@ -29,10 +30,11 @@ namespace SignalRBlazorGroupsMessages.API
                 options.ReturnHttpNotAcceptable = true;
             }).AddNewtonsoftJson();
 
-            // Interface to implementation
-            builder.Services.AddTransient<IPublicMessagesDataAccess, PublicMessagesDataAccess>();
-            builder.Services.AddTransient<IChatGroupsDataAccess, ChatGroupsDataAccess>();
-            builder.Services.AddTransient<ISerilogger, Serilogger>();
+            // Interface to implementing class
+            builder.Services.AddScoped<IPublicMessagesDataAccess, PublicMessagesDataAccess>();
+            builder.Services.AddScoped<IPrivateMessagesDataAccess, PrivateMessagesDataAccess>();
+            builder.Services.AddScoped<IChatGroupsDataAccess, ChatGroupsDataAccess>();
+            builder.Services.AddScoped<ISerilogger, Serilogger>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

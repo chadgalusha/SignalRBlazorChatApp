@@ -47,7 +47,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return await Save();
         }
 
-        public async Task<bool> ModifyChatGroup(ChatGroups chatGroup)
+        public async Task<bool> ModifyChatGroupAsync(ChatGroups chatGroup)
         {
             _context.ChatGroups.Update(chatGroup);
             return await Save();
@@ -59,7 +59,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return await Save();
         }
 
-        public async Task<bool> AddUserToPrivateChatGroup(PrivateGroupMembers privateGroupMember)
+        public async Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember)
         {
             _context.PrivateGroupsMembers.Add(privateGroupMember);
             return await Save();

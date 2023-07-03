@@ -90,7 +90,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             chatGroupToModify.ChatGroupName = expectedModifiedGroupName;
 
             _context.Database.BeginTransaction();
-            bool resultOfModify = await _dataAccess.ModifyChatGroup(chatGroupToModify);
+            bool resultOfModify = await _dataAccess.ModifyChatGroupAsync(chatGroupToModify);
             _context.ChangeTracker.Clear();
 
             ChatGroups modifiedChatGroup = await _dataAccess.GetChatGroupByIdAsync(1);
@@ -129,7 +129,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             PrivateGroupMembers newPrivateGroupMember = GetNewPrivateGroupMember(groupToJoinId, userIdToJoin);
 
             _context.Database.BeginTransaction();
-            bool resultOfAdd = await _dataAccess.AddUserToPrivateChatGroup(newPrivateGroupMember);
+            bool resultOfAdd = await _dataAccess.AddUserToPrivateChatGroupAsync(newPrivateGroupMember);
             _context.ChangeTracker.Clear();
 
             List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers

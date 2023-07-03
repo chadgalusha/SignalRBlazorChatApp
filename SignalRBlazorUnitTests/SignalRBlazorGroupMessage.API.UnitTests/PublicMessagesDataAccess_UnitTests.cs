@@ -106,7 +106,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             PublicMessages publicMessageToDelete = await _dataAccess.GetPublicMessageByIdAsync(publicMessageId);
 
             _context.Database.BeginTransaction();
-            bool resultOfDelete = await _dataAccess.DeleteMessage(publicMessageToDelete);
+            bool resultOfDelete = await _dataAccess.DeleteMessageAsync(publicMessageToDelete);
             _context.ChangeTracker.Clear();
 
             bool messageExists = await _dataAccess.PublicMessageExists(publicMessageId);

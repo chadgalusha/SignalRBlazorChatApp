@@ -1,15 +1,16 @@
 ﻿using ChatApplicationModels;
+using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
     public interface IPublicMessagesDataAccess
     {
         Task<bool> AddMessageAsync(PublicMessages message);
-        Task<bool> DeleteMessage(PublicMessages message);
-        Task<List<PublicMessages>> GetMessagesByGroupIdAsync(int groupId, int currentItemCount);
-        Task<List<PublicMessages>> GetMessagesByUserIdAsync(string userId, int currentItemCount);
-        Task<PublicMessages> GetPublicMessageByIdAsync(string messageId);
+        Task<bool> DeleteMessageAsync(PublicMessages message);
+        Task<List<PublicMessagesView>> GetMessagesByGroupIdAsync(int groupId, int numberItemsToSkip);
+        Task<List<PublicMessagesView>> GetMessagesByUserIdAsync(Guid userId, int numberItemsToSkip);
+        Task<PublicMessagesView> GetPublicMessageByIdAsync(Guid messageId);
         Task<bool> ModifyMessageAsync(PublicMessages message);
-        Task<bool> PublicMessageExists(string messageId);
+        Task<bool> PublicMessageExists(Guid messageId);
     }
 }

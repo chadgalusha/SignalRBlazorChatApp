@@ -10,8 +10,8 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         Task<ChatGroups> GetChatGroupByIdAsync(int id);
         List<ChatGroups> GetPrivateChatGroupsByUserId(string userId);
         Task<List<ChatGroups>> GetPublicChatGroupsAsync();
-        Task<bool> ModifyChatGroup(ChatGroups chatGroup);
-        Task<bool> AddUserToPrivateChatGroup(PrivateGroupMembers privateGroupMember);
+        Task<bool> ModifyChatGroupAsync(ChatGroups chatGroup);
+        Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember);
         Task<PrivateGroupMembers> GetPrivateGroupMemberRecord(int chatGroupid, string userId);
         Task<bool> RemoveUserFromPrivateChatGroup(PrivateGroupMembers privateGroupMember);
     }
