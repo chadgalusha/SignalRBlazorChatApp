@@ -20,9 +20,14 @@ namespace SignalRBlazorGroupsMessages.API
 
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Host.UseSerilog();
+
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.ReturnHttpNotAcceptable = true;
+            }).AddNewtonsoftJson();
 
             // Interface to implementation
             builder.Services.AddTransient<IPublicMessagesDataAccess, PublicMessagesDataAccess>();

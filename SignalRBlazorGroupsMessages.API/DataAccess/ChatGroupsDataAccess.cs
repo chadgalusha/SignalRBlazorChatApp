@@ -1,19 +1,16 @@
 ﻿using ChatApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
-using SignalRBlazorGroupsMessages.API.Helpers;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
     public class ChatGroupsDataAccess : IChatGroupsDataAccess
     {
         private readonly ApplicationDbContext _context;
-        private readonly ISerilogger _serilogger;
 
-        public ChatGroupsDataAccess(ApplicationDbContext context, ISerilogger serilogger)
+        public ChatGroupsDataAccess(ApplicationDbContext context)
         {
             _context = context ?? throw new Exception(nameof(context));
-            _serilogger = serilogger;
         }
 
         public async Task<List<ChatGroups>> GetPublicChatGroupsAsync()
@@ -41,56 +38,53 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         public bool ChatGroupexists(int groupId)
         {
             return _context.ChatGroups
-                .Where(c => c.ChatGroupId == groupId)
-                .Any();
+                .Any(c => c.ChatGroupId == groupId);
         }
 
-        public async Task AddChatGroupAsync(ChatGroups chatGroup)
+        public async Task<bool> AddChatGroupAsync(ChatGroups chatGroup)
         {
             _context.ChatGroups.Add(chatGroup);
-            await _context.SaveChangesAsync();
-            _serilogger.LogNewChatGroupCreated(chatGroup);
+            return await Save();
         }
 
-        public async Task ModifyChatGroup(ChatGroups chatGroup)
+        public async Task<bool> ModifyChatGroup(ChatGroups chatGroup)
         {
             _context.ChatGroups.Update(chatGroup);
-            await _context.SaveChangesAsync();
-            _serilogger.LogChatGroupModified(chatGroup);
+            return await Save();
         }
 
-        public async Task DeleteChatGroupAsync(ChatGroups chatGroup)
+        public async Task<bool> DeleteChatGroupAsync(ChatGroups chatGroup)
         {
             _context.ChatGroups.Remove(chatGroup);
-            await _context.SaveChangesAsync();
-            _serilogger.LogChatGroupDeleted(chatGroup);
+            return await Save();
         }
 
-        public async Task AddUserToPrivateChatGroup(int chatGroupid, string userId)
+        public async Task<bool> AddUserToPrivateChatGroup(PrivateGroupMembers privateGroupMember)
         {
-            PrivateGroupMembers privateGroupMember = new()
-            {
-                PrivateChatGroupId = chatGroupid,
-                UserId = userId
-            };
-
             _context.PrivateGroupsMembers.Add(privateGroupMember);
-            await _context.SaveChangesAsync();
-            _serilogger.LogUserAddedToPrivateChatGroup(privateGroupMember);
+            return await Save();
         }
 
-        public async Task RemoveUserFromPrivateChatGroup(int chatGroupid, string userId)
+        public async Task<PrivateGroupMembers> GetPrivateGroupMemberRecord(int chatGroupid, string userId)
         {
-            PrivateGroupMembers privateGroupMember = _context.PrivateGroupsMembers
-                .Single(p => p.PrivateChatGroupId == chatGroupid 
+            return await _context.PrivateGroupsMembers
+                .SingleAsync(p => p.PrivateChatGroupId == chatGroupid
                     && p.UserId == userId);
-
-            if (privateGroupMember != null)
-            {
-                _context.PrivateGroupsMembers.Remove(privateGroupMember);
-                await _context.SaveChangesAsync();
-                _serilogger.LogUserRemovedFromPrivateChatGroup(privateGroupMember);
-            }
         }
+
+        public async Task<bool> RemoveUserFromPrivateChatGroup(PrivateGroupMembers privateGroupMember)
+        {
+            _context.PrivateGroupsMembers.Remove(privateGroupMember);
+            return await Save();
+        }
+
+        #region PRIVATE METHODS
+
+        private async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
+        }
+
+        #endregion
     }
 }

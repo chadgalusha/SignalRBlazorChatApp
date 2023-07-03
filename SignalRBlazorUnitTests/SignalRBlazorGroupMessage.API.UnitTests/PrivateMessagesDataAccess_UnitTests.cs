@@ -15,8 +15,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
-            ISerilogger serilogger = new Serilogger();
-            _dataAccess = new PrivateMessagesDataAccess(_context, serilogger);
+            _dataAccess = new PrivateMessagesDataAccess(_context);
         }
 
         [Fact]

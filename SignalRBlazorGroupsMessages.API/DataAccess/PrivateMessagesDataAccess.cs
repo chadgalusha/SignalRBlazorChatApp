@@ -8,12 +8,10 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
     public class PrivateMessagesDataAccess : IPrivateMessagesDataAccess
     {
         private readonly ApplicationDbContext _context;
-        private readonly ISerilogger _serilogger;
 
-        public PrivateMessagesDataAccess(ApplicationDbContext context, ISerilogger serilogger)
+        public PrivateMessagesDataAccess(ApplicationDbContext context)
         {
             _context = context;
-            _serilogger = serilogger;
         }
 
         public async Task<List<PrivateMessages>> GetAllPrivateMessagesForUserAsync(string userId)
@@ -40,24 +38,31 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 throw new GroupsMessagesExceptions($"Private message with id of {privateMessageId} not found.");
         }
 
-        public async Task AddPrivateMessageAsync(PrivateMessages privateMessage)
+        public async Task<bool> AddPrivateMessageAsync(PrivateMessages privateMessage)
         {
             _context.PrivateMessages.Add(privateMessage);
-            await _context.SaveChangesAsync();
+            return await Save();
         }
 
-        public async Task ModifyPrivateMessageAsync(PrivateMessages privateMessage)
+        public async Task<bool> ModifyPrivateMessageAsync(PrivateMessages privateMessage)
         {
             _context.PrivateMessages.Update(privateMessage);
-            await _context.SaveChangesAsync();
-            _serilogger.LogPrivateMessageModified(privateMessage);
+            return await Save();
         }
 
-        public async Task DeletePrivateMessageAsync(PrivateMessages privateMessage)
+        public async Task<bool> DeletePrivateMessageAsync(PrivateMessages privateMessage)
         {
             _context.PrivateMessages.Remove(privateMessage);
-            await _context.SaveChangesAsync();
-            _serilogger.LogPrivateMessageDeleted(privateMessage);
+            return await Save();
         }
+
+        #region PRIVATE METHODS
+
+        private async Task<bool> Save()
+        {
+            return await _context.SaveChangesAsync() >= 0;
+        }
+
+        #endregion
     }
 }

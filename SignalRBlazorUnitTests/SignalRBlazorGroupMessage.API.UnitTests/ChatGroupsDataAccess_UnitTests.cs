@@ -2,7 +2,6 @@
 using Moq;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
-using SignalRBlazorGroupsMessages.API.Helpers;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
@@ -16,8 +15,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
-            ISerilogger serilogger = new Serilogger();
-            _dataAccess = new ChatGroupsDataAccess(_context, serilogger);
+            _dataAccess = new ChatGroupsDataAccess(_context);
         }
 
         [Fact]
@@ -69,7 +67,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             ChatGroups newChatGroup = GetNewPublicChatGroup();
 
             _context.Database.BeginTransaction();
-            await _dataAccess.AddChatGroupAsync(newChatGroup);
+            bool resultOfAdd = await _dataAccess.AddChatGroupAsync(newChatGroup);
             _context.ChangeTracker.Clear();
 
             List<ChatGroups> listChatGroups = await _dataAccess.GetPublicChatGroupsAsync();
@@ -77,6 +75,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
             Assert.Multiple(() =>
             {
+                Assert.True(resultOfAdd);
                 Assert.Equal(3, listChatGroups.Count);
                 Assert.Equal(expectedNewChatGroupName, resultNewChatGroupName);
             });
@@ -91,12 +90,16 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             chatGroupToModify.ChatGroupName = expectedModifiedGroupName;
 
             _context.Database.BeginTransaction();
-            await _dataAccess.ModifyChatGroup(chatGroupToModify);
+            bool resultOfModify = await _dataAccess.ModifyChatGroup(chatGroupToModify);
             _context.ChangeTracker.Clear();
 
             ChatGroups modifiedChatGroup = await _dataAccess.GetChatGroupByIdAsync(1);
 
-            Assert.Equal(expectedModifiedGroupName, modifiedChatGroup.ChatGroupName);
+            Assert.Multiple(() =>
+            {
+                Assert.True(resultOfModify);
+                Assert.Equal(expectedModifiedGroupName, modifiedChatGroup.ChatGroupName);
+            });
         }
 
         [Fact]
@@ -106,10 +109,15 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             int chatGroupToDeleteId = chatGroupToDelete.ChatGroupId;
 
             _context.Database.BeginTransaction();
-            await _dataAccess.DeleteChatGroupAsync(chatGroupToDelete);
+            bool resultOfDelete = await _dataAccess.DeleteChatGroupAsync(chatGroupToDelete);
             _context.ChangeTracker.Clear();
 
             bool chatGroupExists = _dataAccess.ChatGroupexists(chatGroupToDeleteId);
+            Assert.Multiple(() =>
+            {
+                Assert.True(resultOfDelete);
+                Assert.False(chatGroupExists);
+            });
             Assert.False(chatGroupExists);
         }
 
@@ -118,9 +126,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             int groupToJoinId = 4;
             string userIdToJoin = "e08b0077-3c15-477e-84bb-bf9d41196455";
+            PrivateGroupMembers newPrivateGroupMember = GetNewPrivateGroupMember(groupToJoinId, userIdToJoin);
 
             _context.Database.BeginTransaction();
-            await _dataAccess.AddUserToPrivateChatGroup(groupToJoinId, userIdToJoin);
+            bool resultOfAdd = await _dataAccess.AddUserToPrivateChatGroup(newPrivateGroupMember);
             _context.ChangeTracker.Clear();
 
             List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
@@ -133,6 +142,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             
             Assert.Multiple(() =>
             {
+                Assert.True(resultOfAdd);
                 Assert.Equal(2, listPrivateGroupMembers.Count);
                 Assert.True(isUserInGroup);
             });
@@ -145,16 +155,20 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             int recordIdToDelete = _context.PrivateGroupsMembers
                 .Single(p => p.UserId == userId)
                 .PrivateGroupMemberId;
+            PrivateGroupMembers privateGroupMember = await _dataAccess.GetPrivateGroupMemberRecord(recordIdToDelete, userId);
 
             _context.Database.BeginTransaction();
-            await _dataAccess.RemoveUserFromPrivateChatGroup(recordIdToDelete, userId);
+            bool resultOfRemove = await _dataAccess.RemoveUserFromPrivateChatGroup(privateGroupMember);
             _context.ChangeTracker.Clear();
 
             bool recordExists = _context.PrivateGroupsMembers
-                .Where(p => p.PrivateGroupMemberId == recordIdToDelete)
-                .Any();
+                .Any(p => p.PrivateGroupMemberId == recordIdToDelete);
 
-            Assert.False(recordExists);
+            Assert.Multiple(() =>
+            {
+                Assert.True(resultOfRemove);
+                Assert.False(recordExists);
+            });
         }
 
         [Fact]
@@ -186,6 +200,15 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
+        private PrivateGroupMembers GetNewPrivateGroupMember(int groupToJoinId, string userIdToJoin)
+        {
+            return new()
+            {
+                PrivateChatGroupId = groupToJoinId,
+                UserId = userIdToJoin
+            };
+        }
+
         // Mock of stored procedure sp_getPrivateChatGroupsForUser @UserId
         private List<ChatGroups> GetListPrivateChatGroups(string userId)
         {
@@ -207,6 +230,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
             return listPrivateChatGroups;
         }
+
         #endregion
     }
 }
