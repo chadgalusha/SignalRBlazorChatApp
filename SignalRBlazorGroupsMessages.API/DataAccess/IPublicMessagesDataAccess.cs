@@ -5,12 +5,14 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
     public interface IPublicMessagesDataAccess
     {
-        Task<bool> AddMessageAsync(PublicMessages message);
-        Task<bool> DeleteMessageAsync(PublicMessages message);
-        Task<List<PublicMessagesView>> GetMessagesByGroupIdAsync(int groupId, int numberItemsToSkip);
-        Task<List<PublicMessagesView>> GetMessagesByUserIdAsync(Guid userId, int numberItemsToSkip);
-        Task<PublicMessagesView> GetPublicMessageByIdAsync(Guid messageId);
-        Task<bool> ModifyMessageAsync(PublicMessages message);
-        Task<bool> PublicMessageExists(Guid messageId);
+        Task<bool> AddAsync(PublicMessages message);
+        Task<bool> DeleteAsync(PublicMessages message);
+        Task<List<PublicMessagesView>> GetViewListByGroupIdAsync(int groupId, int numberItemsToSkip);
+        Task<List<PublicMessagesView>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip);
+        Task<PublicMessagesView> GetViewByMessageIdAsync(Guid messageId);
+        Task<bool> ModifyAsync(PublicMessages message);
+        Task<bool> Exists(Guid messageId);
+        Task<PublicMessages> GetByMessageIdAsync(Guid messageId);
+        Task<bool> DeleteMessagesByResponseMessageIdAsync(Guid responseMessageId);
     }
 }

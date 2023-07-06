@@ -6,7 +6,7 @@ namespace ChatApplicationModels
     public class PublicMessages
     {
         [Key]
-        public Guid PublicMessageId { get; set; }
+        public Guid PublicMessageId { get; set; }   
 
         [Required]
         [DisplayName("User")]
@@ -23,7 +23,7 @@ namespace ChatApplicationModels
         [DisplayName("Message DateTime")]
         public DateTime MessageDateTime { get; set; }
 
-        public string ReplyMessageId { get; set; } = string.Empty;
+        public Guid ReplyMessageId { get; set; }
 
         public string PictureLink { get; set; } = string.Empty;
     }

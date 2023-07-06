@@ -1,15 +1,19 @@
-﻿namespace SignalRBlazorGroupsMessages.API.Models
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace SignalRBlazorGroupsMessages.API.Models
 {
     public class PublicMessagesView
     {
-        public string PublicMessageId { get; set; } = string.Empty;
-        public string UserId { get; set; } = string.Empty;
+        [Key]
+        public Guid PublicMessageId { get; set; }
+        public Guid UserId { get; set; }
         public string UserName { get; set; } = string.Empty;
         public int ChatGroupId { get; set; }
         public string ChatGroupName { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
         public DateTime MessageDateTime { get; set; }
-        public string ReplyMessageId { get; set; } = string.Empty;
+        public Guid ReplyMessageId { get; set; }
         public string PictureLink { get; set; } = string.Empty;
     }
 }

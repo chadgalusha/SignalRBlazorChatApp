@@ -6,11 +6,11 @@ namespace SignalRBlazorGroupsMessages.API.Models
     public class PublicMessageDto
     {
         [Required]
-        public string PublicMessageId { get; set; } = string.Empty;
+        public Guid PublicMessageId { get; set; }
 
         [Required]
         [DisplayName("User Id")]
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
 
         [DisplayName("User Name")]
         public string UserName { get; set; } = string.Empty;
@@ -29,7 +29,7 @@ namespace SignalRBlazorGroupsMessages.API.Models
         [DisplayName("Message DateTime")]
         public DateTime MessageDateTime { get; set; }
 
-        public string ReplyMessageId { get; set; } = string.Empty;
+        public Guid ReplyMessageId { get; set; }
 
         public string PictureLink { get; set; } = string.Empty;
     }
