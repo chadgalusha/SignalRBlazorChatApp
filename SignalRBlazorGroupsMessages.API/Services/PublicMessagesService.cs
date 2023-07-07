@@ -183,6 +183,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
+                // Check message exists
                 if (await _publicMessageDataAccess.Exists(dtoMessage.PublicMessageId) == false)
                 {
                     response = ReturnApiResponse.Failure(response, "Message Id not found.");
@@ -191,9 +192,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
+                // Find message to delete
                 PublicMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
                 messageToDelete = DtoToPublicMessage(dtoMessage, messageToDelete);
 
+                // Delete all messages that are a response to this message
                 bool resultMessageDelete = await _publicMessageDataAccess.DeleteMessagesByResponseMessageIdAsync(messageToDelete.PublicMessageId);
                 if (!resultMessageDelete)
                 {
@@ -203,6 +206,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
+                // Delete the message
                 bool isSuccess = await _publicMessageDataAccess.DeleteAsync(messageToDelete);
                 if (!isSuccess)
                 {
