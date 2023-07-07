@@ -13,7 +13,7 @@ namespace SignalRBlazorGroupsMessages.API.Models
         public string ChatGroupName { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
         public DateTime MessageDateTime { get; set; }
-        public Guid ReplyMessageId { get; set; }
+        public Guid? ReplyMessageId { get; set; }
         public string PictureLink { get; set; } = string.Empty;
     }
 }

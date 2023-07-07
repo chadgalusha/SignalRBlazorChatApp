@@ -116,7 +116,7 @@ public class TestPublicMessagesDatabaseFixture
                     UserId          = Guid.Parse("4eb0c266-894a-4c09-a6e2-4a0fb72e9c1c"),
                     UserName        = "TestUser2",
                     ChatGroupId     = 1,
-                     ChatGroupName  = "Test Chat Group 1",
+                    ChatGroupName   = "Test Chat Group 1",
                     Text            = "Sample message",
                     MessageDateTime = new DateTime(2023, 6, 15)
                 },
