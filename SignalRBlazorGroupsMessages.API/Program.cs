@@ -5,6 +5,7 @@ using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Services;
 using System.Text;
 
 namespace SignalRBlazorGroupsMessages.API
@@ -35,6 +36,7 @@ namespace SignalRBlazorGroupsMessages.API
             builder.Services.AddScoped<IPrivateMessagesDataAccess, PrivateMessagesDataAccess>();
             builder.Services.AddScoped<IChatGroupsDataAccess, ChatGroupsDataAccess>();
             builder.Services.AddScoped<ISerilogger, Serilogger>();
+            builder.Services.AddScoped<IPublicMessagesService, PublicMessagesService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

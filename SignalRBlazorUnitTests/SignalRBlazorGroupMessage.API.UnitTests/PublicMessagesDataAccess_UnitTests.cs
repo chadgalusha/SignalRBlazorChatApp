@@ -1,4 +1,5 @@
 ﻿using ChatApplicationModels;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models;
@@ -11,12 +12,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public TestPublicMessagesDatabaseFixture Fixture { get; }
         private readonly PublicMessagesDataAccess _dataAccess;
         private readonly TestPublicMessagesDbContext _context;
+        private readonly IConfiguration _configuration;
 
         public PublicMessagesDataAccess_UnitTests(TestPublicMessagesDatabaseFixture fixture)
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
-            _dataAccess = new PublicMessagesDataAccess(_context);
+            _configuration = new Mock<IConfiguration>().Object;
+            _dataAccess = new PublicMessagesDataAccess(_context, _configuration);
         }
 
         [Fact]
