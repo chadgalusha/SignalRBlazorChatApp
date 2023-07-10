@@ -1,5 +1,4 @@
 ﻿using ChatApplicationModels;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
@@ -63,8 +62,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
             PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
 
-            var result1 = await _service.GetListByUserIdAsync(testUserId, 0);
-            var result2 = await _service.GetListByUserIdAsync(Guid.Parse("5e34cdf3-7ecc-46df-87ea-4bb1839af3d6"), 0);
+            var result1 = await _service.GetViewListByUserIdAsync(testUserId, 0);
+            var result2 = await _service.GetViewListByUserIdAsync(Guid.Parse("5e34cdf3-7ecc-46df-87ea-4bb1839af3d6"), 0);
 
             Assert.Multiple(() =>
             {

@@ -23,7 +23,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task GetMessagesByGroupId_ReturnsMessages()
+        public async Task GetViewListByGroupId_ReturnsMessages()
         {
             int groupId = 2;
             List<PublicMessagesView> publicMessagesViewsList = _context.PublicMessagesView
@@ -45,7 +45,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task GetMessagesByUserId_ReturnsMessages()
+        public async Task GetViewListByUserId_ReturnsMessages()
         {
             Guid userId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a");
             List<PublicMessagesView> listPublicMessageView = _context.PublicMessagesView

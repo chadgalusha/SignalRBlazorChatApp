@@ -4,7 +4,6 @@ using Serilog;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
-using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Services;
 using System.Text;
 
@@ -73,10 +72,15 @@ namespace SignalRBlazorGroupsMessages.API
 
             app.UseHttpsRedirection();
 
+            app.UseRouting();
+
             app.UseAuthorization();
 
-
-            app.MapControllers();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+            //app.MapControllers();
 
             app.Run();
         }

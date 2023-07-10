@@ -41,7 +41,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
-        public async Task<ApiResponse<List<PublicMessageDto>>> GetListByUserIdAsync(Guid userId, int numberItemsToSkip)
+        public async Task<ApiResponse<List<PublicMessageDto>>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
         {
             ApiResponse<List<PublicMessageDto>> response = new();
 

@@ -20,10 +20,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<List<PublicMessagesView>> GetViewListByGroupIdAsync(int groupId, int numberItemsToSkip)
         {
-            List<PublicMessagesView> listView = new();
-            string connectionString = _configuration.GetConnectionString("ChatApplicationDb");
+            List<PublicMessagesView> viewList = new();
 
-            using SqlConnection connection = new(connectionString);
+            using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPublicMessages_byGroupId", connection)
             {
                 CommandType = System.Data.CommandType.StoredProcedure
@@ -32,41 +31,50 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             command.Parameters.Add("@numberMessagesToSkip", System.Data.SqlDbType.Int).Value = numberItemsToSkip;
 
             await connection.OpenAsync();
-            SqlDataReader reader = command.ExecuteReader();
-
-            while (reader.Read())
-            {
-                PublicMessagesView view = new()
-                {
-                    PublicMessageId = Guid.Parse((string)reader[0]),
-                    UserId          = Guid.Parse((string)reader[1]),
-                    UserName        = (string)reader[2],
-                    ChatGroupId     = (int)reader[3],
-                    ChatGroupName   = (string)reader[4],
-                    Text            = (string)reader[5],
-                    MessageDateTime = (DateTime)reader[6],
-                    ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : Guid.Parse((string)reader[7]),
-                    PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString()
-                };
-                listView.Add(view);
-            }
-
+            SqlDataReader reader = await command.ExecuteReaderAsync();
+            viewList = ReturnViewListFromReader(viewList, reader);
             await connection.CloseAsync();
-            return listView;
+
+            return viewList;
         }
 
         public async Task<List<PublicMessagesView>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
         {
-            return await _context.Database
-                .SqlQuery<PublicMessagesView>($"EXECUTE sp_getPublicMessage_byMessageId @userId={userId}, @numberMessagesToSkip={numberItemsToSkip}")
-                .ToListAsync();
+            List<PublicMessagesView> viewList = new();
+
+            using SqlConnection connection= new(GetConnectionString());
+            SqlCommand command = new("sp_getPublicMessages_byUserId", connection)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId.ToString();
+            command.Parameters.Add("@numberMessagesToSkip", System.Data.SqlDbType.Int).Value = numberItemsToSkip;
+
+            await connection.OpenAsync();
+            SqlDataReader reader = await command.ExecuteReaderAsync();
+            viewList = ReturnViewListFromReader(viewList, reader);
+            await connection.CloseAsync();
+
+            return viewList;
         }
 
         public async Task<PublicMessagesView> GetViewByMessageIdAsync(Guid messageId)
         {
-            return await _context.Database
-                .SqlQuery<PublicMessagesView>($"EXECUTE sp_getPublicMessage_byMessageId @messageId={messageId}")
-                .SingleAsync();
+            PublicMessagesView view = new();
+
+            using SqlConnection connection = new(GetConnectionString());
+            SqlCommand command = new("sp_getPublicMessage_byMessageId", connection)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+            command.Parameters.Add("@messageId", System.Data.SqlDbType.NVarChar).Value = messageId.ToString();
+
+            await connection.OpenAsync();
+            SqlDataReader reader = await command.ExecuteReaderAsync();
+            view = ReturnViewFromReader(view, reader);
+            await connection.CloseAsync();
+
+            return view;
         }
 
         public async Task<PublicMessages> GetByMessageIdAsync(Guid messageId)
@@ -111,6 +119,49 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         private async Task<bool> Save()
         {
             return await _context.SaveChangesAsync() >= 0;
+        }
+
+        private string GetConnectionString()
+        {
+            return _configuration.GetConnectionString("ChatApplicationDb")!;
+        }
+
+        private List<PublicMessagesView> ReturnViewListFromReader(List<PublicMessagesView> viewList, SqlDataReader reader)
+        {
+            while (reader.Read())
+            {
+                PublicMessagesView view = new()
+                {
+                    PublicMessageId = Guid.Parse((string)reader[0]),
+                    UserId = Guid.Parse((string)reader[1]),
+                    UserName = (string)reader[2],
+                    ChatGroupId = (int)reader[3],
+                    ChatGroupName = (string)reader[4],
+                    Text = (string)reader[5],
+                    MessageDateTime = (DateTime)reader[6],
+                    ReplyMessageId = reader[7].ToString().IsNullOrEmpty() ? null : Guid.Parse((string)reader[7]),
+                    PictureLink = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString()
+                };
+                viewList.Add(view);
+            }
+            return viewList;
+        }
+
+        private PublicMessagesView ReturnViewFromReader(PublicMessagesView view, SqlDataReader reader)
+        {
+            while (reader.Read())
+            {
+                view.PublicMessageId = Guid.Parse((string)reader[0]);
+                view.UserId          = Guid.Parse((string)reader[1]);
+                view.UserName        = (string)reader[2];
+                view.ChatGroupId     = (int)reader[3];
+                view.ChatGroupName   = (string)reader[4];
+                view.Text            = (string)reader[5];
+                view.MessageDateTime = (DateTime)reader[6];
+                view.ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : Guid.Parse((string)reader[7]);
+                view.PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString();
+            }
+            return view;
         }
 
         #endregion

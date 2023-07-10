@@ -5,8 +5,8 @@ using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]/")]
     public class PublicMessagesController : ControllerBase
     {
         private readonly IPublicMessagesService _service;
@@ -18,17 +18,32 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
         }
 
-        // GET: api/<PublicMessagesController>
-        [HttpGet("/bygroupid")]
+        // GET: api/<PublicMessagesController>/bygroupid
+        [HttpGet("bygroupid")]
         public async Task<ActionResult<ApiResponse<List<PublicMessageDto>>>> GetListByGroupIdAsync(
             [FromQuery] int groupId, int numberItemsToSkip)
         {
             if (groupId < 0)
-                return BadRequest(nameof(groupId));
+                return BadRequest("Invalid data: " + nameof(groupId));
             if (numberItemsToSkip < 0)
-                return BadRequest(nameof(numberItemsToSkip));
+                return BadRequest("Invalid data: "+nameof(numberItemsToSkip));
 
             ApiResponse<List<PublicMessageDto>> listDto = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
+
+            return Ok(listDto);
+        }
+
+        // GET: api/<PublicMessagesController>/byuserid
+        [HttpGet("byuserid")]
+        public async Task<ActionResult<ApiResponse<List<PublicMessageDto>>>> GetListByUserIdAsync(
+            [FromQuery] Guid userId, int numberItemsToSkip)
+        {
+            if (userId == new Guid())
+                return BadRequest("Invalid data: " + nameof(userId));
+            if (numberItemsToSkip < 0)
+                return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
+
+            ApiResponse<List<PublicMessageDto>> listDto = await _service.GetViewListByUserIdAsync(userId, numberItemsToSkip);
 
             return Ok(listDto);
         }
