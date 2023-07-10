@@ -1,4 +1,5 @@
 ﻿using ChatApplicationModels;
+using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorGroupsMessages.API.Helpers
 {
@@ -11,10 +12,14 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
         void LogPrivateMessageError(string errorAtMethod, Exception ex);
         void LogPrivateMessageDeleted(PrivateMessages message);
         void LogPrivateMessageModified(PrivateMessages message);
-        void LogPublicMessageError(string errorAtMethod, Exception ex);
-        void LogPublicMessageDeleted(PublicMessages message);
-        void LogPublicMessageModified(PublicMessages message);
+        void PublicMessageError(string errorAtMethod, Exception ex);
+        void PublicMessageDeleted(PublicMessages message);
+        void PublicMessageModified(PublicMessages message);
         void LogUserAddedToPrivateChatGroup(PrivateGroupMembers privateGroupMember);
         void LogUserRemovedFromPrivateChatGroup(PrivateGroupMembers privateGroupMember);
+        void GetRequest<T>(string ipv4, ApiResponse<T> apiResponse);
+        void PostRequest<T>(string ipv4, ApiResponse<T> apiResponse);
+        void PutRequest<T>(string ipv4, ApiResponse<T> apiResponse);
+        void DeleteRequest<T>(string ipv4, ApiResponse<T> apiResponse);
     }
 }

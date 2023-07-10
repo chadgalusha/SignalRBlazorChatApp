@@ -41,6 +41,14 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .Any(c => c.ChatGroupId == groupId);
         }
 
+        public async Task<bool> IsPublicChatGroup(int groupId)
+        {
+            return await _context.ChatGroups
+                .Where(c => c.PrivateGroup == true)
+                .Where(c => c.ChatGroupId == groupId)
+                .AnyAsync();
+        }
+
         public async Task<bool> AddChatGroupAsync(ChatGroups chatGroup)
         {
             _context.ChatGroups.Add(chatGroup);

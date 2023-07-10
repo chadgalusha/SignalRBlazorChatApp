@@ -32,7 +32,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
             catch (Exception ex)
             {
-                _serilogger.LogPublicMessageError("PublicMessagesService.GetByGroupIdAsync", ex);
+                _serilogger.PublicMessageError("PublicMessagesService.GetByGroupIdAsync", ex);
 
                 response = ReturnApiResponse.Failure(response, "Error getting messages.");
                 response.Data = null;
@@ -56,7 +56,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
             catch (Exception ex)
             {
-                _serilogger.LogPublicMessageError("PublicMessagesService.GetByUserIdAsync", ex);
+                _serilogger.PublicMessageError("PublicMessagesService.GetByUserIdAsync", ex);
 
                 response = ReturnApiResponse.Failure(response, "Error getting messages.");
                 response.Data = null;
@@ -72,6 +72,12 @@ namespace SignalRBlazorGroupsMessages.API.Services
             try
             {
                 PublicMessagesView messageView = await _publicMessageDataAccess.GetViewByMessageIdAsync(messageId);
+
+                if (messageView.PublicMessageId == new Guid())
+                {
+                    return ReturnApiResponse.Failure(response, "Message Id not found.");
+                }
+
                 PublicMessageDto messageDto = ViewToDto(messageView);
 
                 response = ReturnApiResponse.Success(response, messageDto);
@@ -80,7 +86,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
             catch (Exception ex)
             {
-                _serilogger.LogPublicMessageError("PublicMessagesService.GetByIdAsync", ex);
+                _serilogger.PublicMessageError("PublicMessagesService.GetByIdAsync", ex);
 
                 response = ReturnApiResponse.Failure(response, "Error getting message.");
                 response.Data = null;
@@ -96,14 +102,17 @@ namespace SignalRBlazorGroupsMessages.API.Services
             (bool, string) messageChecks = NewMessageChecks(messageDto);
             if (messageChecks.Item1 == false)
             {
-                response.Data = null;
+                response.Success = false;
                 response.Message = messageChecks.Item2;
+                response.Data = null;
 
                 return response;
             }
 
             try
             {
+                // TODO: need to check that chat group is not public. add with chat group service.
+
                 PublicMessages newMessage = NewPublicMessage(messageDto);
                 bool isSuccess = await _publicMessageDataAccess.AddAsync(newMessage);
 
@@ -122,7 +131,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
             catch (Exception ex)
             {
-                _serilogger.LogPublicMessageError("PublicMessagesService.AddAsync", ex);
+                _serilogger.PublicMessageError("PublicMessagesService.AddAsync", ex);
 
                 response = ReturnApiResponse.Failure(response, "Error saving new message.");
                 response.Data = null;
@@ -166,7 +175,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
             catch (Exception ex)
             {
-                _serilogger.LogPublicMessageError("PublicMessagesService.ModifyAsync", ex);
+                _serilogger.PublicMessageError("PublicMessagesService.ModifyAsync", ex);
 
                 response = ReturnApiResponse.Failure(response, "Error modifying message.");
                 response.Data = null;
@@ -223,7 +232,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
             catch (Exception ex)
             {
-                _serilogger.LogPublicMessageError("PublicMessagesService.DeleteAsync", ex);
+                _serilogger.PublicMessageError("PublicMessagesService.DeleteAsync", ex);
 
                 response = ReturnApiResponse.Failure(response, "Error deleting message.");
                 response.Data = null;
@@ -239,14 +248,14 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = publicMessagesView.PublicMessageId,
-                UserId = publicMessagesView.UserId,
-                UserName = publicMessagesView.UserName,
-                ChatGroupId = publicMessagesView.ChatGroupId,
-                ChatGroupName = publicMessagesView.ChatGroupName,
-                Text = publicMessagesView.Text,
+                UserId          = publicMessagesView.UserId,
+                UserName        = publicMessagesView.UserName,
+                ChatGroupId     = publicMessagesView.ChatGroupId,
+                ChatGroupName   = publicMessagesView.ChatGroupName,
+                Text            = publicMessagesView.Text,
                 MessageDateTime = publicMessagesView.MessageDateTime,
-                ReplyMessageId = publicMessagesView.ReplyMessageId,
-                PictureLink = publicMessagesView.PictureLink
+                ReplyMessageId  = publicMessagesView.ReplyMessageId,
+                PictureLink     = publicMessagesView.PictureLink
             };
         }
 
@@ -259,14 +268,14 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 PublicMessageDto dto = new()
                 {
                     PublicMessageId = viewItem.PublicMessageId,
-                    UserId = viewItem.UserId,
-                    UserName = viewItem.UserName,
-                    ChatGroupId = viewItem.ChatGroupId,
-                    ChatGroupName = viewItem.ChatGroupName,
-                    Text = viewItem.Text,
+                    UserId          = viewItem.UserId,
+                    UserName        = viewItem.UserName,
+                    ChatGroupId     = viewItem.ChatGroupId,
+                    ChatGroupName   = viewItem.ChatGroupName,
+                    Text            = viewItem.Text,
                     MessageDateTime = viewItem.MessageDateTime,
-                    ReplyMessageId = viewItem.ReplyMessageId,
-                    PictureLink = viewItem.PictureLink
+                    ReplyMessageId  = viewItem.ReplyMessageId,
+                    PictureLink     = viewItem.PictureLink
                 };
                 dtoList.Add(dto);
             }
@@ -298,12 +307,12 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = Guid.NewGuid(),
-                UserId = messageDto.UserId,
-                ChatGroupId = messageDto.ChatGroupId,
-                Text = messageDto.Text,
+                UserId          = messageDto.UserId,
+                ChatGroupId     = messageDto.ChatGroupId,
+                Text            = messageDto.Text,
                 MessageDateTime = messageDto.MessageDateTime,
-                ReplyMessageId = messageDto.ReplyMessageId,
-                PictureLink = messageDto.PictureLink
+                ReplyMessageId  = messageDto.ReplyMessageId,
+                PictureLink     = messageDto.PictureLink
             };
         }
 
@@ -313,14 +322,14 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = newMessage.PublicMessageId,
-                UserId = newMessage.UserId,
-                UserName = dtoMessage.UserName,
-                ChatGroupId = newMessage.ChatGroupId,
-                ChatGroupName = dtoMessage.ChatGroupName,
-                Text = newMessage.Text,
+                UserId          = newMessage.UserId,
+                UserName        = dtoMessage.UserName,
+                ChatGroupId     = newMessage.ChatGroupId,
+                ChatGroupName   = dtoMessage.ChatGroupName,
+                Text            = newMessage.Text,
                 MessageDateTime = newMessage.MessageDateTime,
-                ReplyMessageId = newMessage.ReplyMessageId,
-                PictureLink = newMessage.PictureLink
+                ReplyMessageId  = newMessage.ReplyMessageId,
+                PictureLink     = newMessage.PictureLink
             };
         }
 
@@ -330,12 +339,12 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = message.PublicMessageId,
-                UserId = message.UserId,
-                ChatGroupId = message.ChatGroupId,
-                Text = dtoMessage.Text,
+                UserId          = message.UserId,
+                ChatGroupId     = message.ChatGroupId,
+                Text            = dtoMessage.Text,
                 MessageDateTime = dtoMessage.MessageDateTime,
-                ReplyMessageId = dtoMessage.ReplyMessageId,
-                PictureLink = dtoMessage.PictureLink
+                ReplyMessageId  = dtoMessage.ReplyMessageId,
+                PictureLink     = dtoMessage.PictureLink
             };
         }
 

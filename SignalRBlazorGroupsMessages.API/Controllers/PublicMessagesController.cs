@@ -20,6 +20,9 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         // GET: api/<PublicMessagesController>/bygroupid
         [HttpGet("bygroupid")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicMessageDto>>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<List<PublicMessageDto>>>> GetListByGroupIdAsync(
             [FromQuery] int groupId, int numberItemsToSkip)
         {
@@ -29,12 +32,16 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return BadRequest("Invalid data: "+nameof(numberItemsToSkip));
 
             ApiResponse<List<PublicMessageDto>> listDto = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
+            _serilogger.GetRequest(GetIpv4Address(), listDto);
 
             return Ok(listDto);
         }
 
         // GET: api/<PublicMessagesController>/byuserid
         [HttpGet("byuserid")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicMessageDto>>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<List<PublicMessageDto>>>> GetListByUserIdAsync(
             [FromQuery] Guid userId, int numberItemsToSkip)
         {
@@ -43,22 +50,51 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (numberItemsToSkip < 0)
                 return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
 
-            ApiResponse<List<PublicMessageDto>> listDto = await _service.GetViewListByUserIdAsync(userId, numberItemsToSkip);
+            ApiResponse<List<PublicMessageDto>> listDtoResponse = await _service.GetViewListByUserIdAsync(userId, numberItemsToSkip);
+            _serilogger.GetRequest(GetIpv4Address(), listDtoResponse);
 
-            return Ok(listDto);
+            return Ok(listDtoResponse);
         }
 
-        // GET api/<PublicMessagesController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET api/<PublicMessagesController>/bymessageid
+        [HttpGet("bymessageid")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicMessageDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PublicMessageDto>>> GetByMessageIdAsync(
+            [FromQuery] Guid messageId)
         {
-            return "value";
+            if (messageId == new Guid())
+                return BadRequest("Invalid data: " + nameof(messageId));
+
+            ApiResponse<PublicMessageDto> dtoResponse = await _service.GetByMessageIdAsync(messageId);
+            _serilogger.GetRequest(GetIpv4Address(), dtoResponse);
+
+            return Ok(dtoResponse);
         }
 
         // POST api/<PublicMessagesController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicMessageDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse<PublicMessageDto>>> Post([FromBody] PublicMessageDto dtoToCreate)
         {
+            if (!ModelState.IsValid || dtoToCreate == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            ApiResponse<PublicMessageDto> dtoResponse = await _service.AddAsync(dtoToCreate);
+            _serilogger.PostRequest(GetIpv4Address(), dtoResponse);
+
+            if (dtoResponse.Success == false)
+            {
+                return BadRequest(dtoResponse);
+            }
+
+            return Ok(dtoResponse);
         }
 
         // PUT api/<PublicMessagesController>/5
@@ -72,5 +108,14 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         public void Delete(int id)
         {
         }
+
+        #region PRIVATE METHODS
+
+        private string GetIpv4Address()
+        {
+            return HttpContext.Connection.RemoteIpAddress!.MapToIPv4().ToString();
+        }
+
+        #endregion
     }
 }
