@@ -133,14 +133,14 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 PublicMessagesView view = new()
                 {
                     PublicMessageId = Guid.Parse((string)reader[0]),
-                    UserId = Guid.Parse((string)reader[1]),
-                    UserName = (string)reader[2],
-                    ChatGroupId = (int)reader[3],
-                    ChatGroupName = (string)reader[4],
-                    Text = (string)reader[5],
+                    UserId          = Guid.Parse((string)reader[1]),
+                    UserName        = (string)reader[2],
+                    ChatGroupId     = (int)reader[3],
+                    ChatGroupName   = (string)reader[4],
+                    Text            = (string)reader[5],
                     MessageDateTime = (DateTime)reader[6],
-                    ReplyMessageId = reader[7].ToString().IsNullOrEmpty() ? null : Guid.Parse((string)reader[7]),
-                    PictureLink = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString()
+                    ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : Guid.Parse((string)reader[7]),
+                    PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString()
                 };
                 viewList.Add(view);
             }

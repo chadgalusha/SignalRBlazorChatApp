@@ -1,6 +1,7 @@
 ﻿using ChatApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
+using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
@@ -24,6 +25,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
                         context.AddRange(GetListChatGroups());
                         context.AddRange(GetListPrivateGroupMembers());
+                        context.AddRange(GetListChatGroupsViews());
 
                         context.SaveChanges();
                     }
@@ -33,11 +35,25 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             }
         }
 
-        public ApplicationDbContext CreateContext()
-        => new ApplicationDbContext(
-            new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlServer(ConnectionString)
-                .Options);
+        // This class mocks results sent from stored procedures for ChatGroups in the production database
+        public class TestChatGroupsDbContext : ApplicationDbContext
+        {
+            public TestChatGroupsDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
+            public virtual DbSet<ChatGroupsView> ChatGroupsViews { get; set; }
+        }
+
+        public TestChatGroupsDbContext CreateContext()
+            => new TestChatGroupsDbContext(
+                new DbContextOptionsBuilder<ApplicationDbContext>()
+                    .UseSqlServer(ConnectionString)
+                    .Options);
+
+        //public ApplicationDbContext CreateContext()
+        //=> new ApplicationDbContext(
+        //    new DbContextOptionsBuilder<ApplicationDbContext>()
+        //        .UseSqlServer(ConnectionString)
+        //        .Options);
 
         private List<ChatGroups> GetListChatGroups()
         {
@@ -103,6 +119,50 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 }
             };
             return privateGroupMembersList;
+        }
+
+        private List<ChatGroupsView> GetListChatGroupsViews()
+        {
+            List<ChatGroupsView> listView = new()
+            {
+                 new()
+                {
+                    //ChatGroupId      = 1,
+                    ChatGroupName    = "TestPublicGroup1",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    UserName         = "Test Admin",
+                    PrivateGroup     = false
+                },
+                new()
+                {
+                    //ChatGroupId      = 2,
+                    ChatGroupName    = "TestPublicGroup2",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    UserName         = "Test Admin",
+                    PrivateGroup     = false
+                },
+                new()
+                {
+                    //ChatGroupId      = 3,
+                    ChatGroupName    = "TestPrivateGroup1",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    UserName         = "Test Admin",
+                    PrivateGroup     = true
+                },
+                new()
+                {
+                    //ChatGroupId      = 4,
+                    ChatGroupName    = "TestPrivateGroup2",
+                    GroupCreated     = DateTime.Now,
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    UserName         = "Test Admin",
+                    PrivateGroup     = true
+                }
+            };
+            return listView;
         }
     }
 }

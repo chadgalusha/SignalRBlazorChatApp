@@ -3,61 +3,58 @@ using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.Models;
 
-public class TestPublicMessagesDatabaseFixture
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=PublicMessagesTestSample;Trusted_Connection=True";
-
-    private static readonly object _lock = new();
-    private static bool _databaseInitialized;
-
-    public TestPublicMessagesDatabaseFixture()
+    public class TestPublicMessagesDatabaseFixture
     {
-        lock (_lock)
+        private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=PublicMessagesTestSample;Trusted_Connection=True";
+
+        private static readonly object _lock = new();
+        private static bool _databaseInitialized;
+
+        public TestPublicMessagesDatabaseFixture()
         {
-            if (!_databaseInitialized)
+            lock (_lock)
             {
-                using (var context = CreateContext())
+                if (!_databaseInitialized)
                 {
-                    context.Database.EnsureDeleted();
-                    context.Database.EnsureCreated();
+                    using (var context = CreateContext())
+                    {
+                        context.Database.EnsureDeleted();
+                        context.Database.EnsureCreated();
 
-                    context.AddRange(GetListPublicMessages());
-                    context.AddRange(GetListPublicMessagesViews());
-                    context.SaveChanges();
+                        context.AddRange(GetListPublicMessages());
+                        context.AddRange(GetListPublicMessagesViews());
+                        context.SaveChanges();
+                    }
+
+                    _databaseInitialized = true;
                 }
-
-                _databaseInitialized = true;
             }
         }
-    }
 
-    // This class mocks results sent from stored procedures from PublicMessages in the production database
-    public class TestPublicMessagesDbContext : ApplicationDbContext
-    {
-        public TestPublicMessagesDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-        public virtual DbSet<PublicMessagesView> PublicMessagesView { get; set; }
+        // This class mocks results sent from stored procedures from PublicMessages in the production database
+        public class TestPublicMessagesDbContext : ApplicationDbContext
+        {
+            public TestPublicMessagesDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+            public virtual DbSet<PublicMessagesView> PublicMessagesView { get; set; }
+        }
 
-        //protected override void OnModelCreating(ModelBuilder builder)
-        //{
-        //    base.OnModelCreating(builder);
-        //}
-    }
+        //public ApplicationDbContext CreateContext()
+        //    => new ApplicationDbContext(
+        //        new DbContextOptionsBuilder<ApplicationDbContext>()
+        //            .UseSqlServer(ConnectionString)
+        //            .Options);
 
-    //public ApplicationDbContext CreateContext()
-    //    => new ApplicationDbContext(
-    //        new DbContextOptionsBuilder<ApplicationDbContext>()
-    //            .UseSqlServer(ConnectionString)
-    //            .Options);
+        public TestPublicMessagesDbContext CreateContext()
+            => new TestPublicMessagesDbContext(
+                new DbContextOptionsBuilder<ApplicationDbContext>()
+                    .UseSqlServer(ConnectionString)
+                    .Options);
 
-    public TestPublicMessagesDbContext CreateContext()
-        => new TestPublicMessagesDbContext(
-            new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlServer(ConnectionString)
-                .Options);
-
-    private List<PublicMessages> GetListPublicMessages()
-    {
-        List<PublicMessages> messageList = new()
+        private List<PublicMessages> GetListPublicMessages()
+        {
+            List<PublicMessages> messageList = new()
             {
                 new()
                 {
@@ -93,12 +90,12 @@ public class TestPublicMessagesDatabaseFixture
                     MessageDateTime = new DateTime(2023, 6, 15)
                 }
             };
-        return messageList;
-    }
+            return messageList;
+        }
 
-    private List<PublicMessagesView> GetListPublicMessagesViews()
-    {
-        List<PublicMessagesView> messageList = new()
+        private List<PublicMessagesView> GetListPublicMessagesViews()
+        {
+            List<PublicMessagesView> messageList = new()
         {
             new()
                 {
@@ -141,6 +138,7 @@ public class TestPublicMessagesDatabaseFixture
                     MessageDateTime = new DateTime(2023, 6, 15)
                 }
         };
-        return messageList;
+            return messageList;
+        }
     }
 }
