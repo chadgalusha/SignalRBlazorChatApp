@@ -114,6 +114,15 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return result >= 0;
         }
 
+        public async Task<bool> DeleteMessagesFromChatGroupAsync(int chatGroupId)
+        {
+            int result = await _context.PublicMessages
+                .Where(c => c.ChatGroupId == chatGroupId)
+                .ExecuteDeleteAsync();
+
+            return result >= 0;
+        }
+
         #region PRIVATE METHODS
 
         private async Task<bool> Save()

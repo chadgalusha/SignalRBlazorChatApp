@@ -179,6 +179,31 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             });
         }
 
+        [Fact]
+        public async Task DeleteMessagesFromChatGroup_IsSuccess()
+        {
+            int chatGroupToDeleteId = 1;
+            int countShouldBeGreaterThanZero = _context.PublicMessages
+                .Where(c => c.ChatGroupId == chatGroupToDeleteId)
+                .Count();
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.DeleteMessagesFromChatGroupAsync(chatGroupToDeleteId);
+            _context.ChangeTracker.Clear();
+
+            int countShouldBeZero = _context.PublicMessages
+                .Where(c => c.ChatGroupId == chatGroupToDeleteId)
+                .Count();
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(countShouldBeGreaterThanZero > 0);
+                Assert.True(countShouldBeZero == 0);
+                Assert.True(result);
+            });
+
+        }
+
         #region PRIVATE METHODS
 
         private PublicMessages NewPublicMessage()

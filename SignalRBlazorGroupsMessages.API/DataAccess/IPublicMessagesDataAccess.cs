@@ -14,5 +14,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         Task<bool> Exists(Guid messageId);
         Task<PublicMessages> GetByMessageIdAsync(Guid messageId);
         Task<bool> DeleteMessagesByResponseMessageIdAsync(Guid responseMessageId);
+        Task<bool> DeleteMessagesFromChatGroupAsync(int chatGroupId);
     }
 }

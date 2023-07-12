@@ -79,6 +79,12 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .Single(c => c.ChatGroupName == chatGroupName);
         }
 
+        public ChatGroups GetByGroupId(int groupId)
+        {
+            return _context.ChatGroups
+                .Single(c => c.ChatGroupId == groupId);
+        }
+
         public bool GroupNameTaken(string chatGroupName)
         {
             return _context.ChatGroups

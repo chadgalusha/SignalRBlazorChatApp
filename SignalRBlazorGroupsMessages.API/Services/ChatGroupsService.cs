@@ -8,11 +8,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
     public class ChatGroupsService
     {
         private readonly IChatGroupsDataAccess _chatGroupsDataAccess;
+        private readonly IPublicMessagesDataAccess _publicMessagesDataAccess;
         private readonly ISerilogger _serilogger;
 
-        public ChatGroupsService(IChatGroupsDataAccess chatGroupsDataAccess, ISerilogger serilogger) 
+        public ChatGroupsService(IChatGroupsDataAccess chatGroupsDataAccess, IPublicMessagesDataAccess publicMessagesDataAccess, ISerilogger serilogger) 
         {
             _chatGroupsDataAccess = chatGroupsDataAccess ?? throw new Exception(nameof(chatGroupsDataAccess));
+            _publicMessagesDataAccess = publicMessagesDataAccess ?? throw new Exception(nameof(publicMessagesDataAccess));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
         }
 
@@ -102,7 +104,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                ChatGroups newChatGroup = DtoToModel(dto);
+                if (GroupNameTaken(dto.ChatGroupName) == true)
+                {
+                    response.Data = null;
+                    return ReturnApiResponse.Failure(response, "Chat Group name alrady taken.");
+                }
+
+                ChatGroups newChatGroup = DtoToNewChatGroup(dto);
                 bool isSuccess = await _chatGroupsDataAccess.AddAsync(newChatGroup);
 
                 if (!isSuccess)
@@ -111,8 +119,8 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return ReturnApiResponse.Failure(response, "Error saving new chat group.");
                 }
 
-                //ChatGroupsDto newDto = ViewToDto
-                return response; // TODO fix this
+                ChatGroupsDto newDto = NewChatGroupToDto(newChatGroup, dto.ChatGroupName);
+                return ReturnApiResponse.Success(response, newDto);
             }
             catch (Exception ex)
             {
@@ -125,11 +133,108 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
+        public async Task<ApiResponse<ChatGroupsDto>> ModifyAsync(ChatGroupsDto dto)
+        {
+            ApiResponse<ChatGroupsDto> response = new();
+
+            try
+            {
+                ChatGroupsView existingView = await _chatGroupsDataAccess.GetChatGroupByIdAsync(dto.ChatGroupId);
+
+                // check if chat group passes modify checks 1st. if false return failure with error messages.
+                (bool, string) messageChecks = ModifyChatGroupChecks(dto, existingView);
+                if (messageChecks.Item1 == false)
+                {
+                    response.Data = null;
+                    return ReturnApiResponse.Failure(response, messageChecks.Item2);
+                }
+
+                ChatGroups chatGroupToModify = DtoToChatGroup(dto);
+                bool isSuccess = await _chatGroupsDataAccess.ModifyAsync(chatGroupToModify);
+
+                if (!isSuccess)
+                {
+                    response.Data = null;
+                    return ReturnApiResponse.Failure(response, "Error modifying chat group");
+                }
+
+                return ReturnApiResponse.Success(response, dto);
+            }
+            catch (Exception ex)
+            {
+                _serilogger.ChatGroupError("ChatGroupsService.ModifyAsync", ex);
+
+                response = ReturnApiResponse.Failure(response, "Error modifying chat group.");
+                response.Data = null;
+
+                return response;
+            }
+        }
+
+        public async Task<ApiResponse<ChatGroupsDto>> DeleteAsync(ChatGroupsDto dto)
+        {
+            ApiResponse<ChatGroupsDto> response = new();
+
+            try
+            {
+                if (!_chatGroupsDataAccess.GroupExists(dto.ChatGroupId))
+                {
+                    response.Data = null;
+                    return ReturnApiResponse.Failure(response, "Chat Group Id not found");
+                }
+
+                
+
+                return ReturnApiResponse.Success(response, dto);//FIX THIS
+            }
+            catch (Exception ex)
+            {
+                _serilogger.ChatGroupError("ChatGroupsService.DeleteAsync", ex);
+
+                response = ReturnApiResponse.Failure(response, "Error deleting chat group.");
+                response.Data = null;
+
+                return response;
+            }
+        }
+
         #region PRIVATE METHODS
 
         private bool GroupExists(int groupId)
         {
             return _chatGroupsDataAccess.GroupExists(groupId);
+        }
+
+        private bool GroupNameTaken(string chatGroupName)
+        {
+            return _chatGroupsDataAccess.GroupNameTaken(chatGroupName);
+        }
+
+        private (bool, string) ModifyChatGroupChecks(ChatGroupsDto dto, ChatGroupsView view)
+        {
+            bool passesChecks = true;
+            string errorMessage = "";
+
+            if (dto.ChatGroupName != view.ChatGroupName)
+            {
+                if (GroupNameTaken(dto.ChatGroupName) == true)
+                {
+                    passesChecks = false;
+                    errorMessage += "[Chat Group name alrady taken.]";
+                }
+            }
+            if (dto.GroupOwnerUserId != view.GroupOwnerUserId)
+            {
+                passesChecks = false;
+                errorMessage += "[Must use change group owner request for different group owner.]";
+            }
+            if (dto.PrivateGroup != view.PrivateGroup)
+            {
+                passesChecks = false;
+                errorMessage += "[Cannot change status of chat group from private to public, and vice versa.]";
+            }
+
+            return (passesChecks, errorMessage);
         }
 
         private List<ChatGroupsDto> ViewListToDtoList(List<ChatGroupsView> viewList)
@@ -165,7 +270,31 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        private ChatGroups DtoToModel(ChatGroupsDto dto)
+        private ChatGroups DtoToNewChatGroup(ChatGroupsDto dto)
+        {
+            return new()
+            {
+                ChatGroupName    = dto.ChatGroupName,
+                GroupCreated     = dto.GroupCreated,
+                GroupOwnerUserId = dto.GroupOwnerUserId,
+                PrivateGroup     = dto.PrivateGroup
+            };
+        }
+
+        private ChatGroupsDto NewChatGroupToDto(ChatGroups newGroup, string userName)
+        {
+            return new()
+            {
+                ChatGroupId      = newGroup.ChatGroupId,
+                ChatGroupName    = newGroup.ChatGroupName,
+                GroupCreated     = newGroup.GroupCreated,
+                GroupOwnerUserId = newGroup.GroupOwnerUserId,
+                UserName         = userName,
+                PrivateGroup     = newGroup.PrivateGroup
+            };
+        }
+
+        private ChatGroups DtoToChatGroup(ChatGroupsDto dto) 
         {
             return new()
             {

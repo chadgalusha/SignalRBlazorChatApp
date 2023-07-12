@@ -193,7 +193,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             try
             {
                 // Check message exists
-                if (await _publicMessageDataAccess.Exists(dtoMessage.PublicMessageId) == false)
+                if (!await _publicMessageDataAccess.Exists(dtoMessage.PublicMessageId))
                 {
                     response = ReturnApiResponse.Failure(response, "Message Id not found.");
                     response.Data = null;
