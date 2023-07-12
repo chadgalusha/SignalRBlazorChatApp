@@ -108,7 +108,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task ModifyMessageAsync_IsSuccess()
+        public async Task ModifyAsync_IsSuccess()
         {
             Guid messageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
             string newMessage = "Modified message";

@@ -8,22 +8,22 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
     {
         #region CHAT GROUP LOGGING
 
-        public void LogChatGroupError(string errorAtMethod, Exception ex)
+        public void ChatGroupError(string errorAtMethod, Exception ex)
         {
             Log.Error($"Error with Chat Group Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
         }
 
-        public void LogNewChatGroupCreated(ChatGroups chatGroup)
+        public void NewChatGroupCreated(ChatGroups chatGroup)
         {
             Log.Information($"New chat group created. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName} - IsPrivate {chatGroup.PrivateGroup}.");
         }
 
-        public void LogChatGroupModified(ChatGroups chatGroup)
+        public void ChatGroupModified(ChatGroups chatGroup)
         {
             Log.Information($"Chat group modified. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName}");
         }
 
-        public void LogChatGroupDeleted(ChatGroups chatGroup)
+        public void ChatGroupDeleted(ChatGroups chatGroup)
         {
             Log.Information($"Chat group deleted. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName}.");
         }
@@ -31,13 +31,13 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
         #endregion
         #region PRIVATE CHAT GROUP LOGGING
 
-        public void LogUserAddedToPrivateChatGroup(PrivateGroupMembers privateGroupMember)
+        public void UserAddedToPrivateChatGroup(PrivateGroupMembers privateGroupMember)
         {
             Log.Information($"User added to private group. Record Id: {privateGroupMember.PrivateGroupMemberId}" +
                 $" - Group Id: {privateGroupMember.PrivateChatGroupId} - User Id: {privateGroupMember.UserId}");
         }
 
-        public void LogUserRemovedFromPrivateChatGroup(PrivateGroupMembers privateGroupMember)
+        public void UserRemovedFromPrivateChatGroup(PrivateGroupMembers privateGroupMember)
         {
             Log.Information($"User removed from private group. Record Id: {privateGroupMember.PrivateGroupMemberId}" +
                 $" - Group Id: {privateGroupMember.PrivateChatGroupId} - User Id: {privateGroupMember.UserId}");
@@ -64,17 +64,17 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
         #endregion
         #region PRIVATE MESSAGE LOGGING
 
-        public void LogPrivateMessageError(string errorAtMethod, Exception ex)
+        public void PrivateMessageError(string errorAtMethod, Exception ex)
         {
             Log.Error($"Error with Private Message Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
         }
 
-        public void LogPrivateMessageModified(PrivateMessages message)
+        public void PrivateMessageModified(PrivateMessages message)
         {
             Log.Information($"Private message modified. Id: {message.PrivateMessageId} - From UserId: {message.FromUserId} - To UserId: {message.ToUserId}.");
         }
 
-        public void LogPrivateMessageDeleted(PrivateMessages message)
+        public void PrivateMessageDeleted(PrivateMessages message)
         {
             Log.Information($"Private message deleted. Id: {message.PrivateMessageId} - From UserId: {message.FromUserId} - To UserId: {message.ToUserId}.");
         }

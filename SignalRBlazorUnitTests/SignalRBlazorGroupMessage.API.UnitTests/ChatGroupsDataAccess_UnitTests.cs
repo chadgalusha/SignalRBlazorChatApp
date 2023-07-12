@@ -1,4 +1,5 @@
 ﻿using ChatApplicationModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
@@ -37,8 +38,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             _mockChatGroupsDataAccess.Setup(c => c.GetViewListPublicChatGroupsAsync())
                 .ReturnsAsync(viewList);
 
-            var mockedDataAccessObject = _mockChatGroupsDataAccess.Object;
-            List<ChatGroupsView> result = await mockedDataAccessObject.GetViewListPublicChatGroupsAsync();
+            List<ChatGroupsView> result = await _mockChatGroupsDataAccess.Object
+                .GetViewListPublicChatGroupsAsync();
 
             Assert.Multiple(() =>
             {
@@ -47,21 +48,71 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             });
         }
 
-        //[Fact]
-        //public async Task GetChatGroupById_ReturnsCorrectChatGroup()
-        //{
-        //    string expectedChatGroupName = "TestPublicGroup1";
+        [Fact]
+        public async Task GetChatGroupById_ReturnsCorrectChatGroup()
+        {
+            string expectedChatGroupName = "TestPublicGroup1";
+            ChatGroupsView view = _context.ChatGroupsViews
+                .Single(c => c.ChatGroupId == 1);
+            int expectedGroupId = view.ChatGroupId;
 
-        //    ChatGroups resultChatGroup = await _dataAccess.GetChatGroupByIdAsync(1);
+            Mock<IChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
+            _mockChatGroupsDataAccess.Setup(c => c.GetChatGroupByIdAsync(1))
+                .ReturnsAsync(view);
+                
 
-        //    Assert.Equal(expectedChatGroupName, resultChatGroup.ChatGroupName);
-        //}
+            ChatGroupsView resultChatGroup = await _mockChatGroupsDataAccess.Object
+                .GetChatGroupByIdAsync(1);
+
+            Assert.Multiple(() =>
+            {
+                Assert.Equal(expectedChatGroupName, resultChatGroup.ChatGroupName);
+                Assert.Equal(expectedGroupId, resultChatGroup.ChatGroupId);
+            });
+        }
 
         [Fact]
-        public void ChatGroupExists_ReturnsCorrectResult()
+        public void GetByGroupName_ReturnsCorrectResult()
         {
-            bool shouldBeTrue = _dataAccess.ChatGroupexists(1);
-            bool shouldBeFalse = _dataAccess.ChatGroupexists(999);
+            string badName = "shouldnotreturnanything";
+            string goodName = _context.ChatGroups
+                .OrderBy(c => c.ChatGroupId)
+                .First()
+                .ChatGroupName;
+
+            ChatGroups goodChatGroup = _dataAccess.GetByGroupName(goodName);
+
+            Assert.Multiple(() =>
+            {
+                Assert.Equal(goodName, goodChatGroup.ChatGroupName);
+                Assert.Throws<InvalidOperationException>(() => _dataAccess.GetByGroupName(badName));
+            });
+        }
+
+        [Fact]
+        public void GroupNameTaken_ReturnsCorrectResult()
+        {
+            string notTakenName = "ShouldReturnFalse";
+            string takenName = _context.ChatGroups
+                .OrderBy(c => c.ChatGroupId)
+                .First()
+                .ChatGroupName;
+
+            bool shouldBeFalse = _dataAccess.GroupNameTaken(notTakenName);
+            bool shouldBeTrue = _dataAccess.GroupNameTaken(takenName);
+
+            Assert.Multiple(() =>
+            {
+                Assert.False(shouldBeFalse);
+                Assert.True(shouldBeTrue);
+            });
+        }
+
+        [Fact]
+        public void GroupExists_ReturnsCorrectResult()
+        {
+            bool shouldBeTrue = _dataAccess.GroupExists(1);
+            bool shouldBeFalse = _dataAccess.GroupExists(999);
 
             Assert.Multiple(() =>
             {
@@ -70,66 +121,69 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             });
         }
 
-        //[Fact]
-        //public async Task AddChatGroupAsync_IsSuccess()
-        //{
-        //    string expectedNewChatGroupName = "NewPublicChatGroup";
-        //    ChatGroups newChatGroup = GetNewPublicChatGroup();
+        [Fact]
+        public async Task AddAsync_IsSuccess()
+        {
+            string expectedNewChatGroupName = "NewPublicChatGroup";
+            ChatGroups newChatGroup = GetNewPublicChatGroup();
 
-        //    _context.Database.BeginTransaction();
-        //    bool resultOfAdd = await _dataAccess.AddChatGroupAsync(newChatGroup);
-        //    _context.ChangeTracker.Clear();
+            _context.Database.BeginTransaction();
+            bool resultOfAdd = await _dataAccess.AddAsync(newChatGroup);
+            _context.ChangeTracker.Clear();
 
-        //    List<ChatGroups> listChatGroups = await _dataAccess.GetViewListPublicChatGroupsAsync();
-        //    string resultNewChatGroupName = listChatGroups.Last().ChatGroupName;
+            ChatGroups resultChatGroup = _context.ChatGroups
+                .OrderBy(c => c.ChatGroupId)
+                .Last();
 
-        //    Assert.Multiple(() =>
-        //    {
-        //        Assert.True(resultOfAdd);
-        //        Assert.Equal(3, listChatGroups.Count);
-        //        Assert.Equal(expectedNewChatGroupName, resultNewChatGroupName);
-        //    });
-        //}
+            Assert.Multiple(() =>
+            {
+                Assert.True(resultOfAdd);
+                Assert.Equal(expectedNewChatGroupName, resultChatGroup.ChatGroupName);
+            });
+        }
 
+        [Fact]
+        public async Task ModifyAsync_IsSuccess()
+        {
+            int chatGroupId = 1;
+            string expectedModifiedGroupName = "ModifiedChatGroupName";
+            ChatGroups chatGroupToModify = _context.ChatGroups
+                .Single(c => c.ChatGroupId == chatGroupId);
+            chatGroupToModify.ChatGroupName = expectedModifiedGroupName;
 
-        //[Fact]
-        //public async Task ModifyChatGroup_IsSuccess()
-        //{
-        //    string expectedModifiedGroupName = "ModifiedChatGroupName";
-        //    ChatGroups chatGroupToModify = await _dataAccess.GetChatGroupByIdAsync(1);
-        //    chatGroupToModify.ChatGroupName = expectedModifiedGroupName;
+            _context.Database.BeginTransaction();
+            bool resultOfModify = await _dataAccess.ModifyAsync(chatGroupToModify);
+            _context.ChangeTracker.Clear();
 
-        //    _context.Database.BeginTransaction();
-        //    bool resultOfModify = await _dataAccess.ModifyChatGroupAsync(chatGroupToModify);
-        //    _context.ChangeTracker.Clear();
+            ChatGroups modifiedChatGroup = _context.ChatGroups
+                .Single(c => c.ChatGroupId == chatGroupId);
 
-        //    ChatGroups modifiedChatGroup = await _dataAccess.GetChatGroupByIdAsync(1);
+            Assert.Multiple(() =>
+            {
+                Assert.True(resultOfModify);
+                Assert.Equal(expectedModifiedGroupName, modifiedChatGroup.ChatGroupName);
+            });
+        }
 
-        //    Assert.Multiple(() =>
-        //    {
-        //        Assert.True(resultOfModify);
-        //        Assert.Equal(expectedModifiedGroupName, modifiedChatGroup.ChatGroupName);
-        //    });
-        //}
+        [Fact]
+        public async Task DeleteChatGroupAsync_IsSuccess()
+        {
+            int chatGroupId = 1;
+            ChatGroups chatGroupToDelete = _context.ChatGroups
+                .Single(c => c.ChatGroupId == chatGroupId);
 
-        //[Fact]
-        //public async Task DeleteChatGroupAsync_IsSuccess()
-        //{
-        //    ChatGroups chatGroupToDelete = await _dataAccess.GetChatGroupByIdAsync(1);
-        //    int chatGroupToDeleteId = chatGroupToDelete.ChatGroupId;
+            _context.Database.BeginTransaction();
+            bool resultOfDelete = await _dataAccess.DeleteAsync(chatGroupToDelete);
+            _context.ChangeTracker.Clear();
 
-        //    _context.Database.BeginTransaction();
-        //    bool resultOfDelete = await _dataAccess.DeleteChatGroupAsync(chatGroupToDelete);
-        //    _context.ChangeTracker.Clear();
-
-        //    bool chatGroupExists = _dataAccess.ChatGroupexists(chatGroupToDeleteId);
-        //    Assert.Multiple(() =>
-        //    {
-        //        Assert.True(resultOfDelete);
-        //        Assert.False(chatGroupExists);
-        //    });
-        //    Assert.False(chatGroupExists);
-        //}
+            bool chatGroupExists = _dataAccess.GroupExists(chatGroupId);
+            Assert.Multiple(() =>
+            {
+                Assert.True(resultOfDelete);
+                Assert.False(chatGroupExists);
+            });
+            Assert.False(chatGroupExists);
+        }
 
         [Fact]
         public async Task AddUserToPrivateChatGroup_AddsUser()
@@ -181,21 +235,22 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             });
         }
 
-        //[Fact]
-        //public void GetPrivateChatGroupsByUserId_ReturnsCorrectList()
-        //{
-        //    string userId = "e08b0077-3c15-477e-84bb-bf9d41196455";
-        //    List<ChatGroups> listPrivateChatGroups = GetListPrivateChatGroups(userId);
+        [Fact]
+        public async void GetPrivateChatGroupsByUserId_ReturnsCorrectList()
+        {
+            Guid userId = Guid.Parse("e08b0077-3c15-477e-84bb-bf9d41196455");
+            List<ChatGroupsView> listPrivateChatGroups = GetListPrivateChatGroups(userId);
 
-        //    Mock<IChatGroupsDataAccess> _mockDataAccess = new();
-        //    _mockDataAccess.Setup(x => x.GetViewListPrivateChatGroupsByUserId(userId))
-        //        .Returns(listPrivateChatGroups);
+            Mock<IChatGroupsDataAccess> _mockDataAccess = new();
+            _mockDataAccess.Setup(x => x.GetViewListPrivateByUserIdAsync(userId))
+                .ReturnsAsync(listPrivateChatGroups);
 
-        //    var mockedDataAccessObject = _mockDataAccess.Object;
-        //    var result = mockedDataAccessObject.GetViewListPrivateChatGroupsByUserId(userId);
+            var mockedDataAccess = _mockDataAccess.Object;
+            var result = await mockedDataAccess
+                .GetViewListPrivateByUserIdAsync(userId);
 
-        //    Assert.Equal(listPrivateChatGroups, result);
-        //}
+            Assert.Equal(listPrivateChatGroups, result);
+        }
 
         #region PRIVATE METHODS
 
@@ -203,10 +258,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             return new()
             {
-                ChatGroupName = "NewPublicChatGroup",
-                GroupCreated = DateTime.Now,
-                GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
-                PrivateGroup = false
+                ChatGroupName    = "NewPublicChatGroup",
+                GroupCreated     = DateTime.Now,
+                GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                PrivateGroup     = false
             };
         }
 
@@ -215,18 +270,18 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return new()
             {
                 PrivateChatGroupId = groupToJoinId,
-                UserId = userIdToJoin
+                UserId             = userIdToJoin
             };
         }
 
         // Mock of stored procedure sp_getPrivateChatGroupsForUser @UserId
-        private List<ChatGroups> GetListPrivateChatGroups(string userId)
+        private List<ChatGroupsView> GetListPrivateChatGroups(Guid userId)
         {
             List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
-                .Where(p => p.UserId == userId)
+                .Where(p => p.UserId == userId.ToString())
                 .ToList();
 
-            List<ChatGroups> listPrivateChatGroups = new();
+            List<ChatGroupsView> listPrivateChatGroups = new();
             foreach (var listItem in listPrivateGroupMembers)
             {
                 ChatGroups chatGroup = _context.ChatGroups
@@ -234,13 +289,24 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
                 if (chatGroup != null)
                 {
-                    listPrivateChatGroups.Add(chatGroup);
+                    listPrivateChatGroups.Add(ChatGroupToView(chatGroup));
                 }
             }
 
             return listPrivateChatGroups;
         }
 
+        private ChatGroupsView ChatGroupToView(ChatGroups chatGroup)
+        {
+            return new()
+            {
+                ChatGroupId      = chatGroup.ChatGroupId,
+                ChatGroupName    = chatGroup.ChatGroupName,
+                GroupCreated     = chatGroup.GroupCreated,
+                GroupOwnerUserId = chatGroup.GroupOwnerUserId,
+                PrivateGroup     = chatGroup.PrivateGroup
+            };
+        }
         #endregion
     }
 }

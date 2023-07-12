@@ -54,7 +54,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return view;
         }
 
-        public async Task<List<ChatGroupsView>> GetViewListPrivateChatGroupsByUserId(Guid userId)
+        public async Task<List<ChatGroupsView>> GetViewListPrivateByUserIdAsync(Guid userId)
         {
             List<ChatGroupsView> listPrivateGroups = new();
 
@@ -73,7 +73,19 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return listPrivateGroups;
         }
 
-        public bool ChatGroupexists(int groupId)
+        public ChatGroups GetByGroupName(string chatGroupName)
+        {
+            return _context.ChatGroups
+                .Single(c => c.ChatGroupName == chatGroupName);
+        }
+
+        public bool GroupNameTaken(string chatGroupName)
+        {
+            return _context.ChatGroups
+                .Any(c => c.ChatGroupName == chatGroupName);
+        }
+
+        public bool GroupExists(int groupId)
         {
             return _context.ChatGroups
                 .Any(c => c.ChatGroupId == groupId);
@@ -87,19 +99,19 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .AnyAsync();
         }
 
-        public async Task<bool> AddChatGroupAsync(ChatGroups chatGroup)
+        public async Task<bool> AddAsync(ChatGroups chatGroup)
         {
             _context.ChatGroups.Add(chatGroup);
             return await Save();
         }
 
-        public async Task<bool> ModifyChatGroupAsync(ChatGroups chatGroup)
+        public async Task<bool> ModifyAsync(ChatGroups chatGroup)
         {
             _context.ChatGroups.Update(chatGroup);
             return await Save();
         }
 
-        public async Task<bool> DeleteChatGroupAsync(ChatGroups chatGroup)
+        public async Task<bool> DeleteAsync(ChatGroups chatGroup)
         {
             _context.ChatGroups.Remove(chatGroup);
             return await Save();

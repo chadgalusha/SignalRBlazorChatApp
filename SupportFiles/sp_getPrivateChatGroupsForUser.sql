@@ -131,3 +131,5 @@ BEGIN
 	WHERE c.ChatGroupId = @groupId
 END;
 
+-- added unique constraint to ChatGroups. each chat group will be required to have a unique name
+ALTER TABLE ChatGroups ADD CONSTRAINT chatgroupname_unique UNIQUE (ChatGroupName);

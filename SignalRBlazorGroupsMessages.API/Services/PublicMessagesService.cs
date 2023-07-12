@@ -23,10 +23,10 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                List<PublicMessagesView> listPublicMessagesView = await _publicMessageDataAccess.GetViewListByGroupIdAsync(groupId, numberItemsToSkip);
-                List<PublicMessageDto> listPublicMessagesDto = ViewListToDtoList(listPublicMessagesView);
+                List<PublicMessagesView> viewList = await _publicMessageDataAccess.GetViewListByGroupIdAsync(groupId, numberItemsToSkip);
+                List<PublicMessageDto> dtoList = ViewListToDtoList(viewList);
 
-                response = ReturnApiResponse.Success(response, listPublicMessagesDto);
+                response = ReturnApiResponse.Success(response, dtoList);
 
                 return response;
             }
