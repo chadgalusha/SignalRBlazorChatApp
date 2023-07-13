@@ -40,7 +40,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             public TestChatGroupsDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-            public virtual DbSet<ChatGroupsView> ChatGroupsViews { get; set; }
+            public virtual DbSet<PublicChatGroupsView> ChatGroupsViews { get; set; }
         }
 
         public TestChatGroupsDbContext CreateContext()
@@ -121,9 +121,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return privateGroupMembersList;
         }
 
-        private List<ChatGroupsView> GetListChatGroupsViews()
+        private List<PublicChatGroupsView> GetListChatGroupsViews()
         {
-            List<ChatGroupsView> listView = new()
+            List<PublicChatGroupsView> listView = new()
             {
                  new()
                 {

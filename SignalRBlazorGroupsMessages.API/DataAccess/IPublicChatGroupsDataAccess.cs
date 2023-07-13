@@ -3,14 +3,14 @@ using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
-    public interface IChatGroupsDataAccess
+    public interface IPublicChatGroupsDataAccess
     {
         Task<bool> AddAsync(PublicChatGroups chatGroup);
         bool GroupExists(int groupId);
         Task<bool> DeleteAsync(PublicChatGroups chatGroup);
-        Task<ChatGroupsView> GetChatGroupByIdAsync(int id);
-        Task<List<ChatGroupsView>> GetViewListPrivateByUserIdAsync(Guid userId);
-        Task<List<ChatGroupsView>> GetViewListPublicChatGroupsAsync();
+        Task<PublicChatGroupsView> GetChatGroupByIdAsync(int id);
+        Task<List<PublicChatGroupsView>> GetViewListPrivateByUserIdAsync(Guid userId);
+        Task<List<PublicChatGroupsView>> GetViewListPublicChatGroupsAsync();
         Task<bool> ModifyAsync(PublicChatGroups chatGroup);
         Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember);
         Task<PrivateGroupMembers> GetPrivateGroupMemberRecord(int chatGroupid, string userId);

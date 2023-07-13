@@ -12,9 +12,8 @@ BEGIN
 		c.ChatGroupName,
 		c.GroupCreated,
 		c.GroupOwnerUserId,
-		a.UserName,
-		c.PrivateGroup
-	FROM ChatGroups c, AspNetUsers a, PrivateGroupMembers p
+		a.UserName
+	FROM PrivateChatGroups c, AspNetUsers a, PrivateGroupMembers p
 	WHERE c.ChatGroupId = p.PrivateChatGroupId
 	AND p.UserId = @userId
 	AND c.GroupOwnerUserId = a.Id
@@ -35,10 +34,10 @@ BEGIN
 		p.MessageDateTime, 
 		p.ReplyMessageId, 
 		p.PictureLink
-	FROM PublicMessages p 
+	FROM PublicGroupMessages p 
 	JOIN AspNetUsers a
 		ON p.UserId = a.Id
-	JOIN ChatGroups c
+	JOIN PublicChatGroups c
 		ON p.ChatGroupId = c.ChatGroupId
 	WHERE p.PublicMessageId = @messageId
 END;
@@ -59,10 +58,10 @@ BEGIN
 		p.MessageDateTime, 
 		p.ReplyMessageId, 
 		p.PictureLink
-	FROM PublicMessages p 
+	FROM PublicGroupMessages p 
 	JOIN AspNetUsers a
 		ON p.UserId = a.Id
-	JOIN ChatGroups c
+	JOIN PublicChatGroups c
 		ON p.ChatGroupId = c.ChatGroupId
 	WHERE p.UserId = @userId
 	ORDER BY p.MessageDateTime DESC
@@ -86,10 +85,10 @@ BEGIN
 		p.MessageDateTime, 
 		p.ReplyMessageId, 
 		p.PictureLink
-	FROM PublicMessages p 
+	FROM PublicGroupMessages p 
 	JOIN AspNetUsers a
 		ON p.UserId = a.Id
-	JOIN ChatGroups c
+	JOIN PublicChatGroups c
 		ON p.ChatGroupId = c.ChatGroupId
 	WHERE p.ChatGroupId = @groupId
 	ORDER BY p.MessageDateTime DESC
@@ -106,9 +105,8 @@ BEGIN
 		c.ChatGroupName,
 		c.GroupCreated,
 		c.GroupOwnerUserId,
-		a.UserName,
-		c.PrivateGroup
-	FROM ChatGroups c
+		a.UserName
+	FROM PublicChatGroups c
 	JOIN AspNetUsers a
 		ON c.GroupOwnerUserId = a.Id
 END;
@@ -123,13 +121,9 @@ BEGIN
 		c.ChatGroupName,
 		c.GroupCreated,
 		c.GroupOwnerUserId,
-		a.UserName,
-		c.PrivateGroup
-	FROM ChatGroups c
+		a.UserName
+	FROM PublicChatGroups c
 	JOIN AspNetUsers a
 		ON c.GroupOwnerUserId = a.Id
 	WHERE c.ChatGroupId = @groupId
 END;
-
--- added unique constraint to ChatGroups. each chat group will be required to have a unique name
-ALTER TABLE ChatGroups ADD CONSTRAINT chatgroupname_unique UNIQUE (ChatGroupName);

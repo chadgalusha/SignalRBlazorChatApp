@@ -37,7 +37,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public class TestPublicMessagesDbContext : ApplicationDbContext
         {
             public TestPublicMessagesDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-            public virtual DbSet<PublicMessagesView> PublicMessagesView { get; set; }
+            public virtual DbSet<PublicGroupMessagesView> PublicMessagesView { get; set; }
         }
 
         //public ApplicationDbContext CreateContext()
@@ -93,9 +93,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return messageList;
         }
 
-        private List<PublicMessagesView> GetListPublicMessagesViews()
+        private List<PublicGroupMessagesView> GetListPublicMessagesViews()
         {
-            List<PublicMessagesView> messageList = new()
+            List<PublicGroupMessagesView> messageList = new()
         {
             new()
                 {

@@ -4,11 +4,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
 {
     public interface IPublicMessagesService
     {
-        Task<ApiResponse<PublicMessageDto>> AddAsync(PublicMessageDto messageDto);
-        Task<ApiResponse<PublicMessageDto>> DeleteAsync(PublicMessageDto dtoMessage);
-        Task<ApiResponse<List<PublicMessageDto>>> GetListByGroupIdAsync(int groupId, int numberItemsToSkip);
-        Task<ApiResponse<PublicMessageDto>> GetByMessageIdAsync(Guid messageId);
-        Task<ApiResponse<List<PublicMessageDto>>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip);
-        Task<ApiResponse<PublicMessageDto>> ModifyAsync(PublicMessageDto dtoMessage);
+        Task<ApiResponse<PublicGroupMessageDto>> AddAsync(PublicGroupMessageDto messageDto);
+        Task<ApiResponse<PublicGroupMessageDto>> DeleteAsync(PublicGroupMessageDto dtoMessage);
+        Task<ApiResponse<List<PublicGroupMessageDto>>> GetListByGroupIdAsync(int groupId, int numberItemsToSkip);
+        Task<ApiResponse<PublicGroupMessageDto>> GetByMessageIdAsync(Guid messageId);
+        Task<ApiResponse<List<PublicGroupMessageDto>>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip);
+        Task<ApiResponse<PublicGroupMessageDto>> ModifyAsync(PublicGroupMessageDto dtoMessage);
     }
 }

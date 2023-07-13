@@ -11,7 +11,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
     public class ChatGroupsDataAccess_UnitTests : IClassFixture<TestChatGroupsDatabaseFixture>
     {
         public TestChatGroupsDatabaseFixture Fixture { get; }
-        private readonly ChatGroupsDataAccess _dataAccess;
+        private readonly PublicChatGroupsDataAccess _dataAccess;
         private readonly TestChatGroupsDbContext _context;
         private readonly IConfiguration _configuration;
 
@@ -20,25 +20,25 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             Fixture = fixture;
             _context = Fixture.CreateContext();
             _configuration = new Mock<IConfiguration>().Object;
-            _dataAccess = new ChatGroupsDataAccess(_context, _configuration);
+            _dataAccess = new PublicChatGroupsDataAccess(_context, _configuration);
         }
 
         [Fact]
         public async Task GetViewListPublicChatGroupsAsync_ReturnsChatGroups()
         {
-            int expectedPublicChatGroupsCount = _context.ChatGroups
+            int expectedPublicChatGroupsCount = _context.PublicChatGroups
                 .Where(c => c.PrivateGroup == false)
                 .ToList()
                 .Count;
-            List<ChatGroupsView> viewList = _context.ChatGroupsViews
+            List<PublicChatGroupsView> viewList = _context.ChatGroupsViews
                 .Where(c => c.PrivateGroup == false)
                 .ToList();
 
-            Mock<IChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
+            Mock<IPublicChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
             _mockChatGroupsDataAccess.Setup(c => c.GetViewListPublicChatGroupsAsync())
                 .ReturnsAsync(viewList);
 
-            List<ChatGroupsView> result = await _mockChatGroupsDataAccess.Object
+            List<PublicChatGroupsView> result = await _mockChatGroupsDataAccess.Object
                 .GetViewListPublicChatGroupsAsync();
 
             Assert.Multiple(() =>
@@ -52,16 +52,16 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task GetChatGroupById_ReturnsCorrectChatGroup()
         {
             string expectedChatGroupName = "TestPublicGroup1";
-            ChatGroupsView view = _context.ChatGroupsViews
+            PublicChatGroupsView view = _context.ChatGroupsViews
                 .Single(c => c.ChatGroupId == 1);
             int expectedGroupId = view.ChatGroupId;
 
-            Mock<IChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
+            Mock<IPublicChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
             _mockChatGroupsDataAccess.Setup(c => c.GetChatGroupByIdAsync(1))
                 .ReturnsAsync(view);
                 
 
-            ChatGroupsView resultChatGroup = await _mockChatGroupsDataAccess.Object
+            PublicChatGroupsView resultChatGroup = await _mockChatGroupsDataAccess.Object
                 .GetChatGroupByIdAsync(1);
 
             Assert.Multiple(() =>
@@ -75,7 +75,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public void GetByGroupName_ReturnsCorrectResult()
         {
             string badName = "shouldnotreturnanything";
-            string goodName = _context.ChatGroups
+            string goodName = _context.PublicChatGroups
                 .OrderBy(c => c.ChatGroupId)
                 .First()
                 .ChatGroupName;
@@ -93,7 +93,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public void GroupNameTaken_ReturnsCorrectResult()
         {
             string notTakenName = "ShouldReturnFalse";
-            string takenName = _context.ChatGroups
+            string takenName = _context.PublicChatGroups
                 .OrderBy(c => c.ChatGroupId)
                 .First()
                 .ChatGroupName;
@@ -131,7 +131,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             bool resultOfAdd = await _dataAccess.AddAsync(newChatGroup);
             _context.ChangeTracker.Clear();
 
-            PublicChatGroups resultChatGroup = _context.ChatGroups
+            PublicChatGroups resultChatGroup = _context.PublicChatGroups
                 .OrderBy(c => c.ChatGroupId)
                 .Last();
 
@@ -147,7 +147,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             int chatGroupId = 1;
             string expectedModifiedGroupName = "ModifiedChatGroupName";
-            PublicChatGroups chatGroupToModify = _context.ChatGroups
+            PublicChatGroups chatGroupToModify = _context.PublicChatGroups
                 .Single(c => c.ChatGroupId == chatGroupId);
             chatGroupToModify.ChatGroupName = expectedModifiedGroupName;
 
@@ -155,7 +155,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             bool resultOfModify = await _dataAccess.ModifyAsync(chatGroupToModify);
             _context.ChangeTracker.Clear();
 
-            PublicChatGroups modifiedChatGroup = _context.ChatGroups
+            PublicChatGroups modifiedChatGroup = _context.PublicChatGroups
                 .Single(c => c.ChatGroupId == chatGroupId);
 
             Assert.Multiple(() =>
@@ -169,7 +169,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task DeleteChatGroupAsync_IsSuccess()
         {
             int chatGroupId = 1;
-            PublicChatGroups chatGroupToDelete = _context.ChatGroups
+            PublicChatGroups chatGroupToDelete = _context.PublicChatGroups
                 .Single(c => c.ChatGroupId == chatGroupId);
 
             _context.Database.BeginTransaction();
@@ -239,9 +239,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async void GetPrivateChatGroupsByUserId_ReturnsCorrectList()
         {
             Guid userId = Guid.Parse("e08b0077-3c15-477e-84bb-bf9d41196455");
-            List<ChatGroupsView> listPrivateChatGroups = GetListPrivateChatGroups(userId);
+            List<PublicChatGroupsView> listPrivateChatGroups = GetListPrivateChatGroups(userId);
 
-            Mock<IChatGroupsDataAccess> _mockDataAccess = new();
+            Mock<IPublicChatGroupsDataAccess> _mockDataAccess = new();
             _mockDataAccess.Setup(x => x.GetViewListPrivateByUserIdAsync(userId))
                 .ReturnsAsync(listPrivateChatGroups);
 
@@ -275,16 +275,16 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         // Mock of stored procedure sp_getPrivateChatGroupsForUser @UserId
-        private List<ChatGroupsView> GetListPrivateChatGroups(Guid userId)
+        private List<PublicChatGroupsView> GetListPrivateChatGroups(Guid userId)
         {
             List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
                 .Where(p => p.UserId == userId.ToString())
                 .ToList();
 
-            List<ChatGroupsView> listPrivateChatGroups = new();
+            List<PublicChatGroupsView> listPrivateChatGroups = new();
             foreach (var listItem in listPrivateGroupMembers)
             {
-                PublicChatGroups chatGroup = _context.ChatGroups
+                PublicChatGroups chatGroup = _context.PublicChatGroups
                     .Single(c => c.ChatGroupId == listItem.PrivateChatGroupId);
 
                 if (chatGroup != null)
@@ -296,7 +296,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return listPrivateChatGroups;
         }
 
-        private ChatGroupsView ChatGroupToView(PublicChatGroups chatGroup)
+        private PublicChatGroupsView ChatGroupToView(PublicChatGroups chatGroup)
         {
             return new()
             {

@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace SignalRBlazorGroupsMessages.API.Models
 {
-    public class PublicMessageDto
+    public class PublicGroupMessageDto
     {
         [Required]
         public Guid PublicMessageId { get; set; }

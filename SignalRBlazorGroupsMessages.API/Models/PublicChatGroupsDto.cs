@@ -2,7 +2,7 @@
 
 namespace SignalRBlazorGroupsMessages.API.Models
 {
-    public class ChatGroupsView
+    public class PublicChatGroupsDto
     {
         [Key]
         public int ChatGroupId { get; set; }
@@ -10,6 +10,5 @@ namespace SignalRBlazorGroupsMessages.API.Models
         public DateTime GroupCreated { get; set; }
         public Guid GroupOwnerUserId { get; set; }
         public string UserName { get; set; } = string.Empty;
-        public bool PrivateGroup { get; set; }
     }
 }

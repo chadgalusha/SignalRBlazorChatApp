@@ -164,3 +164,62 @@ CREATE TABLE PrivateGroupMessages (
 	CONSTRAINT FK_PrivateGroupMessages_UserId FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id),
 	CONSTRAINT FK_PrivateMessages_ChatGroupId FOREIGN KEY (ChatGroupId) REFERENCES PrivateChatGroups(ChatGroupId)
 );
+
+/*
+-- Sample data to input for new tables
+INSERT INTO PublicChatGroups(ChatGroupName, GroupCreated, GroupOwnerUserId)
+VALUES('TestPublicTable1', SYSDATETIME(), '93eeda54-e362-49b7-8fd0-ab516b7f8071');
+
+INSERT INTO PublicChatGroups(ChatGroupName, GroupCreated, GroupOwnerUserId)
+VALUES('TestPublicTable2', SYSDATETIME(), '93eeda54-e362-49b7-8fd0-ab516b7f8071');
+
+INSERT INTO PrivateChatGroups(ChatGroupName, GroupCreated, GroupOwnerUserId)
+VALUES('TestPrivateTable1', SYSDATETIME(), '93eeda54-e362-49b7-8fd0-ab516b7f8071');
+
+INSERT INTO PrivateChatGroups(ChatGroupName, GroupCreated, GroupOwnerUserId)
+VALUES('TestPrivateTable2', SYSDATETIME(), 'e08b0077-3c15-477e-84bb-bf9d41196455');
+*/
+
+/*
+-- Sample data to input for PublicGroupMessages. This assumes the ChatGroupId is valid. may need to adjust
+INSERT INTO PublicGroupMessages(PublicMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), '93eeda54-e362-49b7-8fd0-ab516b7f8071', 1, 'Test message from Admin', SYSDATETIME());
+
+INSERT INTO PublicGroupMessages(PublicMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), 'e08b0077-3c15-477e-84bb-bf9d41196455', 1, 'Test message from TestUser1', SYSDATETIME());
+
+INSERT INTO PublicGroupMessages(PublicMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), '93eeda54-e362-49b7-8fd0-ab516b7f8071', 2, 'Test message from Admin', SYSDATETIME());
+
+INSERT INTO PublicGroupMessages(PublicMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), 'e08b0077-3c15-477e-84bb-bf9d41196455', 2, 'Test message from TestUser1', SYSDATETIME());
+*/
+/*
+-- Sample data for PrivateGroupMembers table. Dependent on Private chat group tables already created. check before running.
+INSERT INTO PrivateGroupMembers(PrivateChatGroupId, UserId)
+VALUES(1, '93eeda54-e362-49b7-8fd0-ab516b7f8071');
+
+INSERT INTO PrivateGroupMembers(PrivateChatGroupId, UserId)
+VALUES(1, 'e08b0077-3c15-477e-84bb-bf9d41196455');
+
+INSERT INTO PrivateGroupMembers(PrivateChatGroupId, UserId)
+VALUES(2, '93eeda54-e362-49b7-8fd0-ab516b7f8071');
+
+INSERT INTO PrivateGroupMembers(PrivateChatGroupId, UserId)
+VALUES(2, 'e08b0077-3c15-477e-84bb-bf9d41196455');
+*/
+
+/*
+-- Sample data for PrivateGroupMessages. Dependent on private chat groups already existing
+INSERT INTO PrivateGroupMessages(PrivateMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), '93eeda54-e362-49b7-8fd0-ab516b7f8071', 1, 'Test Text', SYSDATETIME());
+
+INSERT INTO PrivateGroupMessages(PrivateMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), 'e08b0077-3c15-477e-84bb-bf9d41196455', 1, 'Test Text', SYSDATETIME());
+
+INSERT INTO PrivateGroupMessages(PrivateMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), '93eeda54-e362-49b7-8fd0-ab516b7f8071', 2, 'Test Text', SYSDATETIME());
+
+INSERT INTO PrivateGroupMessages(PrivateMessageId, UserId, ChatGroupId, Text, MessageDateTime)
+VALUES(NEWID(), 'e08b0077-3c15-477e-84bb-bf9d41196455', 2, 'Test Text', SYSDATETIME());
+*/

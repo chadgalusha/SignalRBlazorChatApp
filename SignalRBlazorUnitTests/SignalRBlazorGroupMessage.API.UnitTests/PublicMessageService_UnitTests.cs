@@ -79,9 +79,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task GetByMessageIdAsync_ReturnsMessage()
         {
             Guid testMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
-            PublicMessagesView viewMessage = GetListPublicMessagesView()
+            PublicGroupMessagesView viewMessage = GetListPublicMessagesView()
                 .Single(g => g.PublicMessageId == testMessageId);
-            PublicMessageDto expectedDtoMessage = ViewToDto(viewMessage);
+            PublicGroupMessageDto expectedDtoMessage = ViewToDto(viewMessage);
 
             _mockDataAccess.Setup(p => p.GetViewByMessageIdAsync(testMessageId))
                 .ReturnsAsync(GetListPublicMessagesView()
@@ -167,9 +167,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
         #region PRIVATE METHODS
 
-        private List<PublicMessagesView> GetListPublicMessagesView()
+        private List<PublicGroupMessagesView> GetListPublicMessagesView()
         {
-            List<PublicMessagesView> messageList = new()
+            List<PublicGroupMessagesView> messageList = new()
             {
                 new()
                 {
@@ -248,7 +248,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicMessageDto NewPublicMessageToDto(PublicGroupMessages message)
+        private PublicGroupMessageDto NewPublicMessageToDto(PublicGroupMessages message)
         {
             return new()
             {
@@ -261,7 +261,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicMessageDto ModifiedPublicMessageToDto(PublicGroupMessages message)
+        private PublicGroupMessageDto ModifiedPublicMessageToDto(PublicGroupMessages message)
         {
             return new()
             {
@@ -275,7 +275,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicMessageDto ViewToDto(PublicMessagesView publicMessagesView)
+        private PublicGroupMessageDto ViewToDto(PublicGroupMessagesView publicMessagesView)
         {
             return new()
             {

@@ -18,9 +18,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             _configuration = configuration ?? throw new Exception(nameof(configuration));
         }
 
-        public async Task<List<PublicMessagesView>> GetViewListByGroupIdAsync(int groupId, int numberItemsToSkip)
+        public async Task<List<PublicGroupMessagesView>> GetViewListByGroupIdAsync(int groupId, int numberItemsToSkip)
         {
-            List<PublicMessagesView> viewList = new();
+            List<PublicGroupMessagesView> viewList = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPublicMessages_byGroupId", connection)
@@ -38,9 +38,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return viewList;
         }
 
-        public async Task<List<PublicMessagesView>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
+        public async Task<List<PublicGroupMessagesView>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
         {
-            List<PublicMessagesView> viewList = new();
+            List<PublicGroupMessagesView> viewList = new();
 
             using SqlConnection connection= new(GetConnectionString());
             SqlCommand command = new("sp_getPublicMessages_byUserId", connection)
@@ -58,9 +58,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return viewList;
         }
 
-        public async Task<PublicMessagesView> GetViewByMessageIdAsync(Guid messageId)
+        public async Task<PublicGroupMessagesView> GetViewByMessageIdAsync(Guid messageId)
         {
-            PublicMessagesView view = new();
+            PublicGroupMessagesView view = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPublicMessage_byMessageId", connection)
@@ -79,18 +79,18 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<PublicGroupMessages> GetByMessageIdAsync(Guid messageId)
         {
-            return await _context.PublicMessages.SingleAsync(p => p.PublicMessageId == messageId);
+            return await _context.PublicGroupMessages.SingleAsync(p => p.PublicMessageId == messageId);
         }
 
         public async Task<bool> Exists(Guid messageId)
         {
-            return await _context.PublicMessages
+            return await _context.PublicGroupMessages
                 .AnyAsync(p => p.PublicMessageId == messageId);
         }
 
         public async Task<bool> AddAsync(PublicGroupMessages message)
         {
-            await _context.PublicMessages.AddAsync(message);
+            await _context.PublicGroupMessages.AddAsync(message);
             return await Save();
         }
 
@@ -101,13 +101,13 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<bool> DeleteAsync(PublicGroupMessages message)
         {
-            _context.PublicMessages.Remove(message);
+            _context.PublicGroupMessages.Remove(message);
             return await Save();
         }
 
         public async Task<bool> DeleteMessagesByResponseMessageIdAsync(Guid responseMessageId)
         {
-            int result = await _context.PublicMessages
+            int result = await _context.PublicGroupMessages
                 .Where(r => r.ReplyMessageId == responseMessageId)
                 .ExecuteDeleteAsync();
 
@@ -116,7 +116,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<bool> DeleteMessagesFromChatGroupAsync(int chatGroupId)
         {
-            int result = await _context.PublicMessages
+            int result = await _context.PublicGroupMessages
                 .Where(c => c.ChatGroupId == chatGroupId)
                 .ExecuteDeleteAsync();
 
@@ -135,11 +135,11 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return _configuration.GetConnectionString("ChatApplicationDb")!;
         }
 
-        private List<PublicMessagesView> ReturnViewListFromReader(List<PublicMessagesView> viewList, SqlDataReader reader)
+        private List<PublicGroupMessagesView> ReturnViewListFromReader(List<PublicGroupMessagesView> viewList, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                PublicMessagesView view = new()
+                PublicGroupMessagesView view = new()
                 {
                     PublicMessageId = Guid.Parse((string)reader[0]),
                     UserId          = Guid.Parse((string)reader[1]),
@@ -156,7 +156,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return viewList;
         }
 
-        private PublicMessagesView ReturnViewFromReader(PublicMessagesView view, SqlDataReader reader)
+        private PublicGroupMessagesView ReturnViewFromReader(PublicGroupMessagesView view, SqlDataReader reader)
         {
             while (reader.Read())
             {

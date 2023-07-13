@@ -112,7 +112,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             await _dataAccess.DeletePrivateMessageAsync(messageToDelete);
             _context.ChangeTracker.Clear();
 
-            bool result = _context.PrivateMessages.Where(p => p.PrivateMessageId == messageToDeleteId).Any();
+            bool result = _context.PrivateUserMessages.Where(p => p.PrivateMessageId == messageToDeleteId).Any();
             Assert.False(result);
         }
 

@@ -6,20 +6,20 @@ using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
-    public class ChatGroupsDataAccess : IChatGroupsDataAccess
+    public class PublicChatGroupsDataAccess : IPublicChatGroupsDataAccess
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public ChatGroupsDataAccess(ApplicationDbContext context, IConfiguration configuration)
+        public PublicChatGroupsDataAccess(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context ?? throw new Exception(nameof(context));
             _configuration = configuration ?? throw new Exception(nameof(configuration));
         }
 
-        public async Task<List<ChatGroupsView>> GetViewListPublicChatGroupsAsync()
+        public async Task<List<PublicChatGroupsView>> GetViewListPublicChatGroupsAsync()
         {
-            List<ChatGroupsView> viewList = new();
+            List<PublicChatGroupsView> viewList = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPublicChatGroups", connection)
@@ -35,9 +35,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return viewList;
         }
 
-        public async Task<ChatGroupsView> GetChatGroupByIdAsync(int groupId)
+        public async Task<PublicChatGroupsView> GetChatGroupByIdAsync(int groupId)
         {
-            ChatGroupsView view = new();
+            PublicChatGroupsView view = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getChatGroup_byGroupId", connection)
@@ -54,9 +54,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return view;
         }
 
-        public async Task<List<ChatGroupsView>> GetViewListPrivateByUserIdAsync(Guid userId)
+        public async Task<List<PublicChatGroupsView>> GetViewListPrivateByUserIdAsync(Guid userId)
         {
-            List<ChatGroupsView> listPrivateGroups = new();
+            List<PublicChatGroupsView> listPrivateGroups = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPrivateChatGroupsForUser", connection)
@@ -75,31 +75,31 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public PublicChatGroups GetByGroupName(string chatGroupName)
         {
-            return _context.ChatGroups
+            return _context.PublicChatGroups
                 .Single(c => c.ChatGroupName == chatGroupName);
         }
 
         public PublicChatGroups GetByGroupId(int groupId)
         {
-            return _context.ChatGroups
+            return _context.PublicChatGroups
                 .Single(c => c.ChatGroupId == groupId);
         }
 
         public bool GroupNameTaken(string chatGroupName)
         {
-            return _context.ChatGroups
+            return _context.PublicChatGroups
                 .Any(c => c.ChatGroupName == chatGroupName);
         }
 
         public bool GroupExists(int groupId)
         {
-            return _context.ChatGroups
+            return _context.PublicChatGroups
                 .Any(c => c.ChatGroupId == groupId);
         }
 
         public async Task<bool> IsPublicChatGroup(int groupId)
         {
-            return await _context.ChatGroups
+            return await _context.PublicChatGroups
                 .Where(c => c.PrivateGroup == true)
                 .Where(c => c.ChatGroupId == groupId)
                 .AnyAsync();
@@ -107,19 +107,19 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<bool> AddAsync(PublicChatGroups chatGroup)
         {
-            _context.ChatGroups.Add(chatGroup);
+            _context.PublicChatGroups.Add(chatGroup);
             return await Save();
         }
 
         public async Task<bool> ModifyAsync(PublicChatGroups chatGroup)
         {
-            _context.ChatGroups.Update(chatGroup);
+            _context.PublicChatGroups.Update(chatGroup);
             return await Save();
         }
 
         public async Task<bool> DeleteAsync(PublicChatGroups chatGroup)
         {
-            _context.ChatGroups.Remove(chatGroup);
+            _context.PublicChatGroups.Remove(chatGroup);
             return await Save();
         }
 
@@ -154,11 +154,11 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return _configuration.GetConnectionString("ChatApplicationDb")!;
         }
 
-        private List<ChatGroupsView> ReturnViewListFromReader(List<ChatGroupsView> viewList, SqlDataReader reader)
+        private List<PublicChatGroupsView> ReturnViewListFromReader(List<PublicChatGroupsView> viewList, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                ChatGroupsView view = new()
+                PublicChatGroupsView view = new()
                 {
                     ChatGroupId      = (int)reader[0],
                     ChatGroupName    = (string)reader[1],
@@ -172,7 +172,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return viewList;
         }
 
-        private ChatGroupsView ReturnViewFromReader(ChatGroupsView view, SqlDataReader reader)
+        private PublicChatGroupsView ReturnViewFromReader(PublicChatGroupsView view, SqlDataReader reader)
         {
             while (reader.Read())
             {
