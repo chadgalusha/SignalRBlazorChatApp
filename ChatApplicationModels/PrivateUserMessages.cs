@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ChatApplicationModels
 {
-    public class PrivateMessages
+    public class PrivateUserMessages
     {
         [Key]
         public int PrivateMessageId { get; set; }

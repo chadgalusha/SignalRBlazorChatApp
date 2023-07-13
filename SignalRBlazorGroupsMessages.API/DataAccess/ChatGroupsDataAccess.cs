@@ -73,13 +73,13 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return listPrivateGroups;
         }
 
-        public ChatGroups GetByGroupName(string chatGroupName)
+        public PublicChatGroups GetByGroupName(string chatGroupName)
         {
             return _context.ChatGroups
                 .Single(c => c.ChatGroupName == chatGroupName);
         }
 
-        public ChatGroups GetByGroupId(int groupId)
+        public PublicChatGroups GetByGroupId(int groupId)
         {
             return _context.ChatGroups
                 .Single(c => c.ChatGroupId == groupId);
@@ -105,19 +105,19 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .AnyAsync();
         }
 
-        public async Task<bool> AddAsync(ChatGroups chatGroup)
+        public async Task<bool> AddAsync(PublicChatGroups chatGroup)
         {
             _context.ChatGroups.Add(chatGroup);
             return await Save();
         }
 
-        public async Task<bool> ModifyAsync(ChatGroups chatGroup)
+        public async Task<bool> ModifyAsync(PublicChatGroups chatGroup)
         {
             _context.ChatGroups.Update(chatGroup);
             return await Save();
         }
 
-        public async Task<bool> DeleteAsync(ChatGroups chatGroup)
+        public async Task<bool> DeleteAsync(PublicChatGroups chatGroup)
         {
             _context.ChatGroups.Remove(chatGroup);
             return await Save();

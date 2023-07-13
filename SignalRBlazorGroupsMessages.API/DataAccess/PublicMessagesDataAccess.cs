@@ -77,7 +77,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return view;
         }
 
-        public async Task<PublicMessages> GetByMessageIdAsync(Guid messageId)
+        public async Task<PublicGroupMessages> GetByMessageIdAsync(Guid messageId)
         {
             return await _context.PublicMessages.SingleAsync(p => p.PublicMessageId == messageId);
         }
@@ -88,18 +88,18 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .AnyAsync(p => p.PublicMessageId == messageId);
         }
 
-        public async Task<bool> AddAsync(PublicMessages message)
+        public async Task<bool> AddAsync(PublicGroupMessages message)
         {
             await _context.PublicMessages.AddAsync(message);
             return await Save();
         }
 
-        public async Task<bool> ModifyAsync(PublicMessages message)
+        public async Task<bool> ModifyAsync(PublicGroupMessages message)
         {
             return await Save();
         }
 
-        public async Task<bool> DeleteAsync(PublicMessages message)
+        public async Task<bool> DeleteAsync(PublicGroupMessages message)
         {
             _context.PublicMessages.Remove(message);
             return await Save();

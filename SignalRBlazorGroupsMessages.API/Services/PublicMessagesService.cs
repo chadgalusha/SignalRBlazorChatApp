@@ -113,7 +113,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 // TODO: need to check that chat group is not public. add with chat group service.
 
-                PublicMessages newMessage = NewPublicMessage(messageDto);
+                PublicGroupMessages newMessage = NewPublicMessage(messageDto);
                 bool isSuccess = await _publicMessageDataAccess.AddAsync(newMessage);
 
                 if (!isSuccess)
@@ -155,7 +155,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
-                PublicMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
+                PublicGroupMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
                 messageToModify = DtoToPublicMessage(dtoMessage, messageToModify);
 
                 bool isSuccess = await _publicMessageDataAccess.ModifyAsync(messageToModify);
@@ -202,7 +202,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 }
 
                 // Find message to delete
-                PublicMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
+                PublicGroupMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
                 messageToDelete = DtoToPublicMessage(dtoMessage, messageToDelete);
 
                 // Delete all messages that are a response to this message
@@ -302,7 +302,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return (passesChecks, errorMessage);
         }
 
-        private PublicMessages NewPublicMessage(PublicMessageDto messageDto)
+        private PublicGroupMessages NewPublicMessage(PublicMessageDto messageDto)
         {
             return new()
             {
@@ -317,7 +317,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
         }
 
         // Map PublicMessage fields to return dto object. This object should retain dto specific fields
-        private PublicMessageDto PublicMessageToPublicMessageDto(PublicMessages newMessage, PublicMessageDto dtoMessage)
+        private PublicMessageDto PublicMessageToPublicMessageDto(PublicGroupMessages newMessage, PublicMessageDto dtoMessage)
         {
             return new()
             {
@@ -334,7 +334,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
         }
 
         // Return PublicMessage with existing Id fields. Id fields should not be updated when modifying a message.
-        private PublicMessages DtoToPublicMessage(PublicMessageDto dtoMessage, PublicMessages message)
+        private PublicGroupMessages DtoToPublicMessage(PublicMessageDto dtoMessage, PublicGroupMessages message)
         {
             return new()
             {

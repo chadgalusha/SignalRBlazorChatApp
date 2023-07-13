@@ -110,7 +110,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return ReturnApiResponse.Failure(response, "Chat Group name alrady taken.");
                 }
 
-                ChatGroups newChatGroup = DtoToNewChatGroup(dto);
+                PublicChatGroups newChatGroup = DtoToNewChatGroup(dto);
                 bool isSuccess = await _chatGroupsDataAccess.AddAsync(newChatGroup);
 
                 if (!isSuccess)
@@ -149,7 +149,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return ReturnApiResponse.Failure(response, messageChecks.Item2);
                 }
 
-                ChatGroups chatGroupToModify = DtoToChatGroup(dto);
+                PublicChatGroups chatGroupToModify = DtoToChatGroup(dto);
                 bool isSuccess = await _chatGroupsDataAccess.ModifyAsync(chatGroupToModify);
 
                 if (!isSuccess)
@@ -270,7 +270,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        private ChatGroups DtoToNewChatGroup(ChatGroupsDto dto)
+        private PublicChatGroups DtoToNewChatGroup(ChatGroupsDto dto)
         {
             return new()
             {
@@ -281,7 +281,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        private ChatGroupsDto NewChatGroupToDto(ChatGroups newGroup, string userName)
+        private ChatGroupsDto NewChatGroupToDto(PublicChatGroups newGroup, string userName)
         {
             return new()
             {
@@ -294,7 +294,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        private ChatGroups DtoToChatGroup(ChatGroupsDto dto) 
+        private PublicChatGroups DtoToChatGroup(ChatGroupsDto dto) 
         {
             return new()
             {

@@ -139,7 +139,7 @@ CREATE TABLE UserFriends (
 	CONSTRAINT FK_UserFriends_FriendUserid FOREIGN KEY (FriendUserid) REFERENCES AspNetUsers(Id)
 );
 
-CREATE TABLE PublicMessages (
+CREATE TABLE PublicGroupMessages (
 	PublicMessageId uniqueidentifier NOT NULL,
 	UserId nvarchar(450) NOT NULL,
 	ChatGroupId int NOT NULL,

@@ -1,13 +1,12 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace ChatApplicationModels
 {
-    public class PublicMessages
+    public class PrivateGroupMessages
     {
         [Key]
-        public Guid PublicMessageId { get; set; }   
+        public Guid PrivateMessageId { get; set; }
 
         [Required]
         [DisplayName("User")]
@@ -15,7 +14,7 @@ namespace ChatApplicationModels
 
         [Required]
         [DisplayName("Chat Group")]
-        public int ChatGroupId  { get; set; }
+        public int ChatGroupId { get; set; }
 
         [Required]
         [DisplayName("Message")]
@@ -23,7 +22,7 @@ namespace ChatApplicationModels
 
         [DisplayName("Message DateTime")]
         public DateTime MessageDateTime { get; set; }
-        
+
         public Guid? ReplyMessageId { get; set; }
 
         public string PictureLink { get; set; } = string.Empty;

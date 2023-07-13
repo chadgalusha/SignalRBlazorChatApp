@@ -80,7 +80,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 .First()
                 .ChatGroupName;
 
-            ChatGroups goodChatGroup = _dataAccess.GetByGroupName(goodName);
+            PublicChatGroups goodChatGroup = _dataAccess.GetByGroupName(goodName);
 
             Assert.Multiple(() =>
             {
@@ -125,13 +125,13 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task AddAsync_IsSuccess()
         {
             string expectedNewChatGroupName = "NewPublicChatGroup";
-            ChatGroups newChatGroup = GetNewPublicChatGroup();
+            PublicChatGroups newChatGroup = GetNewPublicChatGroup();
 
             _context.Database.BeginTransaction();
             bool resultOfAdd = await _dataAccess.AddAsync(newChatGroup);
             _context.ChangeTracker.Clear();
 
-            ChatGroups resultChatGroup = _context.ChatGroups
+            PublicChatGroups resultChatGroup = _context.ChatGroups
                 .OrderBy(c => c.ChatGroupId)
                 .Last();
 
@@ -147,7 +147,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             int chatGroupId = 1;
             string expectedModifiedGroupName = "ModifiedChatGroupName";
-            ChatGroups chatGroupToModify = _context.ChatGroups
+            PublicChatGroups chatGroupToModify = _context.ChatGroups
                 .Single(c => c.ChatGroupId == chatGroupId);
             chatGroupToModify.ChatGroupName = expectedModifiedGroupName;
 
@@ -155,7 +155,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             bool resultOfModify = await _dataAccess.ModifyAsync(chatGroupToModify);
             _context.ChangeTracker.Clear();
 
-            ChatGroups modifiedChatGroup = _context.ChatGroups
+            PublicChatGroups modifiedChatGroup = _context.ChatGroups
                 .Single(c => c.ChatGroupId == chatGroupId);
 
             Assert.Multiple(() =>
@@ -169,7 +169,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task DeleteChatGroupAsync_IsSuccess()
         {
             int chatGroupId = 1;
-            ChatGroups chatGroupToDelete = _context.ChatGroups
+            PublicChatGroups chatGroupToDelete = _context.ChatGroups
                 .Single(c => c.ChatGroupId == chatGroupId);
 
             _context.Database.BeginTransaction();
@@ -254,7 +254,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
         #region PRIVATE METHODS
 
-        private ChatGroups GetNewPublicChatGroup()
+        private PublicChatGroups GetNewPublicChatGroup()
         {
             return new()
             {
@@ -284,7 +284,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             List<ChatGroupsView> listPrivateChatGroups = new();
             foreach (var listItem in listPrivateGroupMembers)
             {
-                ChatGroups chatGroup = _context.ChatGroups
+                PublicChatGroups chatGroup = _context.ChatGroups
                     .Single(c => c.ChatGroupId == listItem.PrivateChatGroupId);
 
                 if (chatGroup != null)
@@ -296,7 +296,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return listPrivateChatGroups;
         }
 
-        private ChatGroupsView ChatGroupToView(ChatGroups chatGroup)
+        private ChatGroupsView ChatGroupToView(PublicChatGroups chatGroup)
         {
             return new()
             {

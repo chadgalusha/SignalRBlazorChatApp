@@ -55,9 +55,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         //        .UseSqlServer(ConnectionString)
         //        .Options);
 
-        private List<ChatGroups> GetListChatGroups()
+        private List<PublicChatGroups> GetListChatGroups()
         {
-            List<ChatGroups> chatGroupList = new()
+            List<PublicChatGroups> chatGroupList = new()
             {
                 new()
                 {

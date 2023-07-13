@@ -71,14 +71,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task AddPublicMessages_IsSuccess()
         {
-            PublicMessages newMessage = NewPublicMessage();
+            PublicGroupMessages newMessage = NewPublicMessage();
             Guid expectedPublicMessageId = newMessage.PublicMessageId;
 
             _context.Database.BeginTransaction();
             await _dataAccess.AddAsync(newMessage);
             _context.ChangeTracker.Clear();
 
-            List<PublicMessages> listMessages = _context.PublicMessages
+            List<PublicGroupMessages> listMessages = _context.PublicMessages
                 .Where(p => p.ChatGroupId == 3)
                 .ToList();
             Guid resultpublicMessageId = listMessages.First().PublicMessageId;
@@ -112,7 +112,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             Guid messageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
             string newMessage = "Modified message";
-            PublicMessages messageToModify = _context.PublicMessages
+            PublicGroupMessages messageToModify = _context.PublicMessages
                 .Single(m => m.PublicMessageId == messageId);
             messageToModify.Text = newMessage;
 
@@ -120,7 +120,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             bool resultOfModify = await _dataAccess.ModifyAsync(messageToModify);
             _context.ChangeTracker.Clear();
 
-            PublicMessages modifiedPublicMessage = _context.PublicMessages
+            PublicGroupMessages modifiedPublicMessage = _context.PublicMessages
                 .Single(p => p.PublicMessageId == messageId);
 
             Assert.Multiple(() =>
@@ -134,7 +134,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task DeleteMessage_IsSuccess()
         {
             Guid publicMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
-            PublicMessages publicMessageToDelete = _context.PublicMessages
+            PublicGroupMessages publicMessageToDelete = _context.PublicMessages
                 .Single(p => p.PublicMessageId == publicMessageId);
 
             _context.Database.BeginTransaction();
@@ -154,7 +154,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             Guid messageId = Guid.Parse("3eea1c79-61fb-41e0-852b-ab790835c827");
 
-            PublicMessages result = await _dataAccess.GetByMessageIdAsync(messageId);
+            PublicGroupMessages result = await _dataAccess.GetByMessageIdAsync(messageId);
 
             Assert.NotNull(result);
         }
@@ -206,7 +206,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
         #region PRIVATE METHODS
 
-        private PublicMessages NewPublicMessage()
+        private PublicGroupMessages NewPublicMessage()
         {
             return new()
             {

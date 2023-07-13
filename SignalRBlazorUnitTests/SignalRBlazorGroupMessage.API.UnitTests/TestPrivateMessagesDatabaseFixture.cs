@@ -37,9 +37,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 .UseSqlServer(ConnectionString)
                 .Options);
 
-        private List<PrivateMessages> GetListPrivateMessages()
+        private List<PrivateUserMessages> GetListPrivateMessages()
         {
-            List<PrivateMessages> listPrivateMessages = new()
+            List<PrivateUserMessages> listPrivateMessages = new()
             {
                 new()
                 {

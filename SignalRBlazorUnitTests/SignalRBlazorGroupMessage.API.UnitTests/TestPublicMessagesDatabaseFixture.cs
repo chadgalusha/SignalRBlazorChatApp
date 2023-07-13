@@ -52,9 +52,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     .UseSqlServer(ConnectionString)
                     .Options);
 
-        private List<PublicMessages> GetListPublicMessages()
+        private List<PublicGroupMessages> GetListPublicMessages()
         {
-            List<PublicMessages> messageList = new()
+            List<PublicGroupMessages> messageList = new()
             {
                 new()
                 {

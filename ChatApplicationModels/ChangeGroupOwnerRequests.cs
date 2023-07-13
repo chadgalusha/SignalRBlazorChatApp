@@ -7,6 +7,10 @@ namespace ChatApplicationModels
         [Key]
         public int Id { get; set; }
 
+        public int PublicChatGroupId { get; set; }
+        public int PrivateChatGroupId { get; set; }
+        public bool IsPrivate { get; set; }
+
         [Required]
         public string CurrentOwnerUserId { get; set; } = string.Empty;
         
