@@ -21,7 +21,7 @@ END
 
 -- PublicMessagesDataAccess.GetPublicMessageByIdAsync(string messageId)
 CREATE OR ALTER PROCEDURE sp_getPublicMessage_byMessageId
-	@messageId nvarchar(450)
+	@messageId uniqueidentifier
 AS
 BEGIN
 	SELECT 

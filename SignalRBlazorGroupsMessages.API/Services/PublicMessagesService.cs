@@ -105,8 +105,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                // TODO: need to check that chat group is not public. add with chat group service.
-
                 PublicGroupMessages newMessage = NewPublicMessage(messageDto);
                 bool isSuccess = await _publicMessageDataAccess.AddAsync(newMessage);
 

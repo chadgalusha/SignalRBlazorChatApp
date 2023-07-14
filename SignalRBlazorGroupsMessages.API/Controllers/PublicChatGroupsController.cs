@@ -5,7 +5,7 @@ using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/")]
     [ApiController]
     public class PublicChatGroupsController : ControllerBase
     {
@@ -25,6 +25,22 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             _serilogger.GetRequest(GetIpv4Address(), dtoList);
 
             return dtoList;
+        }
+
+        [HttpGet("byid")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicChatGroupsDto>>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> GetByIdAsync(
+            [FromQuery] int groupId)
+        {
+            if (groupId < 0)
+                return BadRequest("Invalid data: " + nameof(groupId));
+
+            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetByIdAsync(groupId);
+            _serilogger.GetRequest(GetIpv4Address(), dtoResponse);
+
+            return Ok(dtoResponse);
         }
 
         #region PRIVATE METHODS

@@ -67,7 +67,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             {
                 CommandType = System.Data.CommandType.StoredProcedure
             };
-            command.Parameters.Add("@messageId", System.Data.SqlDbType.NVarChar).Value = messageId.ToString();
+            command.Parameters.Add("@messageId", System.Data.SqlDbType.UniqueIdentifier).Value = messageId;
 
             await connection.OpenAsync();
             SqlDataReader reader = await command.ExecuteReaderAsync();
@@ -141,14 +141,14 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             {
                 PublicGroupMessagesView view = new()
                 {
-                    PublicMessageId = Guid.Parse((string)reader[0]),
+                    PublicMessageId = (Guid)reader[0],
                     UserId          = Guid.Parse((string)reader[1]),
                     UserName        = (string)reader[2],
                     ChatGroupId     = (int)reader[3],
                     ChatGroupName   = (string)reader[4],
                     Text            = (string)reader[5],
                     MessageDateTime = (DateTime)reader[6],
-                    ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : Guid.Parse((string)reader[7]),
+                    ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : (Guid)reader[7],
                     PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString()
                 };
                 viewList.Add(view);
@@ -160,14 +160,14 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         {
             while (reader.Read())
             {
-                view.PublicMessageId = Guid.Parse((string)reader[0]);
+                view.PublicMessageId = (Guid)reader[0];
                 view.UserId          = Guid.Parse((string)reader[1]);
                 view.UserName        = (string)reader[2];
                 view.ChatGroupId     = (int)reader[3];
                 view.ChatGroupName   = (string)reader[4];
                 view.Text            = (string)reader[5];
                 view.MessageDateTime = (DateTime)reader[6];
-                view.ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : Guid.Parse((string)reader[7]);
+                view.ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : (Guid)reader[7];
                 view.PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString();
             }
             return view;
