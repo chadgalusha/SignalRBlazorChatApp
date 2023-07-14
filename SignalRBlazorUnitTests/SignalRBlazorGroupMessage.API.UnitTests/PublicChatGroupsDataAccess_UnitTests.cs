@@ -1,5 +1,4 @@
 ﻿using ChatApplicationModels;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
@@ -24,7 +23,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task GetViewListPublicChatGroupsAsync_ReturnsChatGroups()
+        public async Task GetViewListAsync_ReturnsChatGroups()
         {
             int expectedGroupsCount = _context.PublicChatGroups
                 .ToList()
@@ -47,7 +46,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task GetChatGroupById_ReturnsCorrectChatGroup()
+        public async Task GetByIdAsync_ReturnsCorrectChatGroup()
         {
             string expectedChatGroupName = "TestPublicGroup1";
             PublicChatGroupsView view = _context.ChatGroupsViews
@@ -192,17 +191,6 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 ChatGroupName    = "NewPublicChatGroup",
                 GroupCreated     = DateTime.Now,
                 GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
-            };
-        }
-
-        private PublicChatGroupsView ChatGroupToView(PublicChatGroups chatGroup)
-        {
-            return new()
-            {
-                ChatGroupId      = chatGroup.ChatGroupId,
-                ChatGroupName    = chatGroup.ChatGroupName,
-                GroupCreated     = chatGroup.GroupCreated,
-                GroupOwnerUserId = chatGroup.GroupOwnerUserId
             };
         }
 

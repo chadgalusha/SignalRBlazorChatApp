@@ -180,7 +180,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task DeleteMessagesFromChatGroup_IsSuccess()
+        public async Task DeleteAllMessagesInGroup_IsSuccess()
         {
             int chatGroupToDeleteId = 1;
             int countShouldBeGreaterThanZero = _context.PublicGroupMessages
@@ -188,7 +188,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 .Count();
 
             _context.Database.BeginTransaction();
-            bool result = await _dataAccess.DeleteMessagesFromChatGroupAsync(chatGroupToDeleteId);
+            bool result = await _dataAccess.DeleteAllMessagesInGroupAsync(chatGroupToDeleteId);
             _context.ChangeTracker.Clear();
 
             int countShouldBeZero = _context.PublicGroupMessages

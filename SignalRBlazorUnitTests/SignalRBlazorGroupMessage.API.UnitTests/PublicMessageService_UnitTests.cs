@@ -61,7 +61,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     .ToList());
 
             PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
-
+                
             var result1 = await _service.GetViewListByUserIdAsync(testUserId, 0);
             var result2 = await _service.GetViewListByUserIdAsync(Guid.Parse("5e34cdf3-7ecc-46df-87ea-4bb1839af3d6"), 0);
 

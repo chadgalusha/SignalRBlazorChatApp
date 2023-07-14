@@ -10,5 +10,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
         Task<ApiResponse<PublicGroupMessageDto>> GetByMessageIdAsync(Guid messageId);
         Task<ApiResponse<List<PublicGroupMessageDto>>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip);
         Task<ApiResponse<PublicGroupMessageDto>> ModifyAsync(PublicGroupMessageDto dtoMessage);
+        Task<bool> DeleteAllMessagesInGroupAsync(int chatGroupId);
     }
 }
