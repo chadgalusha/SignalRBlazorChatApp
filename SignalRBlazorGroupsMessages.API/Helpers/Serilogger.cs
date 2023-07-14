@@ -15,7 +15,7 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
 
         public void NewChatGroupCreated(PublicChatGroups chatGroup)
         {
-            Log.Information($"New chat group created. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName} - IsPrivate {chatGroup.PrivateGroup}.");
+            Log.Information($"New chat group created. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName}.");
         }
 
         public void ChatGroupModified(PublicChatGroups chatGroup)

@@ -5,14 +5,14 @@ using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    public class TestPublicMessagesDatabaseFixture
+    public class PublicMessagesDatabaseFixture
     {
         private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=PublicMessagesTestSample;Trusted_Connection=True";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
 
-        public TestPublicMessagesDatabaseFixture()
+        public PublicMessagesDatabaseFixture()
         {
             lock (_lock)
             {

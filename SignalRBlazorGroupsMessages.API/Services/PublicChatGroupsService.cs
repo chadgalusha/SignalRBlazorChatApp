@@ -5,26 +5,26 @@ using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
-    public class PublicChatGroupsService
+    public class PublicChatGroupsService : IPublicChatGroupsService
     {
         private readonly IPublicChatGroupsDataAccess _publicGroupsDataAccess;
         private readonly IPublicMessagesDataAccess _publicMessagesDataAccess;
         private readonly ISerilogger _serilogger;
 
-        public PublicChatGroupsService(IPublicChatGroupsDataAccess publicGroupsDataAccess, IPublicMessagesDataAccess publicMessagesDataAccess, ISerilogger serilogger) 
+        public PublicChatGroupsService(IPublicChatGroupsDataAccess publicGroupsDataAccess, IPublicMessagesDataAccess publicMessagesDataAccess, ISerilogger serilogger)
         {
             _publicGroupsDataAccess = publicGroupsDataAccess ?? throw new Exception(nameof(publicGroupsDataAccess));
             _publicMessagesDataAccess = publicMessagesDataAccess ?? throw new Exception(nameof(publicMessagesDataAccess));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
         }
 
-        public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetViewListPublicChatGroupsAsync()
+        public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetListPublicChatGroupsAsync()
         {
             ApiResponse<List<PublicChatGroupsDto>> response = new();
 
             try
             {
-                List<PublicChatGroupsView> viewList = await _publicGroupsDataAccess.GetViewListPublicChatGroupsAsync();
+                List<PublicChatGroupsView> viewList = await _publicGroupsDataAccess.GetViewListAsync();
                 List<PublicChatGroupsDto> dtoList = ViewListToDtoList(viewList);
 
                 return ReturnApiResponse.Success(response, dtoList);
@@ -40,36 +40,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
-        public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetViewListPrivateByUserId(Guid userId)
-        {
-            ApiResponse<List<PublicChatGroupsDto>> response = new();
-
-            if (userId == new Guid())
-            {
-                response = ReturnApiResponse.Failure(response, "invalid userId");
-                response.Data = null;
-                return response;
-            }
-
-            try
-            {
-                List<PublicChatGroupsView> viewList = await _publicGroupsDataAccess.GetViewListPrivateByUserIdAsync(userId);
-                List<PublicChatGroupsDto> dtoList = ViewListToDtoList(viewList);
-
-                return ReturnApiResponse.Success(response, dtoList);
-            }
-            catch (Exception ex)
-            {
-                _serilogger.ChatGroupError("ChatGroupsService.GetViewListPrivateByUserId", ex);
-
-                response = ReturnApiResponse.Failure(response, "Error getting private chat groups.");
-                response.Data = null;
-
-                return response;
-            }
-        }
-
-        public async Task<ApiResponse<PublicChatGroupsDto>> GetChatGroupByIdAsync(int groupId)
+        public async Task<ApiResponse<PublicChatGroupsDto>> GetByIdAsync(int groupId)
         {
             ApiResponse<PublicChatGroupsDto> response = new();
 
@@ -82,7 +53,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
-                PublicChatGroupsView view = await _publicGroupsDataAccess.GetChatGroupByIdAsync(groupId);
+                PublicChatGroupsView view = await _publicGroupsDataAccess.GetByIdAsync(groupId);
                 PublicChatGroupsDto dtoGroup = ViewToDto(view);
 
                 return ReturnApiResponse.Success(response, dtoGroup);
@@ -139,7 +110,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                PublicChatGroupsView existingView = await _publicGroupsDataAccess.GetChatGroupByIdAsync(dto.ChatGroupId);
+                PublicChatGroupsView existingView = await _publicGroupsDataAccess.GetByIdAsync(dto.ChatGroupId);
 
                 // check if chat group passes modify checks 1st. if false return failure with error messages.
                 (bool, string) messageChecks = ModifyChatGroupChecks(dto, existingView);
@@ -183,7 +154,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return ReturnApiResponse.Failure(response, "Chat Group Id not found");
                 }
 
-                
+                // delete all messages in a public group
 
                 return ReturnApiResponse.Success(response, dto);//FIX THIS
             }
@@ -228,11 +199,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 passesChecks = false;
                 errorMessage += "[Must use change group owner request for different group owner.]";
             }
-            if (dto.PrivateGroup != view.PrivateGroup)
-            {
-                passesChecks = false;
-                errorMessage += "[Cannot change status of chat group from private to public, and vice versa.]";
-            }
 
             return (passesChecks, errorMessage);
         }
@@ -245,12 +211,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 PublicChatGroupsDto dto = new()
                 {
-                    ChatGroupId      = view.ChatGroupId,
-                    ChatGroupName    = view.ChatGroupName,
-                    GroupCreated     = view.GroupCreated,
+                    ChatGroupId = view.ChatGroupId,
+                    ChatGroupName = view.ChatGroupName,
+                    GroupCreated = view.GroupCreated,
                     GroupOwnerUserId = view.GroupOwnerUserId,
-                    UserName         = view.UserName,
-                    PrivateGroup     = view.PrivateGroup
+                    UserName = view.UserName
                 };
                 dtoList.Add(dto);
             }
@@ -261,12 +226,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
         {
             return new()
             {
-                ChatGroupId      = view.ChatGroupId,
-                ChatGroupName    = view.ChatGroupName,
-                GroupCreated     = view.GroupCreated,
+                ChatGroupId = view.ChatGroupId,
+                ChatGroupName = view.ChatGroupName,
+                GroupCreated = view.GroupCreated,
                 GroupOwnerUserId = view.GroupOwnerUserId,
-                UserName         = view.UserName,
-                PrivateGroup     = view.PrivateGroup
+                UserName = view.UserName
             };
         }
 
@@ -274,10 +238,9 @@ namespace SignalRBlazorGroupsMessages.API.Services
         {
             return new()
             {
-                ChatGroupName    = dto.ChatGroupName,
-                GroupCreated     = dto.GroupCreated,
-                GroupOwnerUserId = dto.GroupOwnerUserId,
-                PrivateGroup     = dto.PrivateGroup
+                ChatGroupName = dto.ChatGroupName,
+                GroupCreated = dto.GroupCreated,
+                GroupOwnerUserId = dto.GroupOwnerUserId
             };
         }
 
@@ -285,24 +248,22 @@ namespace SignalRBlazorGroupsMessages.API.Services
         {
             return new()
             {
-                ChatGroupId      = newGroup.ChatGroupId,
-                ChatGroupName    = newGroup.ChatGroupName,
-                GroupCreated     = newGroup.GroupCreated,
+                ChatGroupId = newGroup.ChatGroupId,
+                ChatGroupName = newGroup.ChatGroupName,
+                GroupCreated = newGroup.GroupCreated,
                 GroupOwnerUserId = newGroup.GroupOwnerUserId,
-                UserName         = userName,
-                PrivateGroup     = newGroup.PrivateGroup
+                UserName = userName
             };
         }
 
-        private PublicChatGroups DtoToChatGroup(PublicChatGroupsDto dto) 
+        private PublicChatGroups DtoToChatGroup(PublicChatGroupsDto dto)
         {
             return new()
             {
-                ChatGroupId      = dto.ChatGroupId,
-                ChatGroupName    = dto.ChatGroupName,
-                GroupCreated     = dto.GroupCreated,
-                GroupOwnerUserId = dto.GroupOwnerUserId,
-                PrivateGroup     = dto.PrivateGroup
+                ChatGroupId = dto.ChatGroupId,
+                ChatGroupName = dto.ChatGroupName,
+                GroupCreated = dto.GroupCreated,
+                GroupOwnerUserId = dto.GroupOwnerUserId
             };
         }
 

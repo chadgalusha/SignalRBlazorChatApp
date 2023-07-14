@@ -5,13 +5,13 @@ using SignalRBlazorGroupsMessages.API.Helpers;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    public class PrivateMessagesDataAccess_UnitTests : IClassFixture<TestPrivateMessagesDatabaseFixture>
+    public class PrivateMessagesDataAccess_UnitTests : IClassFixture<PrivateMessagesDatabaseFixture>
     {
-        public TestPrivateMessagesDatabaseFixture Fixture { get; }
+        public PrivateMessagesDatabaseFixture Fixture { get; }
         private readonly PrivateMessagesDataAccess _dataAccess;
         private readonly ApplicationDbContext _context;
 
-        public PrivateMessagesDataAccess_UnitTests(TestPrivateMessagesDatabaseFixture fixture)
+        public PrivateMessagesDataAccess_UnitTests(PrivateMessagesDatabaseFixture fixture)
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();

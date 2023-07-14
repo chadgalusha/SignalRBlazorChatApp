@@ -17,7 +17,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             _configuration = configuration ?? throw new Exception(nameof(configuration));
         }
 
-        public async Task<List<PublicChatGroupsView>> GetViewListPublicChatGroupsAsync()
+        public async Task<List<PublicChatGroupsView>> GetViewListAsync()
         {
             List<PublicChatGroupsView> viewList = new();
 
@@ -35,7 +35,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return viewList;
         }
 
-        public async Task<PublicChatGroupsView> GetChatGroupByIdAsync(int groupId)
+        public async Task<PublicChatGroupsView> GetByIdAsync(int groupId)
         {
             PublicChatGroupsView view = new();
 
@@ -52,25 +52,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             await connection.CloseAsync();
 
             return view;
-        }
-
-        public async Task<List<PublicChatGroupsView>> GetViewListPrivateByUserIdAsync(Guid userId)
-        {
-            List<PublicChatGroupsView> listPrivateGroups = new();
-
-            using SqlConnection connection = new(GetConnectionString());
-            SqlCommand command = new("sp_getPrivateChatGroupsForUser", connection)
-            {
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
-            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId.ToString();
-
-            await connection.OpenAsync();
-            SqlDataReader reader = await command.ExecuteReaderAsync();
-            listPrivateGroups = ReturnViewListFromReader(listPrivateGroups, reader);
-            await connection.CloseAsync();
-
-            return listPrivateGroups;
         }
 
         public PublicChatGroups GetByGroupName(string chatGroupName)
@@ -97,14 +78,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .Any(c => c.ChatGroupId == groupId);
         }
 
-        public async Task<bool> IsPublicChatGroup(int groupId)
-        {
-            return await _context.PublicChatGroups
-                .Where(c => c.PrivateGroup == true)
-                .Where(c => c.ChatGroupId == groupId)
-                .AnyAsync();
-        }
-
         public async Task<bool> AddAsync(PublicChatGroups chatGroup)
         {
             _context.PublicChatGroups.Add(chatGroup);
@@ -120,25 +93,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         public async Task<bool> DeleteAsync(PublicChatGroups chatGroup)
         {
             _context.PublicChatGroups.Remove(chatGroup);
-            return await Save();
-        }
-
-        public async Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember)
-        {
-            _context.PrivateGroupsMembers.Add(privateGroupMember);
-            return await Save();
-        }
-
-        public async Task<PrivateGroupMembers> GetPrivateGroupMemberRecord(int chatGroupid, string userId)
-        {
-            return await _context.PrivateGroupsMembers
-                .SingleAsync(p => p.PrivateChatGroupId == chatGroupid
-                    && p.UserId == userId);
-        }
-
-        public async Task<bool> RemoveUserFromPrivateChatGroup(PrivateGroupMembers privateGroupMember)
-        {
-            _context.PrivateGroupsMembers.Remove(privateGroupMember);
             return await Save();
         }
 
@@ -164,8 +118,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                     ChatGroupName    = (string)reader[1],
                     GroupCreated     = (DateTime)reader[2],
                     GroupOwnerUserId = Guid.Parse((string)reader[3]),
-                    UserName         = (string)reader[4],
-                    PrivateGroup     = (bool)reader[5]
+                    UserName         = (string)reader[4]
                 };
                 viewList.Add(view);
             }
@@ -181,7 +134,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 view.GroupCreated     = (DateTime)reader[2];
                 view.GroupOwnerUserId = Guid.Parse((string)reader[3]);
                 view.UserName         = (string)reader[4];
-                view.PrivateGroup     = (bool)reader[5];
             }
             return view;
         }

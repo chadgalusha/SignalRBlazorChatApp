@@ -6,7 +6,7 @@ using SignalRBlazorGroupsMessages.API.Services;
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/")]
+    [Route("api/[controller]")]
     public class PublicMessagesController : ControllerBase
     {
         private readonly IPublicMessagesService _service;
@@ -19,7 +19,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         // GET: api/<PublicMessagesController>/bygroupid
-        [HttpGet("bygroupid")]
+        [HttpGet("/bygroupid")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicGroupMessageDto>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -31,14 +31,14 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (numberItemsToSkip < 0)
                 return BadRequest("Invalid data: "+nameof(numberItemsToSkip));
 
-            ApiResponse<List<PublicGroupMessageDto>> listDto = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
-            _serilogger.GetRequest(GetIpv4Address(), listDto);
+            ApiResponse<List<PublicGroupMessageDto>> dtoList = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
+            _serilogger.GetRequest(GetIpv4Address(), dtoList);
 
-            return Ok(listDto);
+            return Ok(dtoList);
         }
 
         // GET: api/<PublicMessagesController>/byuserid
-        [HttpGet("byuserid")]
+        [HttpGet("/byuserid")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicGroupMessageDto>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -57,7 +57,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         // GET api/<PublicMessagesController>/bymessageid
-        [HttpGet("bymessageid")]
+        [HttpGet("/bymessageid")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

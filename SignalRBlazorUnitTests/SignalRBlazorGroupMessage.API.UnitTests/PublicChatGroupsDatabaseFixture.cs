@@ -5,14 +5,14 @@ using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    public class TestChatGroupsDatabaseFixture
+    public class PublicChatGroupsDatabaseFixture
     {
         private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=ChatGroupsTestSample;Trusted_Connection=True";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
 
-        public TestChatGroupsDatabaseFixture()
+        public PublicChatGroupsDatabaseFixture()
         {
             lock (_lock)
             {
@@ -23,9 +23,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
 
-                        context.AddRange(GetListChatGroups());
-                        context.AddRange(GetListPrivateGroupMembers());
-                        context.AddRange(GetListChatGroupsViews());
+                        context.AddRange(GetListPublicChatGroups());
+                        context.AddRange(GetListPublicChatGroupsViews());
 
                         context.SaveChanges();
                     }
@@ -55,7 +54,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         //        .UseSqlServer(ConnectionString)
         //        .Options);
 
-        private List<PublicChatGroups> GetListChatGroups()
+        private List<PublicChatGroups> GetListPublicChatGroups()
         {
             List<PublicChatGroups> chatGroupList = new()
             {
@@ -64,64 +63,34 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     //ChatGroupId      = 1,
                     ChatGroupName    = "TestPublicGroup1",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    PrivateGroup     = false
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
                 },
                 new()
                 {
                     //ChatGroupId      = 2,
                     ChatGroupName    = "TestPublicGroup2",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    PrivateGroup     = false
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
                 },
                 new()
                 {
                     //ChatGroupId      = 3,
                     ChatGroupName    = "TestPrivateGroup1",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    PrivateGroup     = true
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
                 },
                 new()
                 {
                     //ChatGroupId      = 4,
                     ChatGroupName    = "TestPrivateGroup2",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    PrivateGroup     = true
+                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
                 }
             };
             return chatGroupList;
         }
 
-        private List<PrivateGroupMembers> GetListPrivateGroupMembers()
-        {
-            List<PrivateGroupMembers> privateGroupMembersList = new()
-            {
-                new()
-                {
-                    //PrivateGroupMemberId = 1,
-                    PrivateChatGroupId   = 3,
-                    UserId               = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
-                },
-                new()
-                {
-                    //PrivateGroupMemberId = 2,
-                    PrivateChatGroupId   = 4,
-                    UserId               = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
-                },
-                new()
-                {
-                    //PrivateGroupMemberId = 3,
-                    PrivateChatGroupId   = 3,
-                    UserId               = "e08b0077-3c15-477e-84bb-bf9d41196455"
-                }
-            };
-            return privateGroupMembersList;
-        }
-
-        private List<PublicChatGroupsView> GetListChatGroupsViews()
+        private List<PublicChatGroupsView> GetListPublicChatGroupsViews()
         {
             List<PublicChatGroupsView> listView = new()
             {
@@ -131,8 +100,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupName    = "TestPublicGroup1",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    UserName         = "Test Admin",
-                    PrivateGroup     = false
+                    UserName         = "Test Admin"
                 },
                 new()
                 {
@@ -140,8 +108,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupName    = "TestPublicGroup2",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    UserName         = "Test Admin",
-                    PrivateGroup     = false
+                    UserName         = "Test Admin"
                 },
                 new()
                 {
@@ -149,8 +116,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupName    = "TestPrivateGroup1",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    UserName         = "Test Admin",
-                    PrivateGroup     = true
+                    UserName         = "Test Admin"
                 },
                 new()
                 {
@@ -158,8 +124,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupName    = "TestPrivateGroup2",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                    UserName         = "Test Admin",
-                    PrivateGroup     = true
+                    UserName         = "Test Admin"
                 }
             };
             return listView;

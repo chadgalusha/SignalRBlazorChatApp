@@ -3,18 +3,18 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.TestPublicMessagesDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesDatabaseFixture;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    public class PublicMessagesDataAccess_UnitTests : IClassFixture<TestPublicMessagesDatabaseFixture>
+    public class PublicMessagesDataAccess_UnitTests : IClassFixture<PublicMessagesDatabaseFixture>
     {
-        public TestPublicMessagesDatabaseFixture Fixture { get; }
+        public PublicMessagesDatabaseFixture Fixture { get; }
         private readonly PublicMessagesDataAccess _dataAccess;
         private readonly TestPublicMessagesDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PublicMessagesDataAccess_UnitTests(TestPublicMessagesDatabaseFixture fixture)
+        public PublicMessagesDataAccess_UnitTests(PublicMessagesDatabaseFixture fixture)
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();

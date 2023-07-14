@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Models;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
 
 namespace SignalRBlazorGroupsMessages.API.Data
 {
@@ -27,11 +25,5 @@ namespace SignalRBlazorGroupsMessages.API.Data
         public virtual DbSet<PublicChatGroups> PublicChatGroups { get; set; }
         public virtual DbSet<PublicGroupMessages> PublicGroupMessages { get; set; }
         public virtual DbSet<UserFriends> UserFriends { get; set; }
-
-        // stored procedures
-        public virtual ObjectResult<PublicChatGroupsView> GetPublicChatGroups()
-        {
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<PublicChatGroupsView>("sp_getPublicChatGroups");
-        }
     }
 }

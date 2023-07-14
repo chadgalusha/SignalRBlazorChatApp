@@ -4,18 +4,18 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.TestChatGroupsDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroupsDatabaseFixture;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    public class ChatGroupsDataAccess_UnitTests : IClassFixture<TestChatGroupsDatabaseFixture>
+    public class PublicChatGroupsDataAccess_UnitTests : IClassFixture<PublicChatGroupsDatabaseFixture>
     {
-        public TestChatGroupsDatabaseFixture Fixture { get; }
+        public PublicChatGroupsDatabaseFixture Fixture { get; }
         private readonly PublicChatGroupsDataAccess _dataAccess;
         private readonly TestChatGroupsDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public ChatGroupsDataAccess_UnitTests(TestChatGroupsDatabaseFixture fixture)
+        public PublicChatGroupsDataAccess_UnitTests(PublicChatGroupsDatabaseFixture fixture)
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
@@ -26,24 +26,22 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task GetViewListPublicChatGroupsAsync_ReturnsChatGroups()
         {
-            int expectedPublicChatGroupsCount = _context.PublicChatGroups
-                .Where(c => c.PrivateGroup == false)
+            int expectedGroupsCount = _context.PublicChatGroups
                 .ToList()
                 .Count;
             List<PublicChatGroupsView> viewList = _context.ChatGroupsViews
-                .Where(c => c.PrivateGroup == false)
                 .ToList();
 
             Mock<IPublicChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
-            _mockChatGroupsDataAccess.Setup(c => c.GetViewListPublicChatGroupsAsync())
+            _mockChatGroupsDataAccess.Setup(c => c.GetViewListAsync())
                 .ReturnsAsync(viewList);
 
             List<PublicChatGroupsView> result = await _mockChatGroupsDataAccess.Object
-                .GetViewListPublicChatGroupsAsync();
+                .GetViewListAsync();
 
             Assert.Multiple(() =>
             {
-                Assert.Equal(expectedPublicChatGroupsCount, result.Count);
+                Assert.Equal(expectedGroupsCount, result.Count);
                 Assert.NotNull(result);
             });
         }
@@ -57,12 +55,12 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             int expectedGroupId = view.ChatGroupId;
 
             Mock<IPublicChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
-            _mockChatGroupsDataAccess.Setup(c => c.GetChatGroupByIdAsync(1))
+            _mockChatGroupsDataAccess.Setup(c => c.GetByIdAsync(1))
                 .ReturnsAsync(view);
                 
 
             PublicChatGroupsView resultChatGroup = await _mockChatGroupsDataAccess.Object
-                .GetChatGroupByIdAsync(1);
+                .GetByIdAsync(1);
 
             Assert.Multiple(() =>
             {
@@ -185,73 +183,6 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             Assert.False(chatGroupExists);
         }
 
-        [Fact]
-        public async Task AddUserToPrivateChatGroup_AddsUser()
-        {
-            int groupToJoinId = 4;
-            string userIdToJoin = "e08b0077-3c15-477e-84bb-bf9d41196455";
-            PrivateGroupMembers newPrivateGroupMember = GetNewPrivateGroupMember(groupToJoinId, userIdToJoin);
-
-            _context.Database.BeginTransaction();
-            bool resultOfAdd = await _dataAccess.AddUserToPrivateChatGroupAsync(newPrivateGroupMember);
-            _context.ChangeTracker.Clear();
-
-            List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
-                .Where(c => c.UserId == userIdToJoin)
-                .ToList();
-            bool isUserInGroup = _context.PrivateGroupsMembers
-                .Where(p => p.PrivateChatGroupId == groupToJoinId
-                    && p.UserId == userIdToJoin)
-                .Any();
-            
-            Assert.Multiple(() =>
-            {
-                Assert.True(resultOfAdd);
-                Assert.Equal(2, listPrivateGroupMembers.Count);
-                Assert.True(isUserInGroup);
-            });
-        }
-
-        [Fact]
-        public async Task RemoveUserFromPrivateChatGroup_RemovesUser()
-        {
-            string userId = "e08b0077-3c15-477e-84bb-bf9d41196455";
-            int recordIdToDelete = _context.PrivateGroupsMembers
-                .Single(p => p.UserId == userId)
-                .PrivateGroupMemberId;
-            PrivateGroupMembers privateGroupMember = await _dataAccess.GetPrivateGroupMemberRecord(recordIdToDelete, userId);
-
-            _context.Database.BeginTransaction();
-            bool resultOfRemove = await _dataAccess.RemoveUserFromPrivateChatGroup(privateGroupMember);
-            _context.ChangeTracker.Clear();
-
-            bool recordExists = _context.PrivateGroupsMembers
-                .Any(p => p.PrivateGroupMemberId == recordIdToDelete);
-
-            Assert.Multiple(() =>
-            {
-                Assert.True(resultOfRemove);
-                Assert.False(recordExists);
-            });
-        }
-
-        [Fact]
-        public async void GetPrivateChatGroupsByUserId_ReturnsCorrectList()
-        {
-            Guid userId = Guid.Parse("e08b0077-3c15-477e-84bb-bf9d41196455");
-            List<PublicChatGroupsView> listPrivateChatGroups = GetListPrivateChatGroups(userId);
-
-            Mock<IPublicChatGroupsDataAccess> _mockDataAccess = new();
-            _mockDataAccess.Setup(x => x.GetViewListPrivateByUserIdAsync(userId))
-                .ReturnsAsync(listPrivateChatGroups);
-
-            var mockedDataAccess = _mockDataAccess.Object;
-            var result = await mockedDataAccess
-                .GetViewListPrivateByUserIdAsync(userId);
-
-            Assert.Equal(listPrivateChatGroups, result);
-        }
-
         #region PRIVATE METHODS
 
         private PublicChatGroups GetNewPublicChatGroup()
@@ -260,40 +191,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             {
                 ChatGroupName    = "NewPublicChatGroup",
                 GroupCreated     = DateTime.Now,
-                GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
-                PrivateGroup     = false
+                GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
             };
-        }
-
-        private PrivateGroupMembers GetNewPrivateGroupMember(int groupToJoinId, string userIdToJoin)
-        {
-            return new()
-            {
-                PrivateChatGroupId = groupToJoinId,
-                UserId             = userIdToJoin
-            };
-        }
-
-        // Mock of stored procedure sp_getPrivateChatGroupsForUser @UserId
-        private List<PublicChatGroupsView> GetListPrivateChatGroups(Guid userId)
-        {
-            List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
-                .Where(p => p.UserId == userId.ToString())
-                .ToList();
-
-            List<PublicChatGroupsView> listPrivateChatGroups = new();
-            foreach (var listItem in listPrivateGroupMembers)
-            {
-                PublicChatGroups chatGroup = _context.PublicChatGroups
-                    .Single(c => c.ChatGroupId == listItem.PrivateChatGroupId);
-
-                if (chatGroup != null)
-                {
-                    listPrivateChatGroups.Add(ChatGroupToView(chatGroup));
-                }
-            }
-
-            return listPrivateChatGroups;
         }
 
         private PublicChatGroupsView ChatGroupToView(PublicChatGroups chatGroup)
@@ -303,10 +202,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 ChatGroupId      = chatGroup.ChatGroupId,
                 ChatGroupName    = chatGroup.ChatGroupName,
                 GroupCreated     = chatGroup.GroupCreated,
-                GroupOwnerUserId = chatGroup.GroupOwnerUserId,
-                PrivateGroup     = chatGroup.PrivateGroup
+                GroupOwnerUserId = chatGroup.GroupOwnerUserId
             };
         }
+
         #endregion
     }
 }
