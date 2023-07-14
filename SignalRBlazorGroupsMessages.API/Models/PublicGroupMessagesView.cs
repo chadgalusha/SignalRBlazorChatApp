@@ -2,7 +2,7 @@
 
 namespace SignalRBlazorGroupsMessages.API.Models
 {
-    public class PublicMessagesView
+    public class PublicGroupMessagesView
     {
         [Key]
         public Guid PublicMessageId { get; set; }

@@ -13,17 +13,17 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
             Log.Error($"Error with Chat Group Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
         }
 
-        public void NewChatGroupCreated(ChatGroups chatGroup)
+        public void NewChatGroupCreated(PublicChatGroups chatGroup)
         {
-            Log.Information($"New chat group created. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName} - IsPrivate {chatGroup.PrivateGroup}.");
+            Log.Information($"New chat group created. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName}.");
         }
 
-        public void ChatGroupModified(ChatGroups chatGroup)
+        public void ChatGroupModified(PublicChatGroups chatGroup)
         {
             Log.Information($"Chat group modified. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName}");
         }
 
-        public void ChatGroupDeleted(ChatGroups chatGroup)
+        public void ChatGroupDeleted(PublicChatGroups chatGroup)
         {
             Log.Information($"Chat group deleted. Id: {chatGroup.ChatGroupId} - Name {chatGroup.ChatGroupName}.");
         }
@@ -51,12 +51,12 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
             Log.Error($"Error with Public Message Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
         }
 
-        public void PublicMessageModified(PublicMessages message)
+        public void PublicMessageModified(PublicGroupMessages message)
         {
             Log.Information($"Public message modified. Id: {message.PublicMessageId} - UserId: {message.UserId} - Chat Group: {message.ChatGroupId}.");
         }
 
-        public void PublicMessageDeleted(PublicMessages message)
+        public void PublicMessageDeleted(PublicGroupMessages message)
         {
             Log.Information($"Public message deleted. Id: {message.PublicMessageId} - UserId: {message.UserId} - Chat Group: {message.ChatGroupId}.");
         }
@@ -69,12 +69,12 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
             Log.Error($"Error with Private Message Service: Method [{errorAtMethod}] - Error message [{ex.Message}]");
         }
 
-        public void PrivateMessageModified(PrivateMessages message)
+        public void PrivateMessageModified(PrivateUserMessages message)
         {
             Log.Information($"Private message modified. Id: {message.PrivateMessageId} - From UserId: {message.FromUserId} - To UserId: {message.ToUserId}.");
         }
 
-        public void PrivateMessageDeleted(PrivateMessages message)
+        public void PrivateMessageDeleted(PrivateUserMessages message)
         {
             Log.Information($"Private message deleted. Id: {message.PrivateMessageId} - From UserId: {message.FromUserId} - To UserId: {message.ToUserId}.");
         }

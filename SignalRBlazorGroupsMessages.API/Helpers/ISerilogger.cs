@@ -6,15 +6,15 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
     public interface ISerilogger
     {
         void ChatGroupError(string errorAtMethod, Exception ex);
-        void ChatGroupDeleted(ChatGroups chatGroup);
-        void ChatGroupModified(ChatGroups chatGroup);
-        void NewChatGroupCreated(ChatGroups chatGroup);
+        void ChatGroupDeleted(PublicChatGroups chatGroup);
+        void ChatGroupModified(PublicChatGroups chatGroup);
+        void NewChatGroupCreated(PublicChatGroups chatGroup);
         void PrivateMessageError(string errorAtMethod, Exception ex);
-        void PrivateMessageDeleted(PrivateMessages message);
-        void PrivateMessageModified(PrivateMessages message);
+        void PrivateMessageDeleted(PrivateUserMessages message);
+        void PrivateMessageModified(PrivateUserMessages message);
         void PublicMessageError(string errorAtMethod, Exception ex);
-        void PublicMessageDeleted(PublicMessages message);
-        void PublicMessageModified(PublicMessages message);
+        void PublicMessageDeleted(PublicGroupMessages message);
+        void PublicMessageModified(PublicGroupMessages message);
         void UserAddedToPrivateChatGroup(PrivateGroupMembers privateGroupMember);
         void UserRemovedFromPrivateChatGroup(PrivateGroupMembers privateGroupMember);
         void GetRequest<T>(string ipv4, ApiResponse<T> apiResponse);

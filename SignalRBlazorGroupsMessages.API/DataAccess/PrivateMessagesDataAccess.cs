@@ -14,45 +14,45 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             _context = context;
         }
 
-        public async Task<List<PrivateMessages>> GetAllPrivateMessagesForUserAsync(string userId)
+        public async Task<List<PrivateUserMessages>> GetAllPrivateMessagesForUserAsync(string userId)
         {
-            return await _context.PrivateMessages
+            return await _context.PrivateUserMessages
                 .Where(p => p.ToUserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<List<PrivateMessages>> GetPrivateMessagesFromUserAsync(string toUserId, string fromUserId)
+        public async Task<List<PrivateUserMessages>> GetPrivateMessagesFromUserAsync(string toUserId, string fromUserId)
         {
-            return await _context.PrivateMessages
+            return await _context.PrivateUserMessages
                 .Where(p => p.ToUserId == toUserId)
                 .Where(p => p.FromUserId == fromUserId)
                 .OrderByDescending(p => p.PrivateMessageDateTime)
                 .ToListAsync();
         }
 
-        public PrivateMessages GetPrivateMessage(int privateMessageId)
+        public PrivateUserMessages GetPrivateMessage(int privateMessageId)
         {
-            PrivateMessages? message = _context.PrivateMessages.SingleOrDefault(p => p.PrivateMessageId == privateMessageId);
+            PrivateUserMessages? message = _context.PrivateUserMessages.SingleOrDefault(p => p.PrivateMessageId == privateMessageId);
 
             return message ?? 
                 throw new GroupsMessagesExceptions($"Private message with id of {privateMessageId} not found.");
         }
 
-        public async Task<bool> AddPrivateMessageAsync(PrivateMessages privateMessage)
+        public async Task<bool> AddPrivateMessageAsync(PrivateUserMessages privateMessage)
         {
-            _context.PrivateMessages.Add(privateMessage);
+            _context.PrivateUserMessages.Add(privateMessage);
             return await Save();
         }
 
-        public async Task<bool> ModifyPrivateMessageAsync(PrivateMessages privateMessage)
+        public async Task<bool> ModifyPrivateMessageAsync(PrivateUserMessages privateMessage)
         {
-            _context.PrivateMessages.Update(privateMessage);
+            _context.PrivateUserMessages.Update(privateMessage);
             return await Save();
         }
 
-        public async Task<bool> DeletePrivateMessageAsync(PrivateMessages privateMessage)
+        public async Task<bool> DeletePrivateMessageAsync(PrivateUserMessages privateMessage)
         {
-            _context.PrivateMessages.Remove(privateMessage);
+            _context.PrivateUserMessages.Remove(privateMessage);
             return await Save();
         }
 

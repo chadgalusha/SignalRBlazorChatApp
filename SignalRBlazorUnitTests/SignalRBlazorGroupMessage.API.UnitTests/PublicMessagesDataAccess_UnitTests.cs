@@ -3,18 +3,18 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.TestPublicMessagesDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesDatabaseFixture;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    public class PublicMessagesDataAccess_UnitTests : IClassFixture<TestPublicMessagesDatabaseFixture>
+    public class PublicMessagesDataAccess_UnitTests : IClassFixture<PublicMessagesDatabaseFixture>
     {
-        public TestPublicMessagesDatabaseFixture Fixture { get; }
+        public PublicMessagesDatabaseFixture Fixture { get; }
         private readonly PublicMessagesDataAccess _dataAccess;
         private readonly TestPublicMessagesDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PublicMessagesDataAccess_UnitTests(TestPublicMessagesDatabaseFixture fixture)
+        public PublicMessagesDataAccess_UnitTests(PublicMessagesDatabaseFixture fixture)
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
@@ -26,7 +26,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task GetViewListByGroupId_ReturnsMessages()
         {
             int groupId = 2;
-            List<PublicMessagesView> publicMessagesViewsList = _context.PublicMessagesView
+            List<PublicGroupMessagesView> publicMessagesViewsList = _context.PublicMessagesView
                 .Where(p => p.ChatGroupId == groupId)
                 .ToList();
 
@@ -35,7 +35,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 .ReturnsAsync(publicMessagesViewsList);
 
             var mockedDataAccessObject = _mockPublicMessageDataAccess.Object;
-            List<PublicMessagesView> result = await mockedDataAccessObject.GetViewListByGroupIdAsync(groupId, 0);
+            List<PublicGroupMessagesView> result = await mockedDataAccessObject.GetViewListByGroupIdAsync(groupId, 0);
 
             Assert.Multiple(() =>
             {
@@ -48,7 +48,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task GetViewListByUserId_ReturnsMessages()
         {
             Guid userId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a");
-            List<PublicMessagesView> listPublicMessageView = _context.PublicMessagesView
+            List<PublicGroupMessagesView> listPublicMessageView = _context.PublicMessagesView
                 .Where(p => p.UserId == userId)
                 .ToList();
 
@@ -57,7 +57,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 .ReturnsAsync(listPublicMessageView);
 
             var mockedDataAccessObject = _mockPublicMessageDataAccess.Object;
-            List<PublicMessagesView> result = await mockedDataAccessObject.GetViewListByUserIdAsync(userId, 0);
+            List<PublicGroupMessagesView> result = await mockedDataAccessObject.GetViewListByUserIdAsync(userId, 0);
 
             Assert.Multiple(() =>
             {
@@ -71,14 +71,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task AddPublicMessages_IsSuccess()
         {
-            PublicMessages newMessage = NewPublicMessage();
+            PublicGroupMessages newMessage = NewPublicMessage();
             Guid expectedPublicMessageId = newMessage.PublicMessageId;
 
             _context.Database.BeginTransaction();
             await _dataAccess.AddAsync(newMessage);
             _context.ChangeTracker.Clear();
 
-            List<PublicMessages> listMessages = _context.PublicMessages
+            List<PublicGroupMessages> listMessages = _context.PublicGroupMessages
                 .Where(p => p.ChatGroupId == 3)
                 .ToList();
             Guid resultpublicMessageId = listMessages.First().PublicMessageId;
@@ -112,7 +112,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             Guid messageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
             string newMessage = "Modified message";
-            PublicMessages messageToModify = _context.PublicMessages
+            PublicGroupMessages messageToModify = _context.PublicGroupMessages
                 .Single(m => m.PublicMessageId == messageId);
             messageToModify.Text = newMessage;
 
@@ -120,7 +120,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             bool resultOfModify = await _dataAccess.ModifyAsync(messageToModify);
             _context.ChangeTracker.Clear();
 
-            PublicMessages modifiedPublicMessage = _context.PublicMessages
+            PublicGroupMessages modifiedPublicMessage = _context.PublicGroupMessages
                 .Single(p => p.PublicMessageId == messageId);
 
             Assert.Multiple(() =>
@@ -134,7 +134,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task DeleteMessage_IsSuccess()
         {
             Guid publicMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
-            PublicMessages publicMessageToDelete = _context.PublicMessages
+            PublicGroupMessages publicMessageToDelete = _context.PublicGroupMessages
                 .Single(p => p.PublicMessageId == publicMessageId);
 
             _context.Database.BeginTransaction();
@@ -154,7 +154,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             Guid messageId = Guid.Parse("3eea1c79-61fb-41e0-852b-ab790835c827");
 
-            PublicMessages result = await _dataAccess.GetByMessageIdAsync(messageId);
+            PublicGroupMessages result = await _dataAccess.GetByMessageIdAsync(messageId);
 
             Assert.NotNull(result);
         }
@@ -168,7 +168,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             bool result = await _dataAccess.DeleteMessagesByResponseMessageIdAsync(messageId);
             _context.ChangeTracker.Clear();
 
-            int count = _context.PublicMessages
+            int count = _context.PublicGroupMessages
                 .Where(r => r.ReplyMessageId == messageId)
                 .Count();
 
@@ -180,18 +180,18 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         }
 
         [Fact]
-        public async Task DeleteMessagesFromChatGroup_IsSuccess()
+        public async Task DeleteAllMessagesInGroup_IsSuccess()
         {
             int chatGroupToDeleteId = 1;
-            int countShouldBeGreaterThanZero = _context.PublicMessages
+            int countShouldBeGreaterThanZero = _context.PublicGroupMessages
                 .Where(c => c.ChatGroupId == chatGroupToDeleteId)
                 .Count();
 
             _context.Database.BeginTransaction();
-            bool result = await _dataAccess.DeleteMessagesFromChatGroupAsync(chatGroupToDeleteId);
+            bool result = await _dataAccess.DeleteAllMessagesInGroupAsync(chatGroupToDeleteId);
             _context.ChangeTracker.Clear();
 
-            int countShouldBeZero = _context.PublicMessages
+            int countShouldBeZero = _context.PublicGroupMessages
                 .Where(c => c.ChatGroupId == chatGroupToDeleteId)
                 .Count();
 
@@ -206,7 +206,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
         #region PRIVATE METHODS
 
-        private PublicMessages NewPublicMessage()
+        private PublicGroupMessages NewPublicMessage()
         {
             return new()
             {

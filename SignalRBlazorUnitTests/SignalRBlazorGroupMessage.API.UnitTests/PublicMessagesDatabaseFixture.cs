@@ -5,14 +5,14 @@ using SignalRBlazorGroupsMessages.API.Models;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 {
-    public class TestPublicMessagesDatabaseFixture
+    public class PublicMessagesDatabaseFixture
     {
         private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=PublicMessagesTestSample;Trusted_Connection=True";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
 
-        public TestPublicMessagesDatabaseFixture()
+        public PublicMessagesDatabaseFixture()
         {
             lock (_lock)
             {
@@ -37,7 +37,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public class TestPublicMessagesDbContext : ApplicationDbContext
         {
             public TestPublicMessagesDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-            public virtual DbSet<PublicMessagesView> PublicMessagesView { get; set; }
+            public virtual DbSet<PublicGroupMessagesView> PublicMessagesView { get; set; }
         }
 
         //public ApplicationDbContext CreateContext()
@@ -52,9 +52,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     .UseSqlServer(ConnectionString)
                     .Options);
 
-        private List<PublicMessages> GetListPublicMessages()
+        private List<PublicGroupMessages> GetListPublicMessages()
         {
-            List<PublicMessages> messageList = new()
+            List<PublicGroupMessages> messageList = new()
             {
                 new()
                 {
@@ -93,9 +93,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return messageList;
         }
 
-        private List<PublicMessagesView> GetListPublicMessagesViews()
+        private List<PublicGroupMessagesView> GetListPublicMessagesViews()
         {
-            List<PublicMessagesView> messageList = new()
+            List<PublicGroupMessagesView> messageList = new()
         {
             new()
                 {

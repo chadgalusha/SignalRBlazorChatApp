@@ -33,9 +33,11 @@ namespace SignalRBlazorGroupsMessages.API
             // Interface to implementing class
             builder.Services.AddScoped<IPublicMessagesDataAccess, PublicMessagesDataAccess>();
             builder.Services.AddScoped<IPrivateMessagesDataAccess, PrivateMessagesDataAccess>();
-            builder.Services.AddScoped<IChatGroupsDataAccess, ChatGroupsDataAccess>();
+            builder.Services.AddScoped<IPublicChatGroupsDataAccess, PublicChatGroupsDataAccess>();
+            builder.Services.AddScoped<IPrivateChatGroupsDataAccess, PrivateChatGroupsDataAccess>();
             builder.Services.AddScoped<ISerilogger, Serilogger>();
             builder.Services.AddScoped<IPublicMessagesService, PublicMessagesService>();
+            builder.Services.AddScoped<IPublicChatGroupsService, PublicChatGroupsService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

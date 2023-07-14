@@ -17,14 +17,14 @@ namespace SignalRBlazorGroupsMessages.API.Services
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
         }
 
-        public async Task<ApiResponse<List<PublicMessageDto>>> GetListByGroupIdAsync(int groupId, int numberItemsToSkip)
+        public async Task<ApiResponse<List<PublicGroupMessageDto>>> GetListByGroupIdAsync(int groupId, int numberItemsToSkip)
         {
-            ApiResponse<List<PublicMessageDto>> response = new();
+            ApiResponse<List<PublicGroupMessageDto>> response = new();
 
             try
             {
-                List<PublicMessagesView> viewList = await _publicMessageDataAccess.GetViewListByGroupIdAsync(groupId, numberItemsToSkip);
-                List<PublicMessageDto> dtoList = ViewListToDtoList(viewList);
+                List<PublicGroupMessagesView> viewList = await _publicMessageDataAccess.GetViewListByGroupIdAsync(groupId, numberItemsToSkip);
+                List<PublicGroupMessageDto> dtoList = ViewListToDtoList(viewList);
 
                 response = ReturnApiResponse.Success(response, dtoList);
 
@@ -34,21 +34,19 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByGroupIdAsync", ex);
 
-                response = ReturnApiResponse.Failure(response, "Error getting messages.");
                 response.Data = null;
-
-                return response;
+                return ReturnApiResponse.Failure(response, "Error getting messages.");
             }
         }
 
-        public async Task<ApiResponse<List<PublicMessageDto>>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
+        public async Task<ApiResponse<List<PublicGroupMessageDto>>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
         {
-            ApiResponse<List<PublicMessageDto>> response = new();
+            ApiResponse<List<PublicGroupMessageDto>> response = new();
 
             try
             {
-                List<PublicMessagesView> listPublicMessagesView = await _publicMessageDataAccess.GetViewListByUserIdAsync(userId, numberItemsToSkip);
-                List<PublicMessageDto> listDto = ViewListToDtoList(listPublicMessagesView);
+                List<PublicGroupMessagesView> listPublicMessagesView = await _publicMessageDataAccess.GetViewListByUserIdAsync(userId, numberItemsToSkip);
+                List<PublicGroupMessageDto> listDto = ViewListToDtoList(listPublicMessagesView);
 
                 response = ReturnApiResponse.Success(response, listDto);
 
@@ -58,27 +56,25 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByUserIdAsync", ex);
 
-                response = ReturnApiResponse.Failure(response, "Error getting messages.");
                 response.Data = null;
-
-                return response;
+                return ReturnApiResponse.Failure(response, "Error getting messages.");
             }
         }
 
-        public async Task<ApiResponse<PublicMessageDto>> GetByMessageIdAsync(Guid messageId)
+        public async Task<ApiResponse<PublicGroupMessageDto>> GetByMessageIdAsync(Guid messageId)
         {
-            ApiResponse<PublicMessageDto> response = new();
+            ApiResponse<PublicGroupMessageDto> response = new();
 
             try
             {
-                PublicMessagesView messageView = await _publicMessageDataAccess.GetViewByMessageIdAsync(messageId);
+                PublicGroupMessagesView messageView = await _publicMessageDataAccess.GetViewByMessageIdAsync(messageId);
 
                 if (messageView.PublicMessageId == new Guid())
                 {
                     return ReturnApiResponse.Failure(response, "Message Id not found.");
                 }
 
-                PublicMessageDto messageDto = ViewToDto(messageView);
+                PublicGroupMessageDto messageDto = ViewToDto(messageView);
 
                 response = ReturnApiResponse.Success(response, messageDto);
 
@@ -88,16 +84,14 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByIdAsync", ex);
 
-                response = ReturnApiResponse.Failure(response, "Error getting message.");
                 response.Data = null;
-
-                return response;
+                return ReturnApiResponse.Failure(response, "Error getting message.");
             }
         }
 
-        public async Task<ApiResponse<PublicMessageDto>> AddAsync(PublicMessageDto messageDto)
+        public async Task<ApiResponse<PublicGroupMessageDto>> AddAsync(PublicGroupMessageDto messageDto)
         {
-            ApiResponse<PublicMessageDto> response = new();
+            ApiResponse<PublicGroupMessageDto> response = new();
 
             (bool, string) messageChecks = NewMessageChecks(messageDto);
             if (messageChecks.Item1 == false)
@@ -111,9 +105,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                // TODO: need to check that chat group is not public. add with chat group service.
-
-                PublicMessages newMessage = NewPublicMessage(messageDto);
+                PublicGroupMessages newMessage = NewPublicMessage(messageDto);
                 bool isSuccess = await _publicMessageDataAccess.AddAsync(newMessage);
 
                 if (!isSuccess)
@@ -124,7 +116,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
-                PublicMessageDto newDto = PublicMessageToPublicMessageDto(newMessage, messageDto);
+                PublicGroupMessageDto newDto = PublicMessageToPublicMessageDto(newMessage, messageDto);
                 response = ReturnApiResponse.Success(response, newDto);
 
                 return response;
@@ -133,16 +125,14 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 _serilogger.PublicMessageError("PublicMessagesService.AddAsync", ex);
 
-                response = ReturnApiResponse.Failure(response, "Error saving new message.");
                 response.Data = null;
-
-                return response;
+                return ReturnApiResponse.Failure(response, "Error saving new message.");
             }
         }
 
-        public async Task<ApiResponse<PublicMessageDto>> ModifyAsync(PublicMessageDto dtoMessage)
+        public async Task<ApiResponse<PublicGroupMessageDto>> ModifyAsync(PublicGroupMessageDto dtoMessage)
         {
-            ApiResponse<PublicMessageDto> response = new();
+            ApiResponse<PublicGroupMessageDto> response = new();
 
             try
             {
@@ -155,7 +145,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
-                PublicMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
+                PublicGroupMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
                 messageToModify = DtoToPublicMessage(dtoMessage, messageToModify);
 
                 bool isSuccess = await _publicMessageDataAccess.ModifyAsync(messageToModify);
@@ -168,7 +158,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
-                PublicMessageDto returnDto = PublicMessageToPublicMessageDto(messageToModify, dtoMessage);
+                PublicGroupMessageDto returnDto = PublicMessageToPublicMessageDto(messageToModify, dtoMessage);
                 response = ReturnApiResponse.Success(response, returnDto);
 
                 return response;
@@ -177,18 +167,16 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 _serilogger.PublicMessageError("PublicMessagesService.ModifyAsync", ex);
 
-                response = ReturnApiResponse.Failure(response, "Error modifying message.");
                 response.Data = null;
-
-                return response;
+                return ReturnApiResponse.Failure(response, "Error modifying message.");
             }
         }
 
         // Check that message exists. If true, then delete and messages that are a reponse to this message (ReponseMessageId).
         // Finally delete message
-        public async Task<ApiResponse<PublicMessageDto>> DeleteAsync(PublicMessageDto dtoMessage)
+        public async Task<ApiResponse<PublicGroupMessageDto>> DeleteAsync(PublicGroupMessageDto dtoMessage)
         {
-            ApiResponse<PublicMessageDto> response = new();
+            ApiResponse<PublicGroupMessageDto> response = new();
 
             try
             {
@@ -202,7 +190,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 }
 
                 // Find message to delete
-                PublicMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
+                PublicGroupMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
                 messageToDelete = DtoToPublicMessage(dtoMessage, messageToDelete);
 
                 // Delete all messages that are a response to this message
@@ -225,25 +213,25 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return response;
                 }
 
-                PublicMessageDto returnDto = PublicMessageToPublicMessageDto(messageToDelete, dtoMessage);
-                response = ReturnApiResponse.Success(response, returnDto);
-
-                return response;
+                return ReturnApiResponse.Success(response, dtoMessage);
             }
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.DeleteAsync", ex);
 
-                response = ReturnApiResponse.Failure(response, "Error deleting message.");
                 response.Data = null;
-
-                return response;
+                return ReturnApiResponse.Failure(response, "Error deleting message.");
             }
+        }
+
+        public async Task<bool> DeleteAllMessagesInGroupAsync(int chatGroupId)
+        {
+            return await _publicMessageDataAccess.DeleteAllMessagesInGroupAsync(chatGroupId);
         }
 
         #region PRIVATE METHODS
 
-        private PublicMessageDto ViewToDto(PublicMessagesView publicMessagesView)
+        private PublicGroupMessageDto ViewToDto(PublicGroupMessagesView publicMessagesView)
         {
             return new()
             {
@@ -259,13 +247,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        private List<PublicMessageDto> ViewListToDtoList(List<PublicMessagesView> publicMessagesViewList)
+        private List<PublicGroupMessageDto> ViewListToDtoList(List<PublicGroupMessagesView> publicMessagesViewList)
         {
-            List<PublicMessageDto> dtoList = new();
+            List<PublicGroupMessageDto> dtoList = new();
 
             foreach (var viewItem in publicMessagesViewList)
             {
-                PublicMessageDto dto = new()
+                PublicGroupMessageDto dto = new()
                 {
                     PublicMessageId = viewItem.PublicMessageId,
                     UserId          = viewItem.UserId,
@@ -283,7 +271,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return dtoList;
         }
 
-        private (bool, string) NewMessageChecks(PublicMessageDto messageDto)
+        private (bool, string) NewMessageChecks(PublicGroupMessageDto messageDto)
         {
             bool passesChecks = true;
             string errorMessage = "";
@@ -302,7 +290,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return (passesChecks, errorMessage);
         }
 
-        private PublicMessages NewPublicMessage(PublicMessageDto messageDto)
+        private PublicGroupMessages NewPublicMessage(PublicGroupMessageDto messageDto)
         {
             return new()
             {
@@ -317,7 +305,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
         }
 
         // Map PublicMessage fields to return dto object. This object should retain dto specific fields
-        private PublicMessageDto PublicMessageToPublicMessageDto(PublicMessages newMessage, PublicMessageDto dtoMessage)
+        private PublicGroupMessageDto PublicMessageToPublicMessageDto(PublicGroupMessages newMessage, PublicGroupMessageDto dtoMessage)
         {
             return new()
             {
@@ -334,7 +322,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
         }
 
         // Return PublicMessage with existing Id fields. Id fields should not be updated when modifying a message.
-        private PublicMessages DtoToPublicMessage(PublicMessageDto dtoMessage, PublicMessages message)
+        private PublicGroupMessages DtoToPublicMessage(PublicGroupMessageDto dtoMessage, PublicGroupMessages message)
         {
             return new()
             {

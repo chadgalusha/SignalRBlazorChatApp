@@ -61,7 +61,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     .ToList());
 
             PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
-
+                
             var result1 = await _service.GetViewListByUserIdAsync(testUserId, 0);
             var result2 = await _service.GetViewListByUserIdAsync(Guid.Parse("5e34cdf3-7ecc-46df-87ea-4bb1839af3d6"), 0);
 
@@ -79,9 +79,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task GetByMessageIdAsync_ReturnsMessage()
         {
             Guid testMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
-            PublicMessagesView viewMessage = GetListPublicMessagesView()
+            PublicGroupMessagesView viewMessage = GetListPublicMessagesView()
                 .Single(g => g.PublicMessageId == testMessageId);
-            PublicMessageDto expectedDtoMessage = ViewToDto(viewMessage);
+            PublicGroupMessageDto expectedDtoMessage = ViewToDto(viewMessage);
 
             _mockDataAccess.Setup(p => p.GetViewByMessageIdAsync(testMessageId))
                 .ReturnsAsync(GetListPublicMessagesView()
@@ -102,10 +102,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task AddAsync_IsSuccess()
         {
-            PublicMessages newMessage = GetNewPublicMessage();
+            PublicGroupMessages newMessage = GetNewPublicMessage();
             string expectedText = newMessage.Text;
 
-            _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<PublicMessages>()))
+            _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
 
             PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
@@ -122,10 +122,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task ModifyAsync_IsSuccess()
         {
-            PublicMessages messageToModify = GetExistingPublicMessage();
+            PublicGroupMessages messageToModify = GetExistingPublicMessage();
             string expectedText = messageToModify.Text;
 
-            _mockDataAccess.Setup(p => p.ModifyAsync(It.IsAny<PublicMessages>()))
+            _mockDataAccess.Setup(p => p.ModifyAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
             _mockDataAccess.Setup(p => p.Exists(messageToModify.PublicMessageId))
                 .ReturnsAsync(true);
@@ -146,9 +146,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task DeleteAsync_IsSuccess()
         {
-            PublicMessages messageToDelete = GetExistingPublicMessage();
+            PublicGroupMessages messageToDelete = GetExistingPublicMessage();
 
-            _mockDataAccess.Setup(p => p.DeleteAsync(It.IsAny<PublicMessages>()))
+            _mockDataAccess.Setup(p => p.DeleteAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
             _mockDataAccess.Setup(p => p.Exists(messageToDelete.PublicMessageId))
                 .ReturnsAsync(true);
@@ -167,9 +167,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
         #region PRIVATE METHODS
 
-        private List<PublicMessagesView> GetListPublicMessagesView()
+        private List<PublicGroupMessagesView> GetListPublicMessagesView()
         {
-            List<PublicMessagesView> messageList = new()
+            List<PublicGroupMessagesView> messageList = new()
             {
                 new()
                 {
@@ -225,7 +225,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return messageList;
         }
 
-        private PublicMessages GetNewPublicMessage()
+        private PublicGroupMessages GetNewPublicMessage()
         {
             return new()
             {
@@ -236,7 +236,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicMessages GetExistingPublicMessage()
+        private PublicGroupMessages GetExistingPublicMessage()
         {
             return new()
             {
@@ -248,7 +248,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicMessageDto NewPublicMessageToDto(PublicMessages message)
+        private PublicGroupMessageDto NewPublicMessageToDto(PublicGroupMessages message)
         {
             return new()
             {
@@ -261,7 +261,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicMessageDto ModifiedPublicMessageToDto(PublicMessages message)
+        private PublicGroupMessageDto ModifiedPublicMessageToDto(PublicGroupMessages message)
         {
             return new()
             {
@@ -275,7 +275,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicMessageDto ViewToDto(PublicMessagesView publicMessagesView)
+        private PublicGroupMessageDto ViewToDto(PublicGroupMessagesView publicMessagesView)
         {
             return new()
             {

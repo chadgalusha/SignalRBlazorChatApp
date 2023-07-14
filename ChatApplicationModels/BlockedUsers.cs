@@ -13,7 +13,7 @@ namespace ChatApplicationModels
         public string UserId { get; set; } = string.Empty;
 
         [Required]
-        [DisplayName("Blocked User")]
+        [DisplayName("Blocked User Id")]
         public string BlockedUserId { get; set; } = string.Empty;
     }
 }

@@ -20,10 +20,10 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         // GET: api/<PublicMessagesController>/bygroupid
         [HttpGet("bygroupid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicMessageDto>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicGroupMessageDto>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse<List<PublicMessageDto>>>> GetListByGroupIdAsync(
+        public async Task<ActionResult<ApiResponse<List<PublicGroupMessageDto>>>> GetListByGroupIdAsync(
             [FromQuery] int groupId, int numberItemsToSkip)
         {
             if (groupId < 0)
@@ -31,18 +31,18 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (numberItemsToSkip < 0)
                 return BadRequest("Invalid data: "+nameof(numberItemsToSkip));
 
-            ApiResponse<List<PublicMessageDto>> listDto = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
-            _serilogger.GetRequest(GetIpv4Address(), listDto);
+            ApiResponse<List<PublicGroupMessageDto>> dtoList = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
+            _serilogger.GetRequest(GetIpv4Address(), dtoList);
 
-            return Ok(listDto);
+            return Ok(dtoList);
         }
 
         // GET: api/<PublicMessagesController>/byuserid
         [HttpGet("byuserid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicMessageDto>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicGroupMessageDto>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse<List<PublicMessageDto>>>> GetListByUserIdAsync(
+        public async Task<ActionResult<ApiResponse<List<PublicGroupMessageDto>>>> GetListByUserIdAsync(
             [FromQuery] Guid userId, int numberItemsToSkip)
         {
             if (userId == new Guid())
@@ -50,7 +50,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (numberItemsToSkip < 0)
                 return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
 
-            ApiResponse<List<PublicMessageDto>> listDtoResponse = await _service.GetViewListByUserIdAsync(userId, numberItemsToSkip);
+            ApiResponse<List<PublicGroupMessageDto>> listDtoResponse = await _service.GetViewListByUserIdAsync(userId, numberItemsToSkip);
             _serilogger.GetRequest(GetIpv4Address(), listDtoResponse);
 
             return Ok(listDtoResponse);
@@ -58,16 +58,16 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         // GET api/<PublicMessagesController>/bymessageid
         [HttpGet("bymessageid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicMessageDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse<PublicMessageDto>>> GetByMessageIdAsync(
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> GetByMessageIdAsync(
             [FromQuery] Guid messageId)
         {
             if (messageId == new Guid())
                 return BadRequest("Invalid data: " + nameof(messageId));
 
-            ApiResponse<PublicMessageDto> dtoResponse = await _service.GetByMessageIdAsync(messageId);
+            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.GetByMessageIdAsync(messageId);
             _serilogger.GetRequest(GetIpv4Address(), dtoResponse);
 
             return Ok(dtoResponse);
@@ -75,18 +75,18 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         // POST api/<PublicMessagesController>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicMessageDto>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse<PublicMessageDto>>> Post([FromBody] PublicMessageDto dtoToCreate)
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> Post([FromBody] PublicGroupMessageDto dtoToCreate)
         {
             if (!ModelState.IsValid || dtoToCreate == null)
             {
                 return BadRequest(ModelState);
             }
 
-            ApiResponse<PublicMessageDto> dtoResponse = await _service.AddAsync(dtoToCreate);
+            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.AddAsync(dtoToCreate);
             _serilogger.PostRequest(GetIpv4Address(), dtoResponse);
 
             if (dtoResponse.Success == false)
