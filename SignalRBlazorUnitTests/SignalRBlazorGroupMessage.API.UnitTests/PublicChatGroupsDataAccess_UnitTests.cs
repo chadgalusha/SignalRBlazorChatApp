@@ -190,7 +190,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             {
                 ChatGroupName    = "NewPublicChatGroup",
                 GroupCreated     = DateTime.Now,
-                GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
+                GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
             };
         }
 

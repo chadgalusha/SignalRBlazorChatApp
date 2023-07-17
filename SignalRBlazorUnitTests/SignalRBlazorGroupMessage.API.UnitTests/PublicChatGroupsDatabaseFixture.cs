@@ -63,28 +63,28 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     //ChatGroupId      = 1,
                     ChatGroupName    = "TestPublicGroup1",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 },
                 new()
                 {
                     //ChatGroupId      = 2,
                     ChatGroupName    = "TestPublicGroup2",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 },
                 new()
                 {
                     //ChatGroupId      = 3,
                     ChatGroupName    = "TestPrivateGroup1",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 },
                 new()
                 {
                     //ChatGroupId      = 4,
                     ChatGroupName    = "TestPrivateGroup2",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071")
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 }
             };
             return chatGroupList;

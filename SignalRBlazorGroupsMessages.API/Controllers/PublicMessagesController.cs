@@ -33,7 +33,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return BadRequest("Invalid data: "+nameof(numberItemsToSkip));
 
             ApiResponse<List<PublicGroupMessageDto>> dtoList = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
-            _serilogger.GetRequest(GetIpv4Address(), dtoList);
+            _serilogger.GetRequest("0.0.0.0", dtoList);
 
             return Ok(dtoList);
         }
@@ -52,7 +52,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
 
             ApiResponse<List<PublicGroupMessageDto>> listDtoResponse = await _service.GetViewListByUserIdAsync(userId, numberItemsToSkip);
-            _serilogger.GetRequest(GetIpv4Address(), listDtoResponse);
+            _serilogger.GetRequest("0.0.0.0", listDtoResponse);
 
             return Ok(listDtoResponse);
         }
@@ -69,7 +69,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return BadRequest("Invalid data: " + nameof(messageId));
 
             ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.GetByMessageIdAsync(messageId);
-            _serilogger.GetRequest(GetIpv4Address(), dtoResponse);
+            _serilogger.GetRequest("0.0.0.0", dtoResponse);
 
             return Ok(dtoResponse);
         }
@@ -88,7 +88,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             }
 
             ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.AddAsync(dtoToCreate);
-            _serilogger.PostRequest(GetIpv4Address(), dtoResponse);
+            _serilogger.PostRequest("0.0.0.0", dtoResponse);
 
             if (dtoResponse.Success == false)
             {

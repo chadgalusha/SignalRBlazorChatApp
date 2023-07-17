@@ -23,7 +23,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         public async Task<ActionResult<ApiResponse<List<PublicChatGroupsDto>>>> GetPublicChatGroupsAsync()
         {
             ApiResponse<List<PublicChatGroupsDto>> dtoList = await _service.GetListPublicChatGroupsAsync();
-            //_serilogger.GetRequest(GetIpv4Address(), dtoList);
+            _serilogger.GetRequest("0.0.0.0", dtoList);
 
             return dtoList;
         }
@@ -39,7 +39,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return BadRequest("Invalid data: " + nameof(groupId));
 
             ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetViewByIdAsync(groupId);
-            //_serilogger.GetRequest(GetIpv4Address(), dtoResponse);
+            _serilogger.GetRequest("0.0.0.0", dtoResponse);
 
             return Ok(dtoResponse);
         }
@@ -57,7 +57,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             }
 
             ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.AddAsync(dtoToCreate);
-            //_serilogger.PostRequest(GetIpv4Address(), dtoResponse);
+            _serilogger.PostRequest("0.0.0.0", dtoResponse);
 
             return Ok(dtoResponse);
         }
@@ -75,7 +75,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             }
 
             ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.ModifyAsync(dtoToModify);
-            //_serilogger.PutRequest(GetIpv4Address(), dtoResponse);
+            _serilogger.PutRequest("0.0.0.0", dtoResponse);
 
             return Ok(dtoResponse);
         }
@@ -88,7 +88,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> DeleteAsync([FromQuery] int groupId)
         {
             ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.DeleteAsync(groupId);
-            //_serilogger.DeleteRequest(GetIpv4Address(), dtoResponse);
+            _serilogger.DeleteRequest("0.0.0.0", dtoResponse);
 
             return dtoResponse;
         }

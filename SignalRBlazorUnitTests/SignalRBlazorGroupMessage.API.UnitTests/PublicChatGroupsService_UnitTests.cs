@@ -200,7 +200,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 ChatGroupId      = newGroup.ChatGroupId,
                 ChatGroupName    = newGroup.ChatGroupName,
                 GroupCreated     = newGroup.GroupCreated,
-                GroupOwnerUserId = newGroup.GroupOwnerUserId,
+                GroupOwnerUserId = Guid.Parse(newGroup.GroupOwnerUserId),
                 UserName         = "Test Owner 2"
             };
         }
@@ -233,7 +233,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 ChatGroupId      = view.ChatGroupId,
                 ChatGroupName    = view.ChatGroupName,
                 GroupCreated     = view.GroupCreated,
-                GroupOwnerUserId = view.GroupOwnerUserId
+                GroupOwnerUserId = view.GroupOwnerUserId.ToString()
             };
         }
 

@@ -6,11 +6,11 @@ namespace ChatApplicationModels
     public class PublicGroupMessages
     {
         [Key]
-        public Guid PublicMessageId { get; set; }   
+        public Guid PublicMessageId { get; set; }
 
         [Required]
         [DisplayName("User")]
-        public Guid UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         [Required]
         [DisplayName("Chat Group")]

@@ -295,10 +295,10 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = Guid.NewGuid(),
-                UserId          = messageDto.UserId,
+                UserId          = messageDto.UserId.ToString(),
                 ChatGroupId     = messageDto.ChatGroupId,
                 Text            = messageDto.Text,
-                MessageDateTime = messageDto.MessageDateTime,
+                MessageDateTime = DateTime.Now,
                 ReplyMessageId  = messageDto.ReplyMessageId,
                 PictureLink     = messageDto.PictureLink
             };
@@ -310,7 +310,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = newMessage.PublicMessageId,
-                UserId          = newMessage.UserId,
+                UserId          = Guid.Parse(newMessage.UserId),
                 UserName        = dtoMessage.UserName,
                 ChatGroupId     = newMessage.ChatGroupId,
                 ChatGroupName   = dtoMessage.ChatGroupName,
