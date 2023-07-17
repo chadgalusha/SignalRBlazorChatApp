@@ -1,5 +1,5 @@
 ﻿using ChatApplicationModels;
-using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Views;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {

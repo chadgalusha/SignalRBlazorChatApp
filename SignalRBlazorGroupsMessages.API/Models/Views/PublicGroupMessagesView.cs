@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SignalRBlazorGroupsMessages.API.Models
+namespace SignalRBlazorGroupsMessages.API.Models.Views
 {
     public class PublicGroupMessagesView
     {

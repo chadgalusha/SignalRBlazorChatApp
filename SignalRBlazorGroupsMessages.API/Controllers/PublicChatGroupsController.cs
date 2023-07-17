@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
@@ -22,13 +23,13 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         public async Task<ActionResult<ApiResponse<List<PublicChatGroupsDto>>>> GetPublicChatGroupsAsync()
         {
             ApiResponse<List<PublicChatGroupsDto>> dtoList = await _service.GetListPublicChatGroupsAsync();
-            _serilogger.GetRequest(GetIpv4Address(), dtoList);
+            //_serilogger.GetRequest(GetIpv4Address(), dtoList);
 
             return dtoList;
         }
 
         [HttpGet("byid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicChatGroupsDto>>))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> GetByIdAsync(
@@ -37,10 +38,59 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (groupId < 0)
                 return BadRequest("Invalid data: " + nameof(groupId));
 
-            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetByIdAsync(groupId);
-            _serilogger.GetRequest(GetIpv4Address(), dtoResponse);
+            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetViewByIdAsync(groupId);
+            //_serilogger.GetRequest(GetIpv4Address(), dtoResponse);
 
             return Ok(dtoResponse);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> AddAsync([FromBody] CreatePublicChatGroupDto dtoToCreate)
+        {
+            if (dtoToCreate == null || !ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.AddAsync(dtoToCreate);
+            //_serilogger.PostRequest(GetIpv4Address(), dtoResponse);
+
+            return Ok(dtoResponse);
+        }
+
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> ModifyAsync([FromBody] ModifyPublicChatGroupDto dtoToModify)
+        {
+            if (dtoToModify == null || !ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.ModifyAsync(dtoToModify);
+            //_serilogger.PutRequest(GetIpv4Address(), dtoResponse);
+
+            return Ok(dtoResponse);
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> DeleteAsync([FromQuery] int groupId)
+        {
+            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.DeleteAsync(groupId);
+            //_serilogger.DeleteRequest(GetIpv4Address(), dtoResponse);
+
+            return dtoResponse;
         }
 
         #region PRIVATE METHODS

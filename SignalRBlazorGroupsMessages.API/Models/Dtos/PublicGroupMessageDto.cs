@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
 
-namespace SignalRBlazorGroupsMessages.API.Models
+namespace SignalRBlazorGroupsMessages.API.Models.Dtos
 {
     public class PublicGroupMessageDto
     {

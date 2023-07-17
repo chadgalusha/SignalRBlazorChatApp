@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SignalRBlazorGroupsMessages.API.Models
+namespace SignalRBlazorGroupsMessages.API.Models.Dtos
 {
-    public class PrivateChatGroupsDto
+    public class PublicChatGroupsDto
     {
         [Key]
         public int ChatGroupId { get; set; }

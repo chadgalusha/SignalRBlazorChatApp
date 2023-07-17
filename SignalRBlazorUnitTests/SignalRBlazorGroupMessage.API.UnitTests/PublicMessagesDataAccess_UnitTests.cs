@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
-using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Views;
 using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesDatabaseFixture;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests

@@ -1,4 +1,5 @@
 ﻿using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {

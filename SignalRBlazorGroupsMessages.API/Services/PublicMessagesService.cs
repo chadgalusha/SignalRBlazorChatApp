@@ -3,6 +3,8 @@ using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
+using SignalRBlazorGroupsMessages.API.Models.Views;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
@@ -26,9 +28,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 List<PublicGroupMessagesView> viewList = await _publicMessageDataAccess.GetViewListByGroupIdAsync(groupId, numberItemsToSkip);
                 List<PublicGroupMessageDto> dtoList = ViewListToDtoList(viewList);
 
-                response = ReturnApiResponse.Success(response, dtoList);
-
-                return response;
+                return ReturnApiResponse.Success(response, dtoList);
             }
             catch (Exception ex)
             {

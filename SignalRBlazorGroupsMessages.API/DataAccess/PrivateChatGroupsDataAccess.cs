@@ -1,7 +1,7 @@
 ﻿using ChatApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
-using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Views;
 using System.Data.SqlClient;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess

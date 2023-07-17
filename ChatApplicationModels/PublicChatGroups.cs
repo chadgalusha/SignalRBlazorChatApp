@@ -16,6 +16,6 @@ namespace ChatApplicationModels
         public DateTime GroupCreated { get; set; }
 
         [DisplayName("Group Owner")]
-        public Guid GroupOwnerUserId { get; set; }
+        public string GroupOwnerUserId { get; set; } = string.Empty;
     }
 }

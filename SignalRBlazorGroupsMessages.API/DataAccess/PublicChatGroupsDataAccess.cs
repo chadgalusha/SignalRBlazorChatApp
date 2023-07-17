@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
-using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Views;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
@@ -35,7 +35,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return viewList;
         }
 
-        public async Task<PublicChatGroupsView> GetByIdAsync(int groupId)
+        public async Task<PublicChatGroupsView> GetViewByIdAsync(int groupId)
         {
             PublicChatGroupsView view = new();
 

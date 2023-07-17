@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
-using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Views;
 using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroupsDatabaseFixture;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
@@ -54,12 +54,12 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             int expectedGroupId = view.ChatGroupId;
 
             Mock<IPublicChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
-            _mockChatGroupsDataAccess.Setup(c => c.GetByIdAsync(1))
+            _mockChatGroupsDataAccess.Setup(c => c.GetViewByIdAsync(1))
                 .ReturnsAsync(view);
                 
 
             PublicChatGroupsView resultChatGroup = await _mockChatGroupsDataAccess.Object
-                .GetByIdAsync(1);
+                .GetViewByIdAsync(1);
 
             Assert.Multiple(() =>
             {

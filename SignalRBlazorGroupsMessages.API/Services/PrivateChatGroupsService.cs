@@ -2,6 +2,8 @@
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
+using SignalRBlazorGroupsMessages.API.Models.Views;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
@@ -82,9 +84,9 @@ namespace SignalRBlazorGroupsMessages.API.Services
         {
             return new()
             {
-                ChatGroupName = dto.ChatGroupName,
-                GroupCreated = dto.GroupCreated,
-                GroupOwnerUserId = dto.GroupOwnerUserId
+                ChatGroupName    = dto.ChatGroupName,
+                GroupCreated     = dto.GroupCreated,
+                GroupOwnerUserId = dto.GroupOwnerUserId.ToString()
             };
         }
 
@@ -92,11 +94,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
         {
             return new()
             {
-                ChatGroupId = newGroup.ChatGroupId,
-                ChatGroupName = newGroup.ChatGroupName,
-                GroupCreated = newGroup.GroupCreated,
-                GroupOwnerUserId = newGroup.GroupOwnerUserId,
-                UserName = userName
+                ChatGroupId      = newGroup.ChatGroupId,
+                ChatGroupName    = newGroup.ChatGroupName,
+                GroupCreated     = newGroup.GroupCreated,
+                GroupOwnerUserId = Guid.Parse(newGroup.GroupOwnerUserId),
+                UserName         = userName
             };
         }
 
@@ -104,10 +106,10 @@ namespace SignalRBlazorGroupsMessages.API.Services
         {
             return new()
             {
-                ChatGroupId = dto.ChatGroupId,
-                ChatGroupName = dto.ChatGroupName,
-                GroupCreated = dto.GroupCreated,
-                GroupOwnerUserId = dto.GroupOwnerUserId
+                ChatGroupId      = dto.ChatGroupId,
+                ChatGroupName    = dto.ChatGroupName,
+                GroupCreated     = dto.GroupCreated,
+                GroupOwnerUserId = dto.GroupOwnerUserId.ToString()
             };
         }
 
