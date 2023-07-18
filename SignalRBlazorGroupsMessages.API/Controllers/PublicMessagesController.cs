@@ -71,7 +71,15 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.GetByMessageIdAsync(messageId);
             _serilogger.GetRequest("0.0.0.0", dtoResponse);
 
-            return Ok(dtoResponse);
+            switch (dtoResponse.Message)
+            {
+                case ("Message Id not found."):
+                    return NotFound(dtoResponse);
+                case ("Error getting message."):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                default:
+                    return Ok(dtoResponse);
+            }
         }
 
         // POST api/<PublicMessagesController>
@@ -90,24 +98,60 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.AddAsync(dtoToCreate);
             _serilogger.PostRequest("0.0.0.0", dtoResponse);
 
-            if (dtoResponse.Success == false)
+            switch (dtoResponse.Message)
             {
-                return BadRequest(dtoResponse);
+                case ("Error saving new message."):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                default:
+                    return Ok(dtoResponse);
             }
-
-            return Ok(dtoResponse);
         }
 
-        // PUT api/<PublicMessagesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // PUT api/<PublicMessagesController>/
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> ModifyAsync([FromBody] ModifyPublicGroupMessageDto dtoToModify)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.ModifyAsync(dtoToModify);
+            _serilogger.PutRequest("0.0.0.0", dtoResponse);
+
+            switch (dtoResponse.Message)
+            {
+                case ("Message Id not found."):
+                    return NotFound(dtoResponse);
+                case ("Error modifying message."):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                default:
+                    return NoContent();
+            }
         }
 
         // DELETE api/<PublicMessagesController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete]
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
         {
+            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.DeleteAsync(messageId);
+            _serilogger.DeleteRequest("0.0.0.0", dtoResponse);
+
+            switch (dtoResponse.Message)
+            {
+                case ("Message Id not found."):
+                    return NotFound(dtoResponse);
+                case ("Response messages not deleted."):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                case ("Error deleting message."):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                default:
+                    return NoContent();
+            }
         }
 
         #region PRIVATE METHODS

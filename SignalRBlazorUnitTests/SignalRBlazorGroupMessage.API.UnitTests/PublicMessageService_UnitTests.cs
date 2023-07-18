@@ -230,7 +230,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             return new()
             {
-                UserId          = Guid.Parse("4eb0c266-894a-4c09-a6e2-4a0fb72e9c1c"),
+                UserId          = "4eb0c266-894a-4c09-a6e2-4a0fb72e9c1c",
                 ChatGroupId     = 1,
                 Text            = "New Message.",
                 MessageDateTime = DateTime.Now
@@ -242,7 +242,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return new()
             {
                 PublicMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3"),
-                UserId          = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
+                UserId          = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
                 ChatGroupId     = 1,
                 Text            = "Updated message",
                 MessageDateTime = new DateTime(2023, 6, 15)
@@ -253,12 +253,12 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             return new()
             {
-                UserId = message.UserId,
-                ChatGroupId = message.ChatGroupId,
-                Text = message.Text,
-                MessageDateTime = message.MessageDateTime,
-                ReplyMessageId = message.ReplyMessageId,
-                PictureLink = message.PictureLink
+                UserId           = Guid.Parse(message.UserId),
+                ChatGroupId      = message.ChatGroupId,
+                Text             = message.Text,
+                MessageDateTime  = message.MessageDateTime,
+                ReplyMessageId   = message.ReplyMessageId,
+                PictureLink      = message.PictureLink
             };
         }
 
@@ -267,7 +267,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return new()
             {
                 PublicMessageId = message.PublicMessageId,
-                UserId          = message.UserId,
+                UserId          = Guid.Parse(message.UserId),
                 ChatGroupId     = message.ChatGroupId,
                 Text            = message.Text,
                 MessageDateTime = message.MessageDateTime,
@@ -281,14 +281,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return new()
             {
                 PublicMessageId = publicMessagesView.PublicMessageId,
-                UserId = publicMessagesView.UserId,
-                UserName = publicMessagesView.UserName,
-                ChatGroupId = publicMessagesView.ChatGroupId,
-                ChatGroupName = publicMessagesView.ChatGroupName,
-                Text = publicMessagesView.Text,
+                UserId          = publicMessagesView.UserId,
+                UserName        = publicMessagesView.UserName,
+                ChatGroupId     = publicMessagesView.ChatGroupId,
+                ChatGroupName   = publicMessagesView.ChatGroupName,
+                Text            = publicMessagesView.Text,
                 MessageDateTime = publicMessagesView.MessageDateTime,
-                ReplyMessageId = publicMessagesView.ReplyMessageId,
-                PictureLink = publicMessagesView.PictureLink
+                ReplyMessageId  = publicMessagesView.ReplyMessageId,
+                PictureLink     = publicMessagesView.PictureLink
             };
         }
 

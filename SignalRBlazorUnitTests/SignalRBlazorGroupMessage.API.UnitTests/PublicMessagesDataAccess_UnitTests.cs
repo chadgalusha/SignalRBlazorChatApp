@@ -211,9 +211,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return new()
             {
                 PublicMessageId = Guid.NewGuid(),
-                UserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
-                ChatGroupId = 3,
-                Text = "Sample message for ChatGroupId 3",
+                UserId          = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                ChatGroupId     = 3,
+                Text            = "Sample message for ChatGroupId 3",
                 MessageDateTime = new DateTime(2023, 6, 25)
             };
         }

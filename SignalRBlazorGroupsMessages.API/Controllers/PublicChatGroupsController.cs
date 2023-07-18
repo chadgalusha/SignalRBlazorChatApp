@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
@@ -25,7 +26,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             ApiResponse<List<PublicChatGroupsDto>> dtoList = await _service.GetListPublicChatGroupsAsync();
             _serilogger.GetRequest("0.0.0.0", dtoList);
 
-            return dtoList;
+            return Ok(dtoList);
         }
 
         [HttpGet("byid")]
@@ -47,11 +48,10 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> AddAsync([FromBody] CreatePublicChatGroupDto dtoToCreate)
         {
-            if (dtoToCreate == null || !ModelState.IsValid)
+            if (!ModelState.IsValid || !CreateDtoChecks(dtoToCreate))
             {
                 return BadRequest(ModelState);
             }
@@ -69,7 +69,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> ModifyAsync([FromBody] ModifyPublicChatGroupDto dtoToModify)
         {
-            if (dtoToModify == null || !ModelState.IsValid)
+            if (!ModelState.IsValid || dtoToModify == null)
             {
                 return BadRequest(ModelState);
             }
@@ -90,7 +90,15 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.DeleteAsync(groupId);
             _serilogger.DeleteRequest("0.0.0.0", dtoResponse);
 
-            return dtoResponse;
+            switch (dtoResponse.Message)
+            {
+                case ("Chat Group Id not found"):
+                    return NotFound(dtoResponse);
+                case ("Error deleting messages from this group"):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                default:
+                    return NoContent();
+            }
         }
 
         #region PRIVATE METHODS
@@ -98,6 +106,19 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         private string GetIpv4Address()
         {
             return HttpContext.Connection.RemoteIpAddress!.MapToIPv4().ToString();
+        }
+
+        private bool CreateDtoChecks(CreatePublicChatGroupDto createDto)
+        {
+            bool result = true;
+
+            if (createDto == null)
+                result = false;
+            if (createDto.ChatGroupName.IsNullOrEmpty())
+                result = false;
+            if (createDto.GroupOwnerUserId == new Guid())
+                result = false;
+            return result;
         }
 
         #endregion

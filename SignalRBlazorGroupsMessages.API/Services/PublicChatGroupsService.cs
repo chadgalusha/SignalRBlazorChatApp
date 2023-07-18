@@ -164,7 +164,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 if (!deleteChatGroupResponse)
                 {
                     response.Data = null;
-                    return ReturnApiResponse.Failure(response, "Error delete the chat group.");
+                    return ReturnApiResponse.Failure(response, "Error deleting the chat group.");
                 }
 
                 return ReturnApiResponse.Success(response, dtoToReturn);

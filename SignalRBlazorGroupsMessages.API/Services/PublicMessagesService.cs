@@ -48,9 +48,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 List<PublicGroupMessagesView> listPublicMessagesView = await _publicMessageDataAccess.GetViewListByUserIdAsync(userId, numberItemsToSkip);
                 List<PublicGroupMessageDto> listDto = ViewListToDtoList(listPublicMessagesView);
 
-                response = ReturnApiResponse.Success(response, listDto);
-
-                return response;
+                return ReturnApiResponse.Success(response, listDto);
             }
             catch (Exception ex)
             {
@@ -110,16 +108,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (!isSuccess)
                 {
-                    response = ReturnApiResponse.Failure(response, "Error saving new message.");
                     response.Data = null;
-
-                    return response;
+                    return ReturnApiResponse.Failure(response, "Error saving new message.");
                 }
 
-                PublicGroupMessageDto newDto = PublicMessageToPublicMessageDto(newMessage, messageDto);
-                response = ReturnApiResponse.Success(response, newDto);
+                PublicGroupMessageDto newDto = NewModelToDto(newMessage, messageDto);
 
-                return response;
+                return ReturnApiResponse.Success(response, newDto);
             }
             catch (Exception ex)
             {
@@ -130,38 +125,33 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
-        public async Task<ApiResponse<PublicGroupMessageDto>> ModifyAsync(PublicGroupMessageDto dtoMessage)
+        public async Task<ApiResponse<PublicGroupMessageDto>> ModifyAsync(ModifyPublicGroupMessageDto dtoToModify)
         {
             ApiResponse<PublicGroupMessageDto> response = new();
 
             try
             {
                 // Check that message exists before proceeding to modify
-                if (await _publicMessageDataAccess.Exists(dtoMessage.PublicMessageId) == false)
+                if (await _publicMessageDataAccess.Exists(dtoToModify.PublicMessageId) == false)
                 {
-                    response = ReturnApiResponse.Failure(response, "Message Id not found.");
                     response.Data = null;
-
-                    return response;
+                    return ReturnApiResponse.Failure(response, "Message Id not found.");
                 }
 
-                PublicGroupMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
-                messageToModify = DtoToPublicMessage(dtoMessage, messageToModify);
+                PublicGroupMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoToModify.PublicMessageId);
+                messageToModify = ModifyDtoToModel(dtoToModify, messageToModify);
 
                 bool isSuccess = await _publicMessageDataAccess.ModifyAsync(messageToModify);
 
                 if (!isSuccess)
                 {
-                    response = ReturnApiResponse.Failure(response, "Message modification not saved.");
                     response.Data = null;
-
-                    return response;
+                    return ReturnApiResponse.Failure(response, "Error modifying message.");
                 }
 
-                PublicGroupMessageDto returnDto = PublicMessageToPublicMessageDto(messageToModify, dtoMessage);
-                response = ReturnApiResponse.Success(response, returnDto);
+                PublicGroupMessageDto returnDto = ModifiedModelToDto(messageToModify);
 
-                return response;
+                return ReturnApiResponse.Success(response, returnDto);
             }
             catch (Exception ex)
             {
@@ -174,46 +164,39 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
         // Check that message exists. If true, then delete and messages that are a reponse to this message (ReponseMessageId).
         // Finally delete message
-        public async Task<ApiResponse<PublicGroupMessageDto>> DeleteAsync(PublicGroupMessageDto dtoMessage)
+        public async Task<ApiResponse<PublicGroupMessageDto>> DeleteAsync(Guid messageId)
         {
             ApiResponse<PublicGroupMessageDto> response = new();
 
             try
             {
                 // Check message exists
-                if (!await _publicMessageDataAccess.Exists(dtoMessage.PublicMessageId))
+                if (!await _publicMessageDataAccess.Exists(messageId))
                 {
-                    response = ReturnApiResponse.Failure(response, "Message Id not found.");
                     response.Data = null;
-
-                    return response;
+                    return ReturnApiResponse.Failure(response, "Message Id not found.");
                 }
 
                 // Find message to delete
-                PublicGroupMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(dtoMessage.PublicMessageId);
-                messageToDelete = DtoToPublicMessage(dtoMessage, messageToDelete);
+                PublicGroupMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(messageId);
 
                 // Delete all messages that are a response to this message
-                bool resultMessageDelete = await _publicMessageDataAccess.DeleteMessagesByResponseMessageIdAsync(messageToDelete.PublicMessageId);
-                if (!resultMessageDelete)
+                bool responseMessagesDeleted = await _publicMessageDataAccess.DeleteMessagesByResponseMessageIdAsync(messageId);
+                if (!responseMessagesDeleted)
                 {
-                    response = ReturnApiResponse.Failure(response, "Response messages not deleted.");
                     response.Data = null;
-
-                    return response;
+                    return ReturnApiResponse.Failure(response, "Response messages not deleted.");
                 }
 
                 // Delete the message
                 bool isSuccess = await _publicMessageDataAccess.DeleteAsync(messageToDelete);
                 if (!isSuccess)
                 {
-                    response = ReturnApiResponse.Failure(response, "Message not deleted.");
                     response.Data = null;
-
-                    return response;
+                    return ReturnApiResponse.Failure(response, "Error deleting message.");
                 }
 
-                return ReturnApiResponse.Success(response, dtoMessage);
+                return ReturnApiResponse.Success(response, ModelToDto(messageToDelete));
             }
             catch (Exception ex)
             {
@@ -290,6 +273,20 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return (passesChecks, errorMessage);
         }
 
+        private PublicGroupMessageDto ModelToDto(PublicGroupMessages message)
+        {
+            return new()
+            {
+                PublicMessageId = message.PublicMessageId,
+                UserId          = Guid.Parse(message.UserId),
+                ChatGroupId     = message.ChatGroupId,
+                Text            = message.Text,
+                MessageDateTime = message.MessageDateTime,
+                ReplyMessageId  = message.ReplyMessageId,
+                PictureLink     = message.PictureLink
+            };
+        }
+
         private PublicGroupMessages NewPublicMessage(PublicGroupMessageDto messageDto)
         {
             return new()
@@ -305,7 +302,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
         }
 
         // Map PublicMessage fields to return dto object. This object should retain dto specific fields
-        private PublicGroupMessageDto PublicMessageToPublicMessageDto(PublicGroupMessages newMessage, PublicGroupMessageDto dtoMessage)
+        private PublicGroupMessageDto NewModelToDto(PublicGroupMessages newMessage, PublicGroupMessageDto dtoMessage)
         {
             return new()
             {
@@ -322,7 +319,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
         }
 
         // Return PublicMessage with existing Id fields. Id fields should not be updated when modifying a message.
-        private PublicGroupMessages DtoToPublicMessage(PublicGroupMessageDto dtoMessage, PublicGroupMessages message)
+        private PublicGroupMessages ModifyDtoToModel(ModifyPublicGroupMessageDto dtoMessage, PublicGroupMessages message)
         {
             return new()
             {
@@ -330,9 +327,24 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 UserId          = message.UserId,
                 ChatGroupId     = message.ChatGroupId,
                 Text            = dtoMessage.Text,
-                MessageDateTime = dtoMessage.MessageDateTime,
+                MessageDateTime = message.MessageDateTime,
                 ReplyMessageId  = dtoMessage.ReplyMessageId,
                 PictureLink     = dtoMessage.PictureLink
+            };
+        }
+
+        // after modified public message is saved, convert back to a dto
+        private PublicGroupMessageDto ModifiedModelToDto(PublicGroupMessages modifiedMessage)
+        {
+            return new()
+            {
+                PublicMessageId = modifiedMessage.PublicMessageId,
+                UserId          = modifiedMessage.PublicMessageId,
+                ChatGroupId     = modifiedMessage.ChatGroupId,
+                MessageDateTime = modifiedMessage.MessageDateTime,
+                Text            = modifiedMessage.Text,
+                ReplyMessageId  = modifiedMessage.ReplyMessageId, 
+                PictureLink     = modifiedMessage.PictureLink
             };
         }
 
