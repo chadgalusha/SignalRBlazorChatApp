@@ -49,7 +49,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             PublicChatGroupsDto dto = GetDtoList().First();
             int id = dto.ChatGroupId;
 
-            _mockService.Setup(p => p.GetViewByIdAsync(id))
+            _mockService.Setup(p => p.GetDtoByIdAsync(id))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dto));
 
             PublicChatGroupsController _controller = GetTestController();

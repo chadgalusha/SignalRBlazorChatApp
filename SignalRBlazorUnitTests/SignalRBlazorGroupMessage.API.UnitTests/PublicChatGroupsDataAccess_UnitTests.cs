@@ -32,11 +32,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 .ToList();
 
             Mock<IPublicChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
-            _mockChatGroupsDataAccess.Setup(c => c.GetViewListAsync())
+            _mockChatGroupsDataAccess.Setup(c => c.GetDtoListAsync())
                 .ReturnsAsync(viewList);
 
             List<PublicChatGroupsView> result = await _mockChatGroupsDataAccess.Object
-                .GetViewListAsync();
+                .GetDtoListAsync();
 
             Assert.Multiple(() =>
             {
@@ -54,12 +54,12 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             int expectedGroupId = view.ChatGroupId;
 
             Mock<IPublicChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
-            _mockChatGroupsDataAccess.Setup(c => c.GetViewByIdAsync(1))
+            _mockChatGroupsDataAccess.Setup(c => c.GetDtoByIdAsync(1))
                 .ReturnsAsync(view);
                 
 
             PublicChatGroupsView resultChatGroup = await _mockChatGroupsDataAccess.Object
-                .GetViewByIdAsync(1);
+                .GetDtoByIdAsync(1);
 
             Assert.Multiple(() =>
             {

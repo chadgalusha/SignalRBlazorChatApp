@@ -26,7 +26,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             int excpectedCount = GetViewListPublicChatGroups().Count;
 
-            _mockDataAccess.Setup(p => p.GetViewListAsync())
+            _mockDataAccess.Setup(p => p.GetDtoListAsync())
                 .ReturnsAsync(GetViewListPublicChatGroups());
 
             PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
@@ -46,7 +46,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             PublicChatGroupsView view = GetViewListPublicChatGroups().First();
 
-            _mockDataAccess.Setup(p => p.GetViewByIdAsync(1))
+            _mockDataAccess.Setup(p => p.GetDtoByIdAsync(1))
                 .ReturnsAsync(GetViewListPublicChatGroups()
                     .Single(p => p.ChatGroupId == 1));
             _mockDataAccess.Setup(p => p.GroupExists(1))
@@ -54,8 +54,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
             PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
 
-            var goodResult = await _service.GetViewByIdAsync(1);
-            var badResult = await _service.GetViewByIdAsync(999);
+            var goodResult = await _service.GetDtoByIdAsync(1);
+            var badResult = await _service.GetDtoByIdAsync(999);
 
             Assert.Multiple(() =>
             {

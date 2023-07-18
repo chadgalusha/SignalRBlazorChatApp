@@ -39,7 +39,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (groupId < 0)
                 return BadRequest("Invalid data: " + nameof(groupId));
 
-            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetViewByIdAsync(groupId);
+            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetDtoByIdAsync(groupId);
             _serilogger.GetRequest("0.0.0.0", dtoResponse);
 
             return Ok(dtoResponse);

@@ -2,7 +2,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
-using SignalRBlazorGroupsMessages.API.Models.Views;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
@@ -17,9 +17,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             _configuration = configuration ?? throw new Exception(nameof(configuration));
         }
 
-        public async Task<List<PublicChatGroupsView>> GetViewListAsync()
+        public async Task<List<PublicChatGroupsDto>> GetDtoListAsync()
         {
-            List<PublicChatGroupsView> viewList = new();
+            List<PublicChatGroupsDto> dtoList = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPublicChatGroups", connection)
@@ -29,15 +29,15 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
             await connection.OpenAsync();
             SqlDataReader reader = await command.ExecuteReaderAsync();
-            viewList = ReturnViewListFromReader(viewList, reader);
+            dtoList = ReturnViewListFromReader(dtoList, reader);
             await connection.CloseAsync();
 
-            return viewList;
+            return dtoList;
         }
 
-        public async Task<PublicChatGroupsView> GetViewByIdAsync(int groupId)
+        public async Task<PublicChatGroupsDto> GetDtoByIdAsync(int groupId)
         {
-            PublicChatGroupsView view = new();
+            PublicChatGroupsDto view = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getChatGroup_byGroupId", connection)
@@ -108,11 +108,11 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return _configuration.GetConnectionString("ChatApplicationDb")!;
         }
 
-        private List<PublicChatGroupsView> ReturnViewListFromReader(List<PublicChatGroupsView> viewList, SqlDataReader reader)
+        private List<PublicChatGroupsDto> ReturnViewListFromReader(List<PublicChatGroupsDto> dtoList, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                PublicChatGroupsView view = new()
+                PublicChatGroupsDto dto = new()
                 {
                     ChatGroupId      = (int)reader[0],
                     ChatGroupName    = (string)reader[1],
@@ -120,22 +120,22 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                     GroupOwnerUserId = Guid.Parse((string)reader[3]),
                     UserName         = (string)reader[4]
                 };
-                viewList.Add(view);
+                dtoList.Add(dto);
             }
-            return viewList;
+            return dtoList;
         }
 
-        private PublicChatGroupsView ReturnViewFromReader(PublicChatGroupsView view, SqlDataReader reader)
+        private PublicChatGroupsDto ReturnViewFromReader(PublicChatGroupsDto dto, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                view.ChatGroupId      = (int)reader[0];
-                view.ChatGroupName    = (string)reader[1];
-                view.GroupCreated     = (DateTime)reader[2];
-                view.GroupOwnerUserId = Guid.Parse((string)reader[3]);
-                view.UserName         = (string)reader[4];
+                dto.ChatGroupId      = (int)reader[0];
+                dto.ChatGroupName    = (string)reader[1];
+                dto.GroupCreated     = (DateTime)reader[2];
+                dto.GroupOwnerUserId = Guid.Parse((string)reader[3]);
+                dto.UserName         = (string)reader[4];
             }
-            return view;
+            return dto;
         }
 
         #endregion

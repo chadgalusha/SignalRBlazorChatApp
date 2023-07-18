@@ -4,7 +4,6 @@ using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using SignalRBlazorGroupsMessages.API.Models.Views;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
@@ -25,8 +24,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                List<PublicGroupMessagesView> viewList = await _publicMessageDataAccess.GetViewListByGroupIdAsync(groupId, numberItemsToSkip);
-                List<PublicGroupMessageDto> dtoList = ViewListToDtoList(viewList);
+                List<PublicGroupMessageDto> dtoList = await _publicMessageDataAccess.GetDtoListByGroupIdAsync(groupId, numberItemsToSkip);
 
                 return ReturnApiResponse.Success(response, dtoList);
             }
@@ -39,14 +37,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
-        public async Task<ApiResponse<List<PublicGroupMessageDto>>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
+        public async Task<ApiResponse<List<PublicGroupMessageDto>>> GetListByUserIdAsync(string userId, int numberItemsToSkip)
         {
             ApiResponse<List<PublicGroupMessageDto>> response = new();
 
             try
             {
-                List<PublicGroupMessagesView> listPublicMessagesView = await _publicMessageDataAccess.GetViewListByUserIdAsync(userId, numberItemsToSkip);
-                List<PublicGroupMessageDto> listDto = ViewListToDtoList(listPublicMessagesView);
+                List<PublicGroupMessageDto> listDto = await _publicMessageDataAccess.GetDtoListByUserIdAsync(userId, numberItemsToSkip);
 
                 return ReturnApiResponse.Success(response, listDto);
             }
@@ -65,18 +62,15 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                PublicGroupMessagesView messageView = await _publicMessageDataAccess.GetViewByMessageIdAsync(messageId);
+                PublicGroupMessageDto messageDto = await _publicMessageDataAccess.GetDtoByMessageIdAsync(messageId);
 
-                if (messageView.PublicMessageId == new Guid())
+                if (messageDto.PublicMessageId == new Guid())
                 {
+                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Message Id not found.");
                 }
 
-                PublicGroupMessageDto messageDto = ViewToDto(messageView);
-
-                response = ReturnApiResponse.Success(response, messageDto);
-
-                return response;
+                return ReturnApiResponse.Success(response, messageDto);
             }
             catch (Exception ex)
             {
@@ -214,52 +208,12 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
         #region PRIVATE METHODS
 
-        private PublicGroupMessageDto ViewToDto(PublicGroupMessagesView publicMessagesView)
-        {
-            return new()
-            {
-                PublicMessageId = publicMessagesView.PublicMessageId,
-                UserId          = publicMessagesView.UserId,
-                UserName        = publicMessagesView.UserName,
-                ChatGroupId     = publicMessagesView.ChatGroupId,
-                ChatGroupName   = publicMessagesView.ChatGroupName,
-                Text            = publicMessagesView.Text,
-                MessageDateTime = publicMessagesView.MessageDateTime,
-                ReplyMessageId  = publicMessagesView.ReplyMessageId,
-                PictureLink     = publicMessagesView.PictureLink
-            };
-        }
-
-        private List<PublicGroupMessageDto> ViewListToDtoList(List<PublicGroupMessagesView> publicMessagesViewList)
-        {
-            List<PublicGroupMessageDto> dtoList = new();
-
-            foreach (var viewItem in publicMessagesViewList)
-            {
-                PublicGroupMessageDto dto = new()
-                {
-                    PublicMessageId = viewItem.PublicMessageId,
-                    UserId          = viewItem.UserId,
-                    UserName        = viewItem.UserName,
-                    ChatGroupId     = viewItem.ChatGroupId,
-                    ChatGroupName   = viewItem.ChatGroupName,
-                    Text            = viewItem.Text,
-                    MessageDateTime = viewItem.MessageDateTime,
-                    ReplyMessageId  = viewItem.ReplyMessageId,
-                    PictureLink     = viewItem.PictureLink
-                };
-                dtoList.Add(dto);
-            }
-
-            return dtoList;
-        }
-
         private (bool, string) NewMessageChecks(PublicGroupMessageDto messageDto)
         {
             bool passesChecks = true;
             string errorMessage = "";
 
-            if (messageDto.UserId == new Guid())
+            if (Guid.Parse(messageDto.UserId) == new Guid())
             {
                 passesChecks = false;
                 errorMessage += "[Invalid UserId]";
@@ -278,7 +232,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = message.PublicMessageId,
-                UserId          = Guid.Parse(message.UserId),
+                UserId          = message.UserId,
                 ChatGroupId     = message.ChatGroupId,
                 Text            = message.Text,
                 MessageDateTime = message.MessageDateTime,
@@ -307,7 +261,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = newMessage.PublicMessageId,
-                UserId          = Guid.Parse(newMessage.UserId),
+                UserId          = newMessage.UserId,
                 UserName        = dtoMessage.UserName,
                 ChatGroupId     = newMessage.ChatGroupId,
                 ChatGroupName   = dtoMessage.ChatGroupName,
@@ -339,7 +293,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return new()
             {
                 PublicMessageId = modifiedMessage.PublicMessageId,
-                UserId          = modifiedMessage.PublicMessageId,
+                UserId          = modifiedMessage.PublicMessageId.ToString(),
                 ChatGroupId     = modifiedMessage.ChatGroupId,
                 MessageDateTime = modifiedMessage.MessageDateTime,
                 Text            = modifiedMessage.Text,
