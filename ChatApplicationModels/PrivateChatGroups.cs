@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace ChatApplicationModels
 {
-    public class ChatGroups
+    public class PrivateChatGroups
     {
         [Key]
         public int ChatGroupId { get; set; }
@@ -17,8 +17,5 @@ namespace ChatApplicationModels
 
         [DisplayName("Group Owner")]
         public string GroupOwnerUserId { get; set; } = string.Empty;
-
-        [DisplayName("Private Group")]
-        public bool PrivateGroup { get;set; }
     }
 }

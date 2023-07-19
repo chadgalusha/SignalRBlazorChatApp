@@ -4,36 +4,29 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-SignalRBlazorChatApp-6e576b71-b74c-49cd-809e-7be6de9f9f80</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Areas\Identity\Pages\Account\LogOut.cshtml" />
-    <None Include="Areas\Identity\Pages\Shared\_LoginPartial.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.7" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.31.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.7" />
-    <PackageReference Include="MudBlazor" Version="6.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.31.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ChatApplicationModels\ChatApplicationModels.csproj" />
+    <Folder Include="Logs\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Logs\" />
+    <ProjectReference Include="..\ChatApplicationModels\ChatApplicationModels.csproj" />
   </ItemGroup>
 
 </Project>

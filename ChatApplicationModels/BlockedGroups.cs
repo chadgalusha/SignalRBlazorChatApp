@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ChatApplicationModels
 {
-    public class BlockedGroups
+    public class BlockedPrivateChatGroups
     {
         [Key]
         public int Id { get; set; }

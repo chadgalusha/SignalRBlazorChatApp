@@ -1,20 +1,20 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace ChatApplicationModels
 {
-    public class PublicMessages
+    public class PrivateGroupMessages
     {
         [Key]
-        public string PublicMessageId { get; set; } = string.Empty;
+        public Guid PrivateMessageId { get; set; }
 
         [Required]
         [DisplayName("User")]
-        public string UserId { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
 
         [Required]
         [DisplayName("Chat Group")]
-        public int ChatGroupId  { get; set; }
+        public int ChatGroupId { get; set; }
 
         [Required]
         [DisplayName("Message")]
@@ -23,7 +23,7 @@ namespace ChatApplicationModels
         [DisplayName("Message DateTime")]
         public DateTime MessageDateTime { get; set; }
 
-        public string ReplyMessageId { get; set; } = string.Empty;
+        public Guid? ReplyMessageId { get; set; }
 
         public string PictureLink { get; set; } = string.Empty;
     }
