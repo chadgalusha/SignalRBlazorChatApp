@@ -3,7 +3,7 @@ using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateMessages
 {
     public class PrivateMessagesDataAccess_UnitTests : IClassFixture<PrivateMessagesDatabaseFixture>
     {
@@ -91,7 +91,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task ModifyPrivateMessageAsync_IsSuccess()
         {
             PrivateUserMessages messageToModify = _dataAccess.GetPrivateMessage(1);
-            string newText = "Modified Text";   
+            string newText = "Modified Text";
             messageToModify.MessageText = newText;
 
             _context.Database.BeginTransaction();

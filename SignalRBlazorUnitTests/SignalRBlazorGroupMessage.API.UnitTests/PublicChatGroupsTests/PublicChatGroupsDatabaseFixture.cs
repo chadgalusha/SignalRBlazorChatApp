@@ -1,9 +1,8 @@
-﻿using ChatApplicationModels;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
-using SignalRBlazorGroupsMessages.API.Models.Views;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroups
 {
     public class PublicChatGroupsDatabaseFixture
     {
@@ -24,7 +23,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                         context.Database.EnsureCreated();
 
                         context.AddRange(GetListPublicChatGroups());
-                        context.AddRange(GetListPublicChatGroupsViews());
+                        context.AddRange(GetListPublicChatGroupsDtos());
 
                         context.SaveChanges();
                     }
@@ -39,7 +38,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             public TestChatGroupsDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-            public virtual DbSet<PublicChatGroupsView> ChatGroupsViews { get; set; }
+            public virtual DbSet<PublicChatGroupsDto> ChatGroupsDtos { get; set; }
         }
 
         public TestChatGroupsDbContext CreateContext()
@@ -54,9 +53,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         //        .UseSqlServer(ConnectionString)
         //        .Options);
 
-        private List<PublicChatGroups> GetListPublicChatGroups()
+        private List<ChatApplicationModels.PublicChatGroups> GetListPublicChatGroups()
         {
-            List<PublicChatGroups> chatGroupList = new()
+            List<ChatApplicationModels.PublicChatGroups> chatGroupList = new()
             {
                 new()
                 {
@@ -90,16 +89,16 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return chatGroupList;
         }
 
-        private List<PublicChatGroupsView> GetListPublicChatGroupsViews()
+        private List<PublicChatGroupsDto> GetListPublicChatGroupsDtos()
         {
-            List<PublicChatGroupsView> listView = new()
+            List<PublicChatGroupsDto> listDto = new()
             {
                  new()
                 {
                     //ChatGroupId      = 1,
                     ChatGroupName    = "TestPublicGroup1",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
                     UserName         = "Test Admin"
                 },
                 new()
@@ -107,7 +106,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     //ChatGroupId      = 2,
                     ChatGroupName    = "TestPublicGroup2",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
                     UserName         = "Test Admin"
                 },
                 new()
@@ -115,7 +114,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     //ChatGroupId      = 3,
                     ChatGroupName    = "TestPrivateGroup1",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
                     UserName         = "Test Admin"
                 },
                 new()
@@ -123,11 +122,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     //ChatGroupId      = 4,
                     ChatGroupName    = "TestPrivateGroup2",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("93eeda54-e362-49b7-8fd0-ab516b7f8071"),
+                    GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
                     UserName         = "Test Admin"
                 }
             };
-            return listView;
+            return listDto;
         }
     }
 }

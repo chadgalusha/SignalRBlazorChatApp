@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroups
 {
     public class PrivateChatGroupsDataAccess_UnitTests
     {

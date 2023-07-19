@@ -1,5 +1,5 @@
 ﻿using ChatApplicationModels;
-using SignalRBlazorGroupsMessages.API.Models.Views;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
@@ -7,9 +7,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
     {
         Task<bool> AddAsync(PublicGroupMessages message);
         Task<bool> DeleteAsync(PublicGroupMessages message);
-        Task<List<PublicGroupMessagesView>> GetViewListByGroupIdAsync(int groupId, int numberItemsToSkip);
-        Task<List<PublicGroupMessagesView>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip);
-        Task<PublicGroupMessagesView> GetViewByMessageIdAsync(Guid messageId);
+        Task<List<PublicGroupMessageDto>> GetDtoListByGroupIdAsync(int groupId, int numberItemsToSkip);
+        Task<List<PublicGroupMessageDto>> GetDtoListByUserIdAsync(string userId, int numberItemsToSkip);
+        Task<PublicGroupMessageDto> GetDtoByMessageIdAsync(Guid messageId);
         Task<bool> ModifyAsync(PublicGroupMessages message);
         Task<bool> Exists(Guid messageId);
         Task<PublicGroupMessages> GetByMessageIdAsync(Guid messageId);

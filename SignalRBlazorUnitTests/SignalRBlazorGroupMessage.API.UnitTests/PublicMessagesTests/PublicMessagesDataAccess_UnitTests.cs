@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
-using SignalRBlazorGroupsMessages.API.Models.Views;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesDatabaseFixture;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages.PublicMessagesDatabaseFixture;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
 {
     public class PublicMessagesDataAccess_UnitTests : IClassFixture<PublicMessagesDatabaseFixture>
     {
@@ -26,44 +26,44 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task GetViewListByGroupId_ReturnsMessages()
         {
             int groupId = 2;
-            List<PublicGroupMessagesView> publicMessagesViewsList = _context.PublicMessagesView
+            List<PublicGroupMessageDto> publicMessagesDtoList = _context.PublicMessagesDto
                 .Where(p => p.ChatGroupId == groupId)
                 .ToList();
 
             Mock<IPublicMessagesDataAccess> _mockPublicMessageDataAccess = new();
-            _mockPublicMessageDataAccess.Setup(x => x.GetViewListByGroupIdAsync(groupId, 0))
-                .ReturnsAsync(publicMessagesViewsList);
+            _mockPublicMessageDataAccess.Setup(x => x.GetDtoListByGroupIdAsync(groupId, 0))
+                .ReturnsAsync(publicMessagesDtoList);
 
             var mockedDataAccessObject = _mockPublicMessageDataAccess.Object;
-            List<PublicGroupMessagesView> result = await mockedDataAccessObject.GetViewListByGroupIdAsync(groupId, 0);
+            List<PublicGroupMessageDto> result = await mockedDataAccessObject.GetDtoListByGroupIdAsync(groupId, 0);
 
             Assert.Multiple(() =>
             {
                 Assert.NotNull(result);
-                Assert.Equal(publicMessagesViewsList, result);
+                Assert.Equal(publicMessagesDtoList, result);
             });
         }
 
         [Fact]
         public async Task GetViewListByUserId_ReturnsMessages()
         {
-            Guid userId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a");
-            List<PublicGroupMessagesView> listPublicMessageView = _context.PublicMessagesView
+            string userId = "e1b9cf9a-ff86-4607-8765-9e47a305062a";
+            List<PublicGroupMessageDto> listPublicMessageDto = _context.PublicMessagesDto
                 .Where(p => p.UserId == userId)
                 .ToList();
 
             Mock<IPublicMessagesDataAccess> _mockPublicMessageDataAccess = new();
-            _mockPublicMessageDataAccess.Setup(x => x.GetViewListByUserIdAsync(userId, 0))
-                .ReturnsAsync(listPublicMessageView);
+            _mockPublicMessageDataAccess.Setup(x => x.GetDtoListByUserIdAsync(userId, 0))
+                .ReturnsAsync(listPublicMessageDto);
 
             var mockedDataAccessObject = _mockPublicMessageDataAccess.Object;
-            List<PublicGroupMessagesView> result = await mockedDataAccessObject.GetViewListByUserIdAsync(userId, 0);
+            List<PublicGroupMessageDto> result = await mockedDataAccessObject.GetDtoListByUserIdAsync(userId, 0);
 
             Assert.Multiple(() =>
             {
                 Assert.NotNull(result);
-                Assert.Equal(listPublicMessageView, result);
-                Assert.Single(listPublicMessageView);
+                Assert.Equal(listPublicMessageDto, result);
+                Assert.Single(listPublicMessageDto);
             });
         }
 
@@ -211,9 +211,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             return new()
             {
                 PublicMessageId = Guid.NewGuid(),
-                UserId          = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
-                ChatGroupId     = 3,
-                Text            = "Sample message for ChatGroupId 3",
+                UserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                ChatGroupId = 3,
+                Text = "Sample message for ChatGroupId 3",
                 MessageDateTime = new DateTime(2023, 6, 25)
             };
         }

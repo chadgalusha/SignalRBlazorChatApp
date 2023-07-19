@@ -7,7 +7,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
     {
         Task<ApiResponse<PublicChatGroupsDto>> AddAsync(CreatePublicChatGroupDto dto);
         Task<ApiResponse<PublicChatGroupsDto>> DeleteAsync(int dtoGroupId);
-        Task<ApiResponse<PublicChatGroupsDto>> GetViewByIdAsync(int groupId);
+        Task<ApiResponse<PublicChatGroupsDto>> GetDtoByIdAsync(int groupId);
         Task<ApiResponse<List<PublicChatGroupsDto>>> GetListPublicChatGroupsAsync();
         Task<ApiResponse<PublicChatGroupsDto>> ModifyAsync(ModifyPublicChatGroupDto dto);
     }

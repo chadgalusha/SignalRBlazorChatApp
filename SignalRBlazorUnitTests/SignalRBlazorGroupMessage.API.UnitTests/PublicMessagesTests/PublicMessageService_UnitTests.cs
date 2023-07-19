@@ -3,10 +3,9 @@ using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using SignalRBlazorGroupsMessages.API.Models.Views;
 using SignalRBlazorGroupsMessages.API.Services;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
 {
     public class PublicMessageService_UnitTests
     {
@@ -22,17 +21,17 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task GetListByGroupIdAsync_ReturnsCorrectResults()
         {
-            int expectedCount = GetListPublicMessagesView()
+            int expectedCount = GetListPublicMessagesDto()
                 .Where(p => p.ChatGroupId == 1)
                 .ToList()
                 .Count;
 
-            _mockDataAccess.Setup(m => m.GetViewListByGroupIdAsync(1, 0))
-                .ReturnsAsync(GetListPublicMessagesView()
+            _mockDataAccess.Setup(m => m.GetDtoListByGroupIdAsync(1, 0))
+                .ReturnsAsync(GetListPublicMessagesDto()
                     .Where(x => x.ChatGroupId == 1)
                     .ToList());
 
-            PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
+            PublicMessagesService _service = GetNewService();
 
             var result1 = await _service.GetListByGroupIdAsync(1, 0);
             var result2 = await _service.GetListByGroupIdAsync(999, 0);
@@ -50,29 +49,25 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task GetListByUserIdAsync_ReturnsCorrectResults()
         {
-            Guid testUserId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
-            int expectedCount = GetListPublicMessagesView()
+            string testUserId = "e8ee70b6-678a-4b86-934e-da7f404a33a3";
+            int expectedCount = GetListPublicMessagesDto()
                 .Where(u => u.UserId == testUserId)
                 .ToList()
                 .Count;
 
-            _mockDataAccess.Setup(m => m.GetViewListByUserIdAsync(testUserId, 0))
-                .ReturnsAsync(GetListPublicMessagesView()
+            _mockDataAccess.Setup(m => m.GetDtoListByUserIdAsync(testUserId, 0))
+                .ReturnsAsync(GetListPublicMessagesDto()
                     .Where(u => u.UserId == testUserId)
                     .ToList());
 
-            PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
-                
-            var result1 = await _service.GetViewListByUserIdAsync(testUserId, 0);
-            var result2 = await _service.GetViewListByUserIdAsync(Guid.Parse("5e34cdf3-7ecc-46df-87ea-4bb1839af3d6"), 0);
+            PublicMessagesService _service = GetNewService();
+
+            var result1 = await _service.GetListByUserIdAsync(testUserId, 0);
 
             Assert.Multiple(() =>
             {
                 Assert.Equal(expectedCount, result1.Data?.Count);
                 Assert.True(result1.Success);
-
-                Assert.False(result2.Success);
-                Assert.Null(result2.Data);
             });
         }
 
@@ -80,15 +75,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         public async Task GetByMessageIdAsync_ReturnsMessage()
         {
             Guid testMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
-            PublicGroupMessagesView viewMessage = GetListPublicMessagesView()
+            PublicGroupMessageDto dtoMessage = GetListPublicMessagesDto()
                 .Single(g => g.PublicMessageId == testMessageId);
-            PublicGroupMessageDto expectedDtoMessage = ViewToDto(viewMessage);
 
-            _mockDataAccess.Setup(p => p.GetViewByMessageIdAsync(testMessageId))
-                .ReturnsAsync(GetListPublicMessagesView()
+            _mockDataAccess.Setup(p => p.GetDtoByMessageIdAsync(testMessageId))
+                .ReturnsAsync(GetListPublicMessagesDto()
                     .Single(m => m.PublicMessageId == testMessageId));
 
-            PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
+            PublicMessagesService _service = GetNewService();
 
             var result = await _service.GetByMessageIdAsync(testMessageId);
 
@@ -109,7 +103,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
 
-            PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
+            PublicMessagesService _service = GetNewService();
 
             var result = await _service.AddAsync(NewPublicMessageToDto(newMessage));
 
@@ -133,7 +127,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             _mockDataAccess.Setup(p => p.GetByMessageIdAsync(messageToModify.PublicMessageId))
                 .ReturnsAsync(messageToModify);
 
-            PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
+            PublicMessagesService _service = GetNewService();
 
             var result = await _service.ModifyAsync(ModifiedPublicMessageToDto(messageToModify));
 
@@ -158,9 +152,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             _mockDataAccess.Setup(p => p.DeleteMessagesByResponseMessageIdAsync(messageToDelete.PublicMessageId))
                 .ReturnsAsync(true);
 
-            PublicMessagesService _service = new(_mockDataAccess.Object, _mockSerilogger.Object);
+            PublicMessagesService _service = GetNewService();
 
-            var result = await _service.DeleteAsync(ModifiedPublicMessageToDto(messageToDelete));
+            var result = await _service.DeleteAsync(messageToDelete.PublicMessageId);
 
             Assert.True(result.Success);
             Assert.Equal("ok", result.Message);
@@ -168,14 +162,19 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
 
         #region PRIVATE METHODS
 
-        private List<PublicGroupMessagesView> GetListPublicMessagesView()
+        private PublicMessagesService GetNewService()
         {
-            List<PublicGroupMessagesView> messageList = new()
+            return new(_mockDataAccess.Object, _mockSerilogger.Object);
+        }
+
+        private List<PublicGroupMessageDto> GetListPublicMessagesDto()
+        {
+            List<PublicGroupMessageDto> messageList = new()
             {
                 new()
                 {
                     PublicMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3"),
-                    UserId          = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
+                    UserId          = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
                     UserName        = "TestUser1",
                     ChatGroupId     = 1,
                     ChatGroupName   = "Test Chat Group 1",
@@ -185,7 +184,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 new()
                 {
                     PublicMessageId = Guid.Parse("added9bc-7c2a-4673-995d-92f4c4432fdc"),
-                    UserId          = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
+                    UserId          = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
                     UserName        = "TestUser1",
                     ChatGroupId     = 1,
                     ChatGroupName   = "Test Chat Group 1",
@@ -195,7 +194,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 new()
                 {
                     PublicMessageId = Guid.Parse("c57b308b-ca1a-4b85-919a-b147db30fde0"),
-                    UserId          = Guid.Parse("4eb0c266-894a-4c09-a6e2-4a0fb72e9c1c"),
+                    UserId          = "4eb0c266-894a-4c09-a6e2-4a0fb72e9c1c",
                     UserName        = "TestUser2",
                     ChatGroupId     = 1,
                     ChatGroupName   = "Test Chat Group 1",
@@ -205,7 +204,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 new()
                 {
                     PublicMessageId = Guid.Parse("512fce5e-865a-4e4d-b6fd-2a57fb86149e"),
-                    UserId          = Guid.Parse("feac8ce0-5a21-4b89-9e23-beee9df517bb"),
+                    UserId          = "feac8ce0-5a21-4b89-9e23-beee9df517bb",
                     UserName        = "TestUser3",
                     ChatGroupId     = 2,
                     ChatGroupName   = "Test Chat Group 2",
@@ -215,7 +214,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                 new()
                 {
                     PublicMessageId = Guid.Parse("3eea1c79-61fb-41e0-852b-ab790835c827"),
-                    UserId          = Guid.Parse("8bc5d23a-9c70-4ef2-b285-814e993ad471"),
+                    UserId          = "8bc5d23a-9c70-4ef2-b285-814e993ad471",
                     UserName        = "TestUser4",
                     ChatGroupId     = 2,
                     ChatGroupName   = "Test Chat Group 2",
@@ -253,21 +252,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             return new()
             {
-                UserId           = Guid.Parse(message.UserId),
-                ChatGroupId      = message.ChatGroupId,
-                Text             = message.Text,
-                MessageDateTime  = message.MessageDateTime,
-                ReplyMessageId   = message.ReplyMessageId,
-                PictureLink      = message.PictureLink
-            };
-        }
-
-        private PublicGroupMessageDto ModifiedPublicMessageToDto(PublicGroupMessages message)
-        {
-            return new()
-            {
-                PublicMessageId = message.PublicMessageId,
-                UserId          = Guid.Parse(message.UserId),
+                UserId          = message.UserId,
                 ChatGroupId     = message.ChatGroupId,
                 Text            = message.Text,
                 MessageDateTime = message.MessageDateTime,
@@ -276,19 +261,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             };
         }
 
-        private PublicGroupMessageDto ViewToDto(PublicGroupMessagesView publicMessagesView)
+        private ModifyPublicGroupMessageDto ModifiedPublicMessageToDto(PublicGroupMessages message)
         {
             return new()
             {
-                PublicMessageId = publicMessagesView.PublicMessageId,
-                UserId          = publicMessagesView.UserId,
-                UserName        = publicMessagesView.UserName,
-                ChatGroupId     = publicMessagesView.ChatGroupId,
-                ChatGroupName   = publicMessagesView.ChatGroupName,
-                Text            = publicMessagesView.Text,
-                MessageDateTime = publicMessagesView.MessageDateTime,
-                ReplyMessageId  = publicMessagesView.ReplyMessageId,
-                PictureLink     = publicMessagesView.PictureLink
+                PublicMessageId = message.PublicMessageId,
+                Text            = message.Text,
+                ReplyMessageId  = message.ReplyMessageId,
+                PictureLink     = message.PictureLink
             };
         }
 

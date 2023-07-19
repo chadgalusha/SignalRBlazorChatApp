@@ -7,7 +7,7 @@ using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
 using System.Net;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroups
 {
     public class PublicChatGroupsController_UnitTests
     {
@@ -23,11 +23,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         [Fact]
         public async Task GetListByGroupIdAsync_ReturnsCorrectResult()
         {
-            ApiResponse<List<PublicChatGroupsDto>> response = new();
+            ApiResponse<List<PublicChatGroupsDto>> apiResponse = new();
             List<PublicChatGroupsDto> dtoList = GetDtoList();
 
             _mockService.Setup(p => p.GetListPublicChatGroupsAsync())
-                .ReturnsAsync(ReturnApiResponse.Success(response, dtoList));
+                .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dtoList));
 
             PublicChatGroupsController _controller = GetTestController();
 
@@ -49,7 +49,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             PublicChatGroupsDto dto = GetDtoList().First();
             int id = dto.ChatGroupId;
 
-            _mockService.Setup(p => p.GetViewByIdAsync(id))
+            _mockService.Setup(p => p.GetDtoByIdAsync(id))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dto));
 
             PublicChatGroupsController _controller = GetTestController();
@@ -129,7 +129,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
             var actionResult = await _controller.DeleteAsync(idToDelete);
             var objectResult = actionResult.Result as NoContentResult;
 
-            Assert.True(objectResult.StatusCode == (int)HttpStatusCode.NoContent);
+            Assert.True(objectResult!.StatusCode == 204);
         }
 
         #region PRIVATE METHODS
@@ -148,7 +148,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupId      = 1,
                     ChatGroupName    = "Test Group 1",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
+                    GroupOwnerUserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
                     UserName         = "Test Owner"
                 },
                 new()
@@ -156,7 +156,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupId      = 2,
                     ChatGroupName    = "Test Group 2",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
+                    GroupOwnerUserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
                     UserName         = "Test Owner"
                 },
                 new()
@@ -164,7 +164,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupId      = 3,
                     ChatGroupName    = "Test Group 3",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
+                    GroupOwnerUserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
                     UserName         = "Test Owner"
                 },
                 new()
@@ -172,7 +172,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
                     ChatGroupId      = 4,
                     ChatGroupName    = "Test Group 4",
                     GroupCreated     = DateTime.Now,
-                    GroupOwnerUserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
+                    GroupOwnerUserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
                     UserName         = "Test Owner"
                 }
             };
@@ -183,7 +183,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             return new()
             {
-                ChatGroupName    = "Test Group 5",
+                ChatGroupName = "Test Group 5",
                 GroupOwnerUserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a")
             };
         }
@@ -192,11 +192,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
         {
             return new()
             {
-                ChatGroupId      = 5,
-                ChatGroupName    = "Test Group 5",
-                GroupCreated     = DateTime.Now,
-                GroupOwnerUserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a"),
-                UserName         = "Test Owner"
+                ChatGroupId = 5,
+                ChatGroupName = "Test Group 5",
+                GroupCreated = DateTime.Now,
+                GroupOwnerUserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                UserName = "Test Owner"
             };
         }
 

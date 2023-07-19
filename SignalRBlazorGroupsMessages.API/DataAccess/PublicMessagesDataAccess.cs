@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Data;
-using SignalRBlazorGroupsMessages.API.Models.Views;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
@@ -18,9 +18,9 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             _configuration = configuration ?? throw new Exception(nameof(configuration));
         }
 
-        public async Task<List<PublicGroupMessagesView>> GetViewListByGroupIdAsync(int groupId, int numberItemsToSkip)
+        public async Task<List<PublicGroupMessageDto>> GetDtoListByGroupIdAsync(int groupId, int numberItemsToSkip)
         {
-            List<PublicGroupMessagesView> viewList = new();
+            List<PublicGroupMessageDto> dtoList = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPublicMessages_byGroupId", connection)
@@ -32,15 +32,15 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
             await connection.OpenAsync();
             SqlDataReader reader = await command.ExecuteReaderAsync();
-            viewList = ReturnViewListFromReader(viewList, reader);
+            dtoList = ReturnDtoListFromReader(dtoList, reader);
             await connection.CloseAsync();
 
-            return viewList;
+            return dtoList;
         }
 
-        public async Task<List<PublicGroupMessagesView>> GetViewListByUserIdAsync(Guid userId, int numberItemsToSkip)
+        public async Task<List<PublicGroupMessageDto>> GetDtoListByUserIdAsync(string userId, int numberItemsToSkip)
         {
-            List<PublicGroupMessagesView> viewList = new();
+            List<PublicGroupMessageDto> dtoList = new();
 
             using SqlConnection connection= new(GetConnectionString());
             SqlCommand command = new("sp_getPublicMessages_byUserId", connection)
@@ -52,15 +52,15 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
             await connection.OpenAsync();
             SqlDataReader reader = await command.ExecuteReaderAsync();
-            viewList = ReturnViewListFromReader(viewList, reader);
+            dtoList = ReturnDtoListFromReader(dtoList, reader);
             await connection.CloseAsync();
 
-            return viewList;
+            return dtoList;
         }
 
-        public async Task<PublicGroupMessagesView> GetViewByMessageIdAsync(Guid messageId)
+        public async Task<PublicGroupMessageDto> GetDtoByMessageIdAsync(Guid messageId)
         {
-            PublicGroupMessagesView view = new();
+            PublicGroupMessageDto dto = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPublicMessage_byMessageId", connection)
@@ -71,10 +71,10 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
             await connection.OpenAsync();
             SqlDataReader reader = await command.ExecuteReaderAsync();
-            view = ReturnViewFromReader(view, reader);
+            dto = ReturnDtoFromReader(dto, reader);
             await connection.CloseAsync();
 
-            return view;
+            return dto;
         }
 
         public async Task<PublicGroupMessages> GetByMessageIdAsync(Guid messageId)
@@ -135,14 +135,14 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return _configuration.GetConnectionString("ChatApplicationDb")!;
         }
 
-        private List<PublicGroupMessagesView> ReturnViewListFromReader(List<PublicGroupMessagesView> viewList, SqlDataReader reader)
+        private List<PublicGroupMessageDto> ReturnDtoListFromReader(List<PublicGroupMessageDto> dtoList, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                PublicGroupMessagesView view = new()
+                PublicGroupMessageDto dto = new()
                 {
                     PublicMessageId = (Guid)reader[0],
-                    UserId          = Guid.Parse((string)reader[1]),
+                    UserId          = (string)reader[1],
                     UserName        = (string)reader[2],
                     ChatGroupId     = (int)reader[3],
                     ChatGroupName   = (string)reader[4],
@@ -151,26 +151,26 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                     ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : (Guid)reader[7],
                     PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString()
                 };
-                viewList.Add(view);
+                dtoList.Add(dto);
             }
-            return viewList;
+            return dtoList;
         }
 
-        private PublicGroupMessagesView ReturnViewFromReader(PublicGroupMessagesView view, SqlDataReader reader)
+        private PublicGroupMessageDto ReturnDtoFromReader(PublicGroupMessageDto dto, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                view.PublicMessageId = (Guid)reader[0];
-                view.UserId          = Guid.Parse((string)reader[1]);
-                view.UserName        = (string)reader[2];
-                view.ChatGroupId     = (int)reader[3];
-                view.ChatGroupName   = (string)reader[4];
-                view.Text            = (string)reader[5];
-                view.MessageDateTime = (DateTime)reader[6];
-                view.ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : (Guid)reader[7];
-                view.PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString();
+                dto.PublicMessageId = (Guid)reader[0];
+                dto.UserId          =(string)reader[1];
+                dto.UserName        = (string)reader[2];
+                dto.ChatGroupId     = (int)reader[3];
+                dto.ChatGroupName   = (string)reader[4];
+                dto.Text            = (string)reader[5];
+                dto.MessageDateTime = (DateTime)reader[6];
+                dto.ReplyMessageId  = reader[7].ToString().IsNullOrEmpty() ? null : (Guid)reader[7];
+                dto.PictureLink     = reader[8].ToString().IsNullOrEmpty() ? null : reader[8].ToString();
             }
-            return view;
+            return dto;
         }
 
         #endregion

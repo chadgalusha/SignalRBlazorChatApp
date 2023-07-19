@@ -44,14 +44,14 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<List<PublicGroupMessageDto>>>> GetListByUserIdAsync(
-            [FromQuery] Guid userId, int numberItemsToSkip)
+            [FromQuery] string userId, int numberItemsToSkip)
         {
-            if (userId == new Guid())
+            if (Guid.Parse(userId) == new Guid())
                 return BadRequest("Invalid data: " + nameof(userId));
             if (numberItemsToSkip < 0)
                 return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
 
-            ApiResponse<List<PublicGroupMessageDto>> listDtoResponse = await _service.GetViewListByUserIdAsync(userId, numberItemsToSkip);
+            ApiResponse<List<PublicGroupMessageDto>> listDtoResponse = await _service.GetListByUserIdAsync(userId, numberItemsToSkip);
             _serilogger.GetRequest("0.0.0.0", listDtoResponse);
 
             return Ok(listDtoResponse);
@@ -88,7 +88,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> Post([FromBody] PublicGroupMessageDto dtoToCreate)
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> AddAsync([FromBody] PublicGroupMessageDto dtoToCreate)
         {
             if (!ModelState.IsValid || dtoToCreate == null)
             {
@@ -130,7 +130,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 case ("Error modifying message."):
                     return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
                 default:
-                    return NoContent();
+                    return Ok(dtoResponse);
             }
         }
 

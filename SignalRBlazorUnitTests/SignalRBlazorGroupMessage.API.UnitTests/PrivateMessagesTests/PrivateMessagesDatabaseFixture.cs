@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateMessages
 {
     public class PrivateMessagesDatabaseFixture
     {

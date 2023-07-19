@@ -33,13 +33,14 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> GetByIdAsync(
             [FromQuery] int groupId)
         {
             if (groupId < 0)
                 return BadRequest("Invalid data: " + nameof(groupId));
 
-            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetViewByIdAsync(groupId);
+            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetDtoByIdAsync(groupId);
             _serilogger.GetRequest("0.0.0.0", dtoResponse);
 
             return Ok(dtoResponse);
@@ -59,7 +60,15 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.AddAsync(dtoToCreate);
             _serilogger.PostRequest("0.0.0.0", dtoResponse);
 
-            return Ok(dtoResponse);
+            switch (dtoResponse.Message)
+            {
+                case ("Chat Group name already taken."):
+                    return BadRequest(dtoResponse);
+                case ("Error creating new chat group."):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                default:
+                    return Ok(dtoResponse);
+            }
         }
 
         [HttpPut]
@@ -77,7 +86,13 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.ModifyAsync(dtoToModify);
             _serilogger.PutRequest("0.0.0.0", dtoResponse);
 
-            return Ok(dtoResponse);
+            switch (dtoResponse.Message)
+            {
+                case ("Error modifying chat group"):
+                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                default:
+                    return Ok(dtoResponse);
+            }
         }
 
         [HttpDelete]
