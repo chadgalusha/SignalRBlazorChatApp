@@ -5,6 +5,7 @@ namespace SignalRBlazorGroupsMessages.API.Models.Dtos
 {
     public class PublicGroupMessageDto
     {
+        [Key]
         [Required]
         public Guid PublicMessageId { get; set; }
         [Required]

@@ -88,7 +88,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> Post([FromBody] PublicGroupMessageDto dtoToCreate)
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> AddAsync([FromBody] PublicGroupMessageDto dtoToCreate)
         {
             if (!ModelState.IsValid || dtoToCreate == null)
             {
@@ -130,7 +130,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 case ("Error modifying message."):
                     return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
                 default:
-                    return NoContent();
+                    return Ok(dtoResponse);
             }
         }
 

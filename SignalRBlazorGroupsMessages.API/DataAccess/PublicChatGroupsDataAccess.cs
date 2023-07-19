@@ -117,7 +117,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                     ChatGroupId      = (int)reader[0],
                     ChatGroupName    = (string)reader[1],
                     GroupCreated     = (DateTime)reader[2],
-                    GroupOwnerUserId = Guid.Parse((string)reader[3]),
+                    GroupOwnerUserId = (string)reader[3],
                     UserName         = (string)reader[4]
                 };
                 dtoList.Add(dto);
@@ -132,7 +132,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 dto.ChatGroupId      = (int)reader[0];
                 dto.ChatGroupName    = (string)reader[1];
                 dto.GroupCreated     = (DateTime)reader[2];
-                dto.GroupOwnerUserId = Guid.Parse((string)reader[3]);
+                dto.GroupOwnerUserId = (string)reader[3];
                 dto.UserName         = (string)reader[4];
             }
             return dto;

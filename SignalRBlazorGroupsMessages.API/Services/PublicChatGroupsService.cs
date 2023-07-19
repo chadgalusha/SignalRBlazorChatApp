@@ -81,7 +81,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 if (!isSuccess)
                 {
                     response.Data = null;
-                    return ReturnApiResponse.Failure(response, "Error saving new chat group.");
+                    return ReturnApiResponse.Failure(response, "Error creating new chat group.");
                 }
 
                 PublicChatGroupsDto newDto = ModelToDto(newChatGroup, dto.ChatGroupName);
@@ -118,7 +118,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 if (!isSuccess)
                 {
                     response.Data = null;
-                    return ReturnApiResponse.Failure(response, "Error modifying chat group");
+                    return ReturnApiResponse.Failure(response, "Error modifying chat group.");
                 }
 
                 return ReturnApiResponse.Success(response, ModelToDto(chatGroupToModify, existingDto.UserName));
@@ -263,7 +263,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 ChatGroupId      = chatgroup.ChatGroupId,
                 ChatGroupName    = chatgroup.ChatGroupName,
                 GroupCreated     = chatgroup.GroupCreated,
-                GroupOwnerUserId = Guid.Parse(chatgroup.GroupOwnerUserId),
+                GroupOwnerUserId = chatgroup.GroupOwnerUserId,
                 UserName         = userName
             };
         }
