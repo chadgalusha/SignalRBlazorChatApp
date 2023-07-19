@@ -7,6 +7,7 @@ namespace JWTGenerator
 {
     public static class JwtProcessor
     {
+        // randomly generated securityKey that is also found in other projects appsettings.json file.
         private static readonly SymmetricSecurityKey securityKey = new(Encoding.ASCII.GetBytes("Iyg17SD2f7tUhV1cRxEox3WqqUwJH2I0PRLefDOYp3SsIQOg2+E4SPUGiJnF2bK0"));
         private static readonly string issuer = "https://localhost:7117";
         private static readonly string audience = "SignalRBlazorChatApp";
