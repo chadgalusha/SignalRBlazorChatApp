@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRBlazorGroupsMessages
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRBlazorRequestsInvitations.API", "SignalRBlazorRequestInvitation.API\SignalRBlazorRequestsInvitations.API.csproj", "{8B2421FE-D857-4A8E-96DF-9F9F6442E6CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SignalRBlazorUnitTests", "SignalRBlazorUnitTests\SignalRBlazorUnitTests.csproj", "{B0F2F3D7-BAF7-41B7-A019-68BFD957BF61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRBlazorUnitTests", "SignalRBlazorUnitTests\SignalRBlazorUnitTests.csproj", "{B0F2F3D7-BAF7-41B7-A019-68BFD957BF61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JWTGenerator", "JWTGenerator\JWTGenerator.csproj", "{F0F426E4-A360-44E2-AAF3-BD30F7CD197F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{B0F2F3D7-BAF7-41B7-A019-68BFD957BF61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0F2F3D7-BAF7-41B7-A019-68BFD957BF61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0F2F3D7-BAF7-41B7-A019-68BFD957BF61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0F426E4-A360-44E2-AAF3-BD30F7CD197F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0F426E4-A360-44E2-AAF3-BD30F7CD197F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0F426E4-A360-44E2-AAF3-BD30F7CD197F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0F426E4-A360-44E2-AAF3-BD30F7CD197F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
