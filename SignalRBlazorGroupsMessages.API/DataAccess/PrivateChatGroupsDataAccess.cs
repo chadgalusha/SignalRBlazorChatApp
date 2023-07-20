@@ -1,7 +1,7 @@
 ﻿using ChatApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
-using SignalRBlazorGroupsMessages.API.Models.Views;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using System.Data.SqlClient;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
@@ -17,29 +17,60 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             _configuration = configuration ?? throw new Exception(nameof(configuration));
         }
 
-        public async Task<List<PrivateChatGroupsView>> GetViewListPrivateByUserIdAsync(Guid userId)
+        public async Task<List<PrivateChatGroupsDto>> GetDtoListByUserIdAsync(string userId)
         {
-            List<PrivateChatGroupsView> listPrivateGroups = new();
+            List<PrivateChatGroupsDto> listPrivateGroups = new();
 
             using SqlConnection connection = new(GetConnectionString());
             SqlCommand command = new("sp_getPrivateChatGroupsForUser", connection)
             {
                 CommandType = System.Data.CommandType.StoredProcedure
             };
-            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId.ToString();
+            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId;
 
             await connection.OpenAsync();
             SqlDataReader reader = await command.ExecuteReaderAsync();
-            listPrivateGroups = ReturnViewListFromReader(listPrivateGroups, reader);
+            listPrivateGroups = ReturnDtoListFromReader(listPrivateGroups, reader);
             await connection.CloseAsync();
 
             return listPrivateGroups;
         }
 
-        public async Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember)
+        public async Task<PrivateChatGroupsDto> GetDtoByGroupId(int groupId)
         {
-            _context.PrivateGroupsMembers.Add(privateGroupMember);
-            return await Save();
+            PrivateChatGroupsDto dtoToReturn = new();
+
+            using SqlConnection connection = new(GetConnectionString());
+            SqlCommand command = new("sp_getPrivateChatGroupByGroupId", connection)
+            {
+                CommandType = System.Data.CommandType.StoredProcedure
+            };
+            command.Parameters.Add("groupId", System.Data.SqlDbType.Int).Value = groupId;
+
+            await connection.OpenAsync();
+            SqlDataReader reader = await command.ExecuteReaderAsync();
+            dtoToReturn = ReturnDtoFromReader(dtoToReturn, reader);
+            await connection.CloseAsync();
+
+            return dtoToReturn;
+        }
+
+        public PrivateChatGroups GetByGroupname(string groupName)
+        {
+            return _context.PrivateChatGroups
+                .Single(c => c.ChatGroupName == groupName);
+        }
+
+        public PrivateChatGroups GetByGroupId(int groupId)
+        {
+            return _context.PrivateChatGroups
+                .Single(g => g.ChatGroupId == groupId);
+        }
+
+        public bool GroupNameTaken(string groupName)
+        {
+            return _context.PrivateChatGroups
+                .Any(c => c.ChatGroupName == groupName);
         }
 
         public async Task<PrivateGroupMembers> GetPrivateGroupMemberRecord(int chatGroupid, string userId)
@@ -48,10 +79,40 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .SingleAsync(p => p.PrivateChatGroupId == chatGroupid
                     && p.UserId == userId);
         }
+        public async Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember)
+        {
+            _context.PrivateGroupsMembers.Add(privateGroupMember);
+            return await Save();
+        }
 
         public async Task<bool> RemoveUserFromPrivateChatGroup(PrivateGroupMembers privateGroupMember)
         {
             _context.PrivateGroupsMembers.Remove(privateGroupMember);
+            return await Save();
+        }
+
+        public async Task<bool> IsUserInPrivateGroup(int groupId, string userId)
+        {
+            return await _context.PrivateGroupsMembers
+                .Where(g => g.PrivateChatGroupId == groupId)
+                .AnyAsync(u => u.UserId == userId);
+        }
+
+        public async Task<bool> AddAsync(PrivateChatGroups newGroup)
+        {
+            _context.PrivateChatGroups.Add(newGroup);
+            return await Save();
+        }
+
+        public async Task<bool> ModifyAsync(PrivateChatGroups modifiedGroup)
+        {
+            _context.PrivateChatGroups.Update(modifiedGroup);
+            return await Save();
+        }
+
+        public async Task<bool> DeleteAsync(PrivateChatGroups deleteGroup)
+        {
+            _context.PrivateChatGroups.Remove(deleteGroup);
             return await Save();
         }
 
@@ -67,34 +128,34 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return _configuration.GetConnectionString("ChatApplicationDb")!;
         }
 
-        private List<PrivateChatGroupsView> ReturnViewListFromReader(List<PrivateChatGroupsView> viewList, SqlDataReader reader)
+        private List<PrivateChatGroupsDto> ReturnDtoListFromReader(List<PrivateChatGroupsDto> viewList, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                PrivateChatGroupsView view = new()
+                PrivateChatGroupsDto dto = new()
                 {
-                    ChatGroupId = (int)reader[0],
-                    ChatGroupName = (string)reader[1],
-                    GroupCreated = (DateTime)reader[2],
-                    GroupOwnerUserId = Guid.Parse((string)reader[3]),
-                    UserName = (string)reader[4]
+                    ChatGroupId      = (int)reader[0],
+                    ChatGroupName    = (string)reader[1],
+                    GroupCreated     = (DateTime)reader[2],
+                    GroupOwnerUserId = (string)reader[3],
+                    UserName         = (string)reader[4]
                 };
-                viewList.Add(view);
+                viewList.Add(dto);
             }
             return viewList;
         }
 
-        private PrivateChatGroupsView ReturnViewFromReader(PrivateChatGroupsView view, SqlDataReader reader)
+        private PrivateChatGroupsDto ReturnDtoFromReader(PrivateChatGroupsDto dto, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                view.ChatGroupId = (int)reader[0];
-                view.ChatGroupName = (string)reader[1];
-                view.GroupCreated = (DateTime)reader[2];
-                view.GroupOwnerUserId = Guid.Parse((string)reader[3]);
-                view.UserName = (string)reader[4];
+                dto.ChatGroupId      = (int)reader[0];
+                dto.ChatGroupName    = (string)reader[1];
+                dto.GroupCreated     = (DateTime)reader[2];
+                dto.GroupOwnerUserId = (string)reader[3];
+                dto.UserName         = (string)reader[4];
             }
-            return view;
+            return dto;
         }
 
         #endregion

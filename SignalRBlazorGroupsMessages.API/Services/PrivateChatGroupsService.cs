@@ -3,7 +3,6 @@ using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using SignalRBlazorGroupsMessages.API.Models.Views;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
@@ -18,21 +17,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
         }
 
-        public async Task<ApiResponse<List<PrivateChatGroupsDto>>> GetViewListPrivateByUserId(Guid userId)
+        public async Task<ApiResponse<List<PrivateChatGroupsDto>>> GetViewListPrivateByUserId(string userId)
         {
             ApiResponse<List<PrivateChatGroupsDto>> response = new();
 
-            if (userId == new Guid())
-            {
-                response = ReturnApiResponse.Failure(response, "invalid userId");
-                response.Data = null;
-                return response;
-            }
-
             try
             {
-                List<PrivateChatGroupsView> viewList = await _privateGroupsDataAccess.GetViewListPrivateByUserIdAsync(userId);
-                List<PrivateChatGroupsDto> dtoList = ViewListToDtoList(viewList);
+                List<PrivateChatGroupsDto> dtoList = await _privateGroupsDataAccess.GetDtoListByUserIdAsync(userId);
 
                 return ReturnApiResponse.Success(response, dtoList);
             }
@@ -49,37 +40,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
         #region PRIVATE METHODS
 
-        private List<PrivateChatGroupsDto> ViewListToDtoList(List<PrivateChatGroupsView> viewList)
-        {
-            List<PrivateChatGroupsDto> dtoList = new();
-
-            foreach (PrivateChatGroupsView view in viewList)
-            {
-                PrivateChatGroupsDto dto = new()
-                {
-                    ChatGroupId = view.ChatGroupId,
-                    ChatGroupName = view.ChatGroupName,
-                    GroupCreated = view.GroupCreated,
-                    GroupOwnerUserId = view.GroupOwnerUserId,
-                    UserName = view.UserName
-                };
-                dtoList.Add(dto);
-            }
-            return dtoList;
-        }
-
-        private PrivateChatGroupsDto ViewToDto(PrivateChatGroupsView view)
-        {
-            return new()
-            {
-                ChatGroupId = view.ChatGroupId,
-                ChatGroupName = view.ChatGroupName,
-                GroupCreated = view.GroupCreated,
-                GroupOwnerUserId = view.GroupOwnerUserId,
-                UserName = view.UserName
-            };
-        }
-
         private PrivateChatGroups DtoToNewChatGroup(PrivateChatGroupsDto dto)
         {
             return new()
@@ -90,19 +50,19 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        private PrivateChatGroupsDto NewChatGroupToDto(PrivateChatGroups newGroup, string userName)
+        private PrivateChatGroupsDto ModelGroupToDto(PrivateChatGroups newGroup, string userName)
         {
             return new()
             {
                 ChatGroupId      = newGroup.ChatGroupId,
                 ChatGroupName    = newGroup.ChatGroupName,
                 GroupCreated     = newGroup.GroupCreated,
-                GroupOwnerUserId = Guid.Parse(newGroup.GroupOwnerUserId),
+                GroupOwnerUserId = newGroup.GroupOwnerUserId,
                 UserName         = userName
             };
         }
 
-        private PrivateChatGroups DtoToChatGroup(PrivateChatGroupsDto dto)
+        private PrivateChatGroups DtoToModel(PrivateChatGroupsDto dto)
         {
             return new()
             {

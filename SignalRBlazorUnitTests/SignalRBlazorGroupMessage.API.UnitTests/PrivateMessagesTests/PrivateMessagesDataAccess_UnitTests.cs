@@ -80,7 +80,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             string userId = "e08b0077-3c15-477e-84bb-bf9d41196455";
 
             _context.Database.BeginTransaction();
-            await _dataAccess.AddPrivateMessageAsync(newPrivateMessage);
+            await _dataAccess.AddAsync(newPrivateMessage);
             _context.ChangeTracker.Clear();
 
             List<PrivateUserMessages> resultListExpctedMessages = await _dataAccess.GetAllPrivateMessagesForUserAsync(userId);
@@ -95,7 +95,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             messageToModify.MessageText = newText;
 
             _context.Database.BeginTransaction();
-            await _dataAccess.ModifyPrivateMessageAsync(messageToModify);
+            await _dataAccess.ModifyAsync(messageToModify);
             _context.ChangeTracker.Clear();
 
             PrivateUserMessages resultPrivateMessage = _dataAccess.GetPrivateMessage(1);
@@ -109,7 +109,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             PrivateUserMessages messageToDelete = _dataAccess.GetPrivateMessage(messageToDeleteId);
 
             _context.Database.BeginTransaction();
-            await _dataAccess.DeletePrivateMessageAsync(messageToDelete);
+            await _dataAccess.DeleteAsync(messageToDelete);
             _context.ChangeTracker.Clear();
 
             bool result = _context.PrivateUserMessages.Where(p => p.PrivateMessageId == messageToDeleteId).Any();

@@ -47,7 +47,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             {
                 CommandType = System.Data.CommandType.StoredProcedure
             };
-            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId.ToString();
+            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId;
             command.Parameters.Add("@numberMessagesToSkip", System.Data.SqlDbType.Int).Value = numberItemsToSkip;
 
             await connection.OpenAsync();
@@ -79,7 +79,8 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<PublicGroupMessages> GetByMessageIdAsync(Guid messageId)
         {
-            return await _context.PublicGroupMessages.SingleAsync(p => p.PublicMessageId == messageId);
+            return await _context.PublicGroupMessages
+                .SingleAsync(p => p.PublicMessageId == messageId);
         }
 
         public async Task<bool> Exists(Guid messageId)
@@ -161,7 +162,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             while (reader.Read())
             {
                 dto.PublicMessageId = (Guid)reader[0];
-                dto.UserId          =(string)reader[1];
+                dto.UserId          = (string)reader[1];
                 dto.UserName        = (string)reader[2];
                 dto.ChatGroupId     = (int)reader[3];
                 dto.ChatGroupName   = (string)reader[4];
