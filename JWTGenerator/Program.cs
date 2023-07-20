@@ -17,14 +17,20 @@
                 Menu();
                 userSelection = UserSelection();
 
-                if (userSelection == -1)
+                switch (userSelection)
                 {
-                    Console.WriteLine("Invalid selection. Please try again.");
-                }
-                if (userSelection == 1)
-                {
-                    string newJwt = JwtProcessor.GetJwtToken();
-                    Console.WriteLine(newJwt);
+                    case 1:
+                        string newJwt = JwtProcessor.GetJwtToken();
+                        Console.WriteLine(newJwt);
+                        break;
+                    case 0:
+                        break;
+                    case -1:
+                        Console.WriteLine("Invalid selection. Please try again.");
+                        break;
+                    default: 
+                        Console.WriteLine("Invalid input. Please try again.");
+                        break;
                 }
             }
         }

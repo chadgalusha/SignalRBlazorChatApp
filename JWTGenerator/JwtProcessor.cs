@@ -26,7 +26,7 @@ namespace JWTGenerator
                 audience,
                 claimsForToken,
                 DateTime.UtcNow,
-                DateTime.UtcNow.AddMinutes(15),
+                DateTime.UtcNow.AddHours(1),
                 signingCredentials);
 
             return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
