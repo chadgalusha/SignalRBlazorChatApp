@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
@@ -8,6 +9,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]/")]
+    [Authorize]
     public class PublicMessagesController : ControllerBase
     {
         private readonly IPublicMessagesService _service;

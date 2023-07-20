@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
@@ -9,6 +10,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 {
     [Route("api/[controller]/")]
     [ApiController]
+    [Authorize]
     public class PublicChatGroupsController : ControllerBase
     {
         private readonly IPublicChatGroupsService _service;
