@@ -1,14 +1,4 @@
-﻿using ChatApplicationModels;
-using Moq;
-using SignalRBlazorGroupsMessages.API.DataAccess;
-using SignalRBlazorGroupsMessages.API.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroups
+﻿namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroups
 {
     public class PrivateChatGroupsDataAccess_UnitTests
     {

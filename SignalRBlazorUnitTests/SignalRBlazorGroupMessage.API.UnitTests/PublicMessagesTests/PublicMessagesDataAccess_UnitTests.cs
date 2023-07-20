@@ -23,7 +23,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         }
 
         [Fact]
-        public async Task GetViewListByGroupId_ReturnsMessages()
+        public async Task GetDtoListByGroupId_ReturnsMessages()
         {
             int groupId = 2;
             List<PublicGroupMessageDto> publicMessagesDtoList = _context.PublicMessagesDto
@@ -45,7 +45,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         }
 
         [Fact]
-        public async Task GetViewListByUserId_ReturnsMessages()
+        public async Task GetDtoListByUserId_ReturnsMessages()
         {
             string userId = "e1b9cf9a-ff86-4607-8765-9e47a305062a";
             List<PublicGroupMessageDto> listPublicMessageDto = _context.PublicMessagesDto

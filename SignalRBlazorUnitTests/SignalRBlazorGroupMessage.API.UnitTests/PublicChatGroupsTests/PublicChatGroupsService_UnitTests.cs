@@ -1,9 +1,7 @@
-﻿using ChatApplicationModels;
-using Moq;
+﻿using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using SignalRBlazorGroupsMessages.API.Models.Views;
 using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroups
