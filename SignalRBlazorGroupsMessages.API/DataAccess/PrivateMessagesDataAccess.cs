@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using System.Data.Entity;
 using System.Data.SqlClient;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
@@ -90,28 +89,28 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .AnyAsync(p => p.PrivateMessageId == messageId);
         }
 
-        public async Task<bool> AddAsync(PrivateUserMessages newMessage)
+        public async Task<bool> AddAsync(PrivateGroupMessages newMessage)
         {
-            _context.PrivateUserMessages.Add(newMessage);
+            _context.PrivateGroupMessages.Add(newMessage);
             return await Save();
         }
 
-        public async Task<bool> ModifyAsync(PrivateUserMessages modifyMessage)
+        public async Task<bool> ModifyAsync(PrivateGroupMessages modifyMessage)
         {
-            _context.PrivateUserMessages.Update(modifyMessage);
+            _context.PrivateGroupMessages.Update(modifyMessage);
             return await Save();
         }
 
-        public async Task<bool> DeleteAsync(PrivateUserMessages deleteMessage)
+        public async Task<bool> DeleteAsync(PrivateGroupMessages deleteMessage)
         {
-            _context.PrivateUserMessages.Remove(deleteMessage);
+            _context.PrivateGroupMessages.Remove(deleteMessage);
             return await Save();
         }
 
-        public async Task<bool> DeleteMessagesByResponseMessageIdAsync(Guid responseMessageId)
+        public async Task<bool> DeleteMessagesByReplyMessageIdAsync(Guid replyMessageId)
         {
             int result = await _context.PrivateGroupMessages
-                .Where(r => r.ReplyMessageId == responseMessageId)
+                .Where(r => r.ReplyMessageId == replyMessageId)
                 .ExecuteDeleteAsync();
 
             return result >= 0;

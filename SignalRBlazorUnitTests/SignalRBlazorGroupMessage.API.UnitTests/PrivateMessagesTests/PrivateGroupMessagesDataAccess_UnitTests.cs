@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using ChatApplicationModels;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
@@ -86,5 +87,146 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             });
         }
 
+        [Fact]
+        public async Task GetByMessageIdAsync_ReturnsMessage()
+        {
+            Guid messageId = _context.PrivateGroupMessages.First().PrivateMessageId;
+            
+            PrivateGroupMessages result = await _dataAccess.GetByMessageIdAsync(messageId);
+
+            Assert.Equal(messageId, result.PrivateMessageId);
+        }
+
+        [Fact]
+        public async Task Exists_ReturnsCorrectResult()
+        {
+            Guid goodMessageId = _context.PrivateGroupMessages.First().PrivateMessageId;
+            Guid badMessageId = Guid.Parse("00000000-0000-0000-0000-000000000000");
+
+            bool messageExistsTrue = await _dataAccess.Exists(goodMessageId);
+            bool messageExistsFalse = await _dataAccess.Exists(badMessageId);
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(messageExistsTrue);
+                Assert.False(messageExistsFalse);
+            });
+        }
+
+        [Fact]
+        public async Task AddAsync_IsSuccess()
+        {
+            PrivateGroupMessages newMessage = GetNewMessage();
+            Guid newMessageId = newMessage.PrivateMessageId;
+
+            _context.Database.BeginTransaction();
+            bool addResult = await _dataAccess.AddAsync(newMessage);
+            _context.ChangeTracker.Clear();
+
+            var addedMessage = _context.PrivateGroupMessages
+                .Single(p => p.PrivateMessageId == newMessageId);
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(addResult);
+                Assert.Equal(addedMessage.UserId, newMessage.UserId);
+            });
+        }
+
+        [Fact]
+        public async Task ModifyAsync_IsSuccess()
+        {
+            PrivateGroupMessages messageToModify = _context.PrivateGroupMessages.First();
+            string newMessage = "modified message";
+            messageToModify.Text = newMessage;
+
+            _context.Database.BeginTransaction();
+            bool modifyResult = await _dataAccess.ModifyAsync(messageToModify);
+            _context.ChangeTracker.Clear();
+
+            var result = _context.PrivateGroupMessages
+                .Single(p => p.PrivateMessageId == messageToModify.PrivateMessageId);
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(modifyResult);
+                Assert.Equal(newMessage, result.Text);
+            });
+        }
+
+        [Fact]
+        public async Task DeleteAsync_IsSuccess()
+        {
+            PrivateGroupMessages messageToDelete = _context.PrivateGroupMessages.First();
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.DeleteAsync(messageToDelete);
+            _context.ChangeTracker.Clear();
+
+            bool messageExists = await _dataAccess.Exists(messageToDelete.PrivateMessageId);
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result);
+                Assert.False(messageExists);
+            });
+        }
+
+        [Fact]
+        public async Task DeleteMessagesByReplyMessageIdAsync_IsSuccess()
+        {
+            // 2nd message in fixture data has this as replymessageid
+            Guid replyMessageId = _context.PrivateGroupMessages.First().PrivateMessageId;
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.DeleteMessagesByReplyMessageIdAsync(replyMessageId);
+            _context.ChangeTracker.Clear();
+
+            int count = _context.PrivateGroupMessages
+                .Where(r => r.ReplyMessageId == replyMessageId)
+                .Count();
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result);
+                Assert.Equal(0, count);
+            });
+        }
+
+        [Fact]
+        public async Task DeleteAllMessagesInGroupAsync_IsSuccess()
+        {
+            int groupId = 1;
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.DeleteAllMessagesInGroupAsync(groupId);
+            _context.ChangeTracker.Clear();
+
+            int count = _context.PrivateGroupMessages
+                .Where(c => c.ChatGroupId == groupId)
+                .Count();
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result);
+                Assert.Equal(0, count);
+            });
+        }
+
+        #region PRIVATE METHODS
+
+        private PrivateGroupMessages GetNewMessage()
+        {
+            return new()
+            {
+                PrivateMessageId = Guid.NewGuid(),
+                ChatGroupId      = 1,
+                UserId           = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                MessageDateTime  = DateTime.UtcNow,
+                Text             = "Test"
+            };
+        }
+
+        #endregion
     }
 }
