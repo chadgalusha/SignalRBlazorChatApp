@@ -12,14 +12,14 @@ using Xunit.Sdk;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests
 {
-    public class PublicMessagesController_UnitTests
+    public class PublicGroupMessagesController_UnitTests
     {
-        private readonly Mock<IPublicMessagesService> _mockService;
+        private readonly Mock<IPublicGroupMessagesService> _mockService;
         private readonly Mock<ISerilogger> _mockSerilogger;
 
-        public PublicMessagesController_UnitTests()
+        public PublicGroupMessagesController_UnitTests()
         {
-            _mockService = new Mock<IPublicMessagesService>();
+            _mockService = new Mock<IPublicGroupMessagesService>();
             _mockSerilogger = new Mock<ISerilogger>();
         }
 
@@ -36,7 +36,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.GetListByGroupIdAsync(testGroupId, 0))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dtoList));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.GetListByGroupIdAsync(testGroupId, 0);
             var objectResult = actionResult.Result as OkObjectResult;
@@ -61,7 +61,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.GetListByUserIdAsync(testUserId, 0))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dtoList));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.GetListByUserIdAsync(testUserId, 0);
             var objectResult = actionResult.Result as OkObjectResult;
@@ -85,7 +85,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.GetByMessageIdAsync(testMessageId))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dto));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.GetByMessageIdAsync(testMessageId);
             var objectResult = actionResult.Result as OkObjectResult;
@@ -107,7 +107,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.AddAsync(newDto))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, newDto));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.AddAsync(newDto);
             var objectResult = actionResult.Result as OkObjectResult;
@@ -133,7 +133,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.ModifyAsync(modifiedDto))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dtoToModify));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.ModifyAsync(modifiedDto);
             var objectResult = actionResult.Result as OkObjectResult;
@@ -156,7 +156,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.DeleteAsync(dtoToDelete.PublicMessageId))
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dtoToDelete));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.DeleteAsync(dtoToDelete.PublicMessageId);
             var objectResult = actionResult.Result as NoContentResult;
@@ -176,7 +176,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.DeleteAsync(dtoToDelete.PublicMessageId))
                 .ReturnsAsync(ReturnApiResponse.Failure(apiResponse, "Message Id not found."));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.DeleteAsync(dtoToDelete.PublicMessageId);
             var objectResult = actionResult.Result as NotFoundObjectResult;
@@ -198,7 +198,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockService.Setup(p => p.DeleteAsync(dtoToDelete.PublicMessageId))
                 .ReturnsAsync(ReturnApiResponse.Failure(apiResponse, "Error deleting message."));
 
-            PublicMessagesController _controller = GetNewController();
+            PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.DeleteAsync(dtoToDelete.PublicMessageId);
             var objectResult = actionResult.Result as Microsoft.AspNetCore.Mvc.ObjectResult;
@@ -213,7 +213,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
 
         #region PRIVATE METHODS
 
-        private PublicMessagesController GetNewController()
+        private PublicGroupMessagesController GetNewController()
         {
             return new(_mockService.Object, _mockSerilogger.Object);
         }

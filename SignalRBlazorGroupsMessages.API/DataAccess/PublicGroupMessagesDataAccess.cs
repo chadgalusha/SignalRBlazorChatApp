@@ -7,12 +7,12 @@ using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
-    public class PublicMessagesDataAccess : IPublicMessagesDataAccess
+    public class PublicGroupMessagesDataAccess : IPublicGroupMessagesDataAccess
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PublicMessagesDataAccess(ApplicationDbContext context, IConfiguration configuration)
+        public PublicGroupMessagesDataAccess(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context ?? throw new Exception(nameof(context));
             _configuration = configuration ?? throw new Exception(nameof(configuration));

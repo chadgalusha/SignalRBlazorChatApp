@@ -9,13 +9,13 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
     public class PublicChatGroupsService_UnitTests
     {
         private readonly Mock<IPublicChatGroupsDataAccess> _mockDataAccess;
-        private readonly Mock<IPublicMessagesService> _mockMessagesService;
+        private readonly Mock<IPublicGroupMessagesService> _mockMessagesService;
         private readonly Mock<ISerilogger> _mockSerilogger;
 
         public PublicChatGroupsService_UnitTests()
         {
             _mockDataAccess = new Mock<IPublicChatGroupsDataAccess>();
-            _mockMessagesService = new Mock<IPublicMessagesService>();
+            _mockMessagesService = new Mock<IPublicGroupMessagesService>();
             _mockSerilogger = new Mock<ISerilogger>();
         }
 

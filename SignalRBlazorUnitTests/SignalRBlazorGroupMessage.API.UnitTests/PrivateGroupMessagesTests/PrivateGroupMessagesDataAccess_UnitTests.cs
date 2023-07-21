@@ -10,7 +10,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
     public class PrivateGroupMessagesDataAccess_UnitTests : IClassFixture<PrivateGroupMessagesDatabaseFixture>
     {
         public PrivateGroupMessagesDatabaseFixture Fixture { get; }
-        private readonly PrivateMessagesDataAccess _dataAccess;
+        private readonly PrivateGroupMessagesDataAccess _dataAccess;
         private readonly TestPrivateGroupMessagesDbContext _context;
         private readonly IConfiguration _configuration;
 
@@ -19,7 +19,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             Fixture = fixture;
             _context = Fixture.CreateContext();
             _configuration = new Mock<IConfiguration>().Object;
-            _dataAccess = new PrivateMessagesDataAccess(_context, _configuration);
+            _dataAccess = new PrivateGroupMessagesDataAccess(_context, _configuration);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
                 .Where(p => p.ChatGroupId == groupId)
                 .ToList();
 
-            Mock<IPrivateMessagesDataAccess> _mockPrivateMessagesDataAccess = new();
+            Mock<IPrivateGroupMessagesDataAccess> _mockPrivateMessagesDataAccess = new();
             _mockPrivateMessagesDataAccess.Setup(p => p.GetDtoListByGroupIdAsync(groupId, 0))
                 .ReturnsAsync(dtoList);
 
@@ -52,7 +52,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
                 .Where(p => p.UserId == userId)
                 .ToList();
 
-            Mock<IPrivateMessagesDataAccess> _mockPrivateMessagesDataAccess = new();
+            Mock<IPrivateGroupMessagesDataAccess> _mockPrivateMessagesDataAccess = new();
             _mockPrivateMessagesDataAccess.Setup(p => p.GetDtoListByUserIdAsync(userId, 0))
                 .ReturnsAsync(dtoList);
 
@@ -73,7 +73,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             PrivateGroupMessageDto dto = _context.PrivateMessagesDto
                  .Single(p => p.PrivateMessageId == messageId);
 
-            Mock<IPrivateMessagesDataAccess> _mockPrivateMessagesDataAccess = new();
+            Mock<IPrivateGroupMessagesDataAccess> _mockPrivateMessagesDataAccess = new();
             _mockPrivateMessagesDataAccess.Setup(p => p.GetDtoByMessageIdAsync(messageId))
                 .ReturnsAsync(dto);
 
@@ -103,8 +103,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             Guid goodMessageId = _context.PrivateGroupMessages.First().PrivateMessageId;
             Guid badMessageId = Guid.Parse("00000000-0000-0000-0000-000000000000");
 
-            bool messageExistsTrue = await _dataAccess.Exists(goodMessageId);
-            bool messageExistsFalse = await _dataAccess.Exists(badMessageId);
+            bool messageExistsTrue = await _dataAccess.MessageIdExists(goodMessageId);
+            bool messageExistsFalse = await _dataAccess.MessageIdExists(badMessageId);
 
             Assert.Multiple(() =>
             {
@@ -163,7 +163,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             bool result = await _dataAccess.DeleteAsync(messageToDelete);
             _context.ChangeTracker.Clear();
 
-            bool messageExists = await _dataAccess.Exists(messageToDelete.PrivateMessageId);
+            bool messageExists = await _dataAccess.MessageIdExists(messageToDelete.PrivateMessageId);
 
             Assert.Multiple(() =>
             {

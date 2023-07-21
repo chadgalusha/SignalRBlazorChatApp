@@ -3,23 +3,23 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages.PublicMessagesDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages.PublicGroupMessagesDatabaseFixture;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
 {
-    public class PublicMessagesDataAccess_UnitTests : IClassFixture<PublicMessagesDatabaseFixture>
+    public class PublicGroupMessagesDataAccess_UnitTests : IClassFixture<PublicGroupMessagesDatabaseFixture>
     {
-        public PublicMessagesDatabaseFixture Fixture { get; }
-        private readonly PublicMessagesDataAccess _dataAccess;
+        public PublicGroupMessagesDatabaseFixture Fixture { get; }
+        private readonly PublicGroupMessagesDataAccess _dataAccess;
         private readonly TestPublicMessagesDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PublicMessagesDataAccess_UnitTests(PublicMessagesDatabaseFixture fixture)
+        public PublicGroupMessagesDataAccess_UnitTests(PublicGroupMessagesDatabaseFixture fixture)
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
             _configuration = new Mock<IConfiguration>().Object;
-            _dataAccess = new PublicMessagesDataAccess(_context, _configuration);
+            _dataAccess = new PublicGroupMessagesDataAccess(_context, _configuration);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
                 .Where(p => p.ChatGroupId == groupId)
                 .ToList();
 
-            Mock<IPublicMessagesDataAccess> _mockPublicMessageDataAccess = new();
+            Mock<IPublicGroupMessagesDataAccess> _mockPublicMessageDataAccess = new();
             _mockPublicMessageDataAccess.Setup(x => x.GetDtoListByGroupIdAsync(groupId, 0))
                 .ReturnsAsync(publicMessagesDtoList);
 
@@ -52,7 +52,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
                 .Where(p => p.UserId == userId)
                 .ToList();
 
-            Mock<IPublicMessagesDataAccess> _mockPublicMessageDataAccess = new();
+            Mock<IPublicGroupMessagesDataAccess> _mockPublicMessageDataAccess = new();
             _mockPublicMessageDataAccess.Setup(x => x.GetDtoListByUserIdAsync(userId, 0))
                 .ReturnsAsync(listPublicMessageDto);
 

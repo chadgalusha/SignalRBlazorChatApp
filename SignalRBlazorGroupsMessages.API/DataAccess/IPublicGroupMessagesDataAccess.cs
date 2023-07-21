@@ -3,7 +3,7 @@ using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
-    public interface IPublicMessagesDataAccess
+    public interface IPublicGroupMessagesDataAccess
     {
         Task<bool> AddAsync(PublicGroupMessages message);
         Task<bool> DeleteAsync(PublicGroupMessages message);

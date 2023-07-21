@@ -9,10 +9,10 @@ namespace SignalRBlazorGroupsMessages.API.Services
     public class PublicChatGroupsService : IPublicChatGroupsService
     {
         private readonly IPublicChatGroupsDataAccess _publicGroupsDataAccess;
-        private readonly IPublicMessagesService _publicMessagesService;
+        private readonly IPublicGroupMessagesService _publicMessagesService;
         private readonly ISerilogger _serilogger;
 
-        public PublicChatGroupsService(IPublicChatGroupsDataAccess publicGroupsDataAccess, IPublicMessagesService publicMessagesService, ISerilogger serilogger)
+        public PublicChatGroupsService(IPublicChatGroupsDataAccess publicGroupsDataAccess, IPublicGroupMessagesService publicMessagesService, ISerilogger serilogger)
         {
             _publicGroupsDataAccess = publicGroupsDataAccess ?? throw new Exception(nameof(publicGroupsDataAccess));
             _publicMessagesService = publicMessagesService ?? throw new Exception(nameof(publicMessagesService));

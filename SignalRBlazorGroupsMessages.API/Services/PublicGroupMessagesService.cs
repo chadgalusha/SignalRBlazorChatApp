@@ -7,12 +7,12 @@ using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
-    public class PublicMessagesService : IPublicMessagesService
+    public class PublicGroupMessagesService : IPublicGroupMessagesService
     {
-        private readonly IPublicMessagesDataAccess _publicMessageDataAccess;
+        private readonly IPublicGroupMessagesDataAccess _publicMessageDataAccess;
         private readonly ISerilogger _serilogger;
 
-        public PublicMessagesService(IPublicMessagesDataAccess publicMessageDataAccess, ISerilogger serilogger)
+        public PublicGroupMessagesService(IPublicGroupMessagesDataAccess publicMessageDataAccess, ISerilogger serilogger)
         {
             _publicMessageDataAccess = publicMessageDataAccess ?? throw new Exception(nameof(publicMessageDataAccess));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
@@ -25,7 +25,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             try
             {
                 List<PublicGroupMessageDto> dtoList = await _publicMessageDataAccess.GetDtoListByGroupIdAsync(groupId, numberItemsToSkip);
-
                 return ReturnApiResponse.Success(response, dtoList);
             }
             catch (Exception ex)
@@ -44,7 +43,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             try
             {
                 List<PublicGroupMessageDto> listDto = await _publicMessageDataAccess.GetDtoListByUserIdAsync(userId, numberItemsToSkip);
-
                 return ReturnApiResponse.Success(response, listDto);
             }
             catch (Exception ex)
@@ -88,11 +86,8 @@ namespace SignalRBlazorGroupsMessages.API.Services
             (bool, string) messageChecks = NewMessageChecks(messageDto);
             if (messageChecks.Item1 == false)
             {
-                response.Success = false;
-                response.Message = messageChecks.Item2;
                 response.Data = null;
-
-                return response;
+                return ReturnApiResponse.Failure(response, messageChecks.Item2);
             }
 
             try

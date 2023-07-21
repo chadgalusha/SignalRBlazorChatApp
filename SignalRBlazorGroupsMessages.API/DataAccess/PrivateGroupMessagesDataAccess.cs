@@ -7,12 +7,12 @@ using System.Data.SqlClient;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
-    public class PrivateMessagesDataAccess : IPrivateMessagesDataAccess
+    public class PrivateGroupMessagesDataAccess : IPrivateGroupMessagesDataAccess
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PrivateMessagesDataAccess(ApplicationDbContext context, IConfiguration configuration)
+        public PrivateGroupMessagesDataAccess(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context ?? throw new Exception(nameof(context));
             _configuration = configuration ?? throw new Exception(nameof(configuration));
@@ -47,7 +47,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             {
                 CommandType = System.Data.CommandType.StoredProcedure
             };
-            command.Parameters.Add("@userId", System.Data.SqlDbType.Int).Value = userId;
+            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId;
             command.Parameters.Add("@numberMessagesToSkip", System.Data.SqlDbType.Int).Value = numberMessagesToSkip;
 
             await connection.OpenAsync();
@@ -83,7 +83,13 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .SingleAsync(p => p.PrivateMessageId == messageId);
         }
 
-        public async Task<bool> Exists(Guid messageId)
+        public async Task<bool> GroupIdExists(int groupId)
+        {
+            return await _context.PrivateGroupMessages
+                .AnyAsync(g => g.ChatGroupId == groupId);
+        }
+
+        public async Task<bool> MessageIdExists(Guid messageId)
         {
             return await _context.PrivateGroupMessages
                 .AnyAsync(p => p.PrivateMessageId == messageId);

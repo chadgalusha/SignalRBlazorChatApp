@@ -10,12 +10,12 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
     [ApiController]
     [Route("api/[controller]/")]
     [Authorize]
-    public class PublicMessagesController : ControllerBase
+    public class PublicGroupMessagesController : ControllerBase
     {
-        private readonly IPublicMessagesService _service;
+        private readonly IPublicGroupMessagesService _service;
         private readonly ISerilogger _serilogger;
 
-        public PublicMessagesController(IPublicMessagesService service, ISerilogger serilogger)
+        public PublicGroupMessagesController(IPublicGroupMessagesService service, ISerilogger serilogger)
         {
             _service    = service ?? throw new Exception(nameof(service));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
@@ -88,7 +88,6 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> AddAsync([FromBody] PublicGroupMessageDto dtoToCreate)
         {
@@ -138,6 +137,9 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         // DELETE api/<PublicMessagesController>/5
         [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
         {
             ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.DeleteAsync(messageId);

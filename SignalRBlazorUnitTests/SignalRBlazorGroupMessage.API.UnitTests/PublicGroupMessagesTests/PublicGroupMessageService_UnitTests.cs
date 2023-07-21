@@ -7,14 +7,14 @@ using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
 {
-    public class PublicMessageService_UnitTests
+    public class PublicGroupMessageService_UnitTests
     {
-        private readonly Mock<IPublicMessagesDataAccess> _mockDataAccess;
+        private readonly Mock<IPublicGroupMessagesDataAccess> _mockDataAccess;
         private readonly Mock<ISerilogger> _mockSerilogger;
 
-        public PublicMessageService_UnitTests()
+        public PublicGroupMessageService_UnitTests()
         {
-            _mockDataAccess = new Mock<IPublicMessagesDataAccess>();
+            _mockDataAccess = new Mock<IPublicGroupMessagesDataAccess>();
             _mockSerilogger = new Mock<ISerilogger>();
         }
 
@@ -31,7 +31,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
                     .Where(x => x.ChatGroupId == 1)
                     .ToList());
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result1 = await _service.GetListByGroupIdAsync(1, 0);
             var result2 = await _service.GetListByGroupIdAsync(999, 0);
@@ -60,7 +60,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
                     .Where(u => u.UserId == testUserId)
                     .ToList());
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result1 = await _service.GetListByUserIdAsync(testUserId, 0);
 
@@ -82,7 +82,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
                 .ReturnsAsync(GetListPublicMessagesDto()
                     .Single(m => m.PublicMessageId == testMessageId));
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result = await _service.GetByMessageIdAsync(testMessageId);
 
@@ -103,7 +103,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result = await _service.AddAsync(NewPublicMessageToDto(newMessage));
 
@@ -127,7 +127,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockDataAccess.Setup(p => p.GetByMessageIdAsync(messageToModify.PublicMessageId))
                 .ReturnsAsync(messageToModify);
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result = await _service.ModifyAsync(ModifiedPublicMessageToDto(messageToModify));
 
@@ -152,7 +152,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             _mockDataAccess.Setup(p => p.DeleteMessagesByResponseMessageIdAsync(messageToDelete.PublicMessageId))
                 .ReturnsAsync(true);
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result = await _service.DeleteAsync(messageToDelete.PublicMessageId);
 
@@ -162,7 +162,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
 
         #region PRIVATE METHODS
 
-        private PublicMessagesService GetNewService()
+        private PublicGroupMessagesService GetNewService()
         {
             return new(_mockDataAccess.Object, _mockSerilogger.Object);
         }

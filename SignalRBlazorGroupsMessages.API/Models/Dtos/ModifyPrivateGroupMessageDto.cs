@@ -2,7 +2,7 @@
 
 namespace SignalRBlazorGroupsMessages.API.Models.Dtos
 {
-    public class ModityPrivateGroupMessageDto
+    public class ModifyPrivateGroupMessageDto
     {
         [Key]
         [Required]
