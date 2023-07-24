@@ -1,14 +1,10 @@
-﻿using ChatApplicationModels;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SignalRBlazorGroupsMessages.API.Controllers;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
-using System.Data.Entity.Core.Objects;
-using Xunit.Sdk;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests
 {

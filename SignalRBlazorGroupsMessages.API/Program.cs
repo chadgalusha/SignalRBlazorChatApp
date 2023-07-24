@@ -40,6 +40,8 @@ namespace SignalRBlazorGroupsMessages.API
             builder.Services.AddScoped<IPublicChatGroupsService, PublicChatGroupsService>();
             builder.Services.AddScoped<IPrivateGroupMessagesService, PrivateGroupMessagesService>();
 
+            builder.Services.AddScoped<IUserProvider, UserProvider>();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
