@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
-using System.Security.Claims;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
@@ -41,17 +38,17 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (numberItemsToSkip < 0)
                 return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
 
-            ApiResponse<List<PrivateGroupMessageDto>> dtoListResponse = await _service.GetDtoListByGroupIdAsync(groupId, numberItemsToSkip);
-            _serilogger.GetRequest("0.0.0.0", dtoListResponse);
+            ApiResponse<List<PrivateGroupMessageDto>> apiResponse = await _service.GetDtoListByGroupIdAsync(groupId, numberItemsToSkip);
+            _serilogger.GetRequest("0.0.0.0", apiResponse);
 
-            switch (dtoListResponse.Message)
+            switch (apiResponse.Message)
             {
                 case "Group Id does not exists.":
-                    return NotFound(dtoListResponse);
+                    return NotFound(apiResponse);
                 case "Error getting messages.":
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoListResponse);
+                    return StatusCode(StatusCodes.Status500InternalServerError, apiResponse);
                 default:
-                    return Ok(dtoListResponse);
+                    return Ok(apiResponse);
             }
         }
 
@@ -59,6 +56,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [HttpGet("byuserid")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PrivateGroupMessageDto>>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<List<PrivateGroupMessageDto>>>> GetListByUserIdAsync(
@@ -69,26 +67,22 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (numberItemsToSkip < 0)
                 return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
 
-            // if userId from JWT not userId in query, return bad request.
-            string? jwtUserId = _userProvider.GetUserIdClaim(ControllerContext.HttpContext);
-            if (jwtUserId.IsNullOrEmpty())
+            // if userId from JWT not userId in query, return unauthorized.
+            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            if (!UserIdValid(jwtUserId, userId))
             {
-                return BadRequest("JWT userId not valid.");
-            }
-            if (jwtUserId != userId)
-            {
-                return BadRequest("JWT userId does not match query userId.");
+                return Forbid("requesting userId not valid for this request.");
             }
 
-            ApiResponse<List<PrivateGroupMessageDto>> dtoListResponse = await _service.GetDtoListByUserIdAsync(userId, numberItemsToSkip);
-            _serilogger.GetRequest("0.0.0.0", dtoListResponse);
+            ApiResponse<List<PrivateGroupMessageDto>> apiResponse = await _service.GetDtoListByUserIdAsync(userId, numberItemsToSkip);
+            _serilogger.GetRequest("0.0.0.0", apiResponse);
 
-            switch (dtoListResponse.Message)
+            switch (apiResponse.Message)
             {
                 case "Error getting messages.":
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoListResponse);
+                    return StatusCode(StatusCodes.Status500InternalServerError, apiResponse);
                 default:
-                    return Ok(dtoListResponse);
+                    return Ok(apiResponse);
             }
         }
 
@@ -101,20 +95,17 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         public async Task<ActionResult<ApiResponse<PrivateGroupMessageDto>>> GetByMessageIdAsync(
             [FromQuery] Guid messageId)
         {
-            if (messageId == new Guid())
-                return BadRequest("Invalid data: " + nameof(messageId));
+            ApiResponse<PrivateGroupMessageDto> apiResponse = await _service.GetDtoByMessageIdAsync(messageId);
+            _serilogger.GetRequest("0.0.0.0", apiResponse);
 
-            ApiResponse<PrivateGroupMessageDto> dtoResponse = await _service.GetDtoByMessageIdAsync(messageId);
-            _serilogger.GetRequest("0.0.0.0", dtoResponse);
-
-            switch (dtoResponse.Message)
+            switch (apiResponse.Message)
             {
                 case "Message Id not found.":
-                    return NotFound(dtoResponse);
+                    return NotFound(apiResponse);
                 case "Error getting message.":
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                    return StatusCode(StatusCodes.Status500InternalServerError, apiResponse);
                 default:
-                    return Ok(dtoResponse);
+                    return Ok(apiResponse);
             }
         }
 
@@ -122,6 +113,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PrivateGroupMessageDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PrivateGroupMessageDto>>> AddAsync([FromBody] CreatePrivateGroupMessageDto createDto)
         {
@@ -130,19 +122,24 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            // TODO: user validation here. create message should have same userid as jwt
+            // Check that jwt userId matches new message userId.
+            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            if (!UserIdValid(jwtUserId, createDto.UserId))
+            {
+                return Forbid("requesting userId not valid for this request.");
+            }
 
-            ApiResponse<PrivateGroupMessageDto> dtoResponse = await _service.AddAsync(createDto);
-            _serilogger.PostRequest("0.0.0.0", dtoResponse);
+            ApiResponse<PrivateGroupMessageDto> apiResponse = await _service.AddAsync(createDto);
+            _serilogger.PostRequest("0.0.0.0", apiResponse);
 
-            switch (dtoResponse.Message)
+            switch (apiResponse.Message)
             {
                 case string s when s.StartsWith("["):
-                    return BadRequest(dtoResponse);
+                    return BadRequest(apiResponse);
                 case "Error saving new message.":
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                    return StatusCode(StatusCodes.Status500InternalServerError, apiResponse);
                 default:
-                    return Ok(dtoResponse);
+                    return Ok(apiResponse);
             }
         }
 
@@ -150,6 +147,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PrivateGroupMessageDto>))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PrivateGroupMessageDto>> ModifyAsync([FromBody] ModifyPrivateGroupMessageDto modifyDto)
         {
@@ -158,13 +156,19 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            ApiResponse<PrivateGroupMessageDto> apiResponse = await _service.ModifyAsync(modifyDto);
+            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            if (!UserIdValid(jwtUserId))
+            {
+                return Forbid("requesting userId not valid for this request.");
+            }
+
+            ApiResponse<PrivateGroupMessageDto> apiResponse = await _service.ModifyAsync(modifyDto, jwtUserId!);
             _serilogger.PutRequest("0.0.0.0", apiResponse);
 
             switch (apiResponse.Message)
             {
-                case "Message Id not found.":
-                    return NotFound(apiResponse);
+                case string s when s.StartsWith("["):
+                    return BadRequest(apiResponse);
                 case "Error modifying message.":
                     return StatusCode(StatusCodes.Status500InternalServerError, apiResponse);
                 default:
@@ -173,19 +177,29 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PrivateGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
         {
-            ApiResponse<PrivateGroupMessageDto> dtoResponse = await _service.DeleteAsync(messageId);
-            _serilogger.DeleteRequest("0.0.0.0", dtoResponse);
-
-            switch (dtoResponse.Message)
+            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            if (!UserIdValid(jwtUserId))
             {
-                case ("Message Id not found."):
-                    return NotFound(dtoResponse);
+                return Forbid("requesting userId not valid for this request.");
+            }
+
+            ApiResponse<PrivateGroupMessageDto> apiResponse = await _service.DeleteAsync(messageId, jwtUserId!);
+            _serilogger.DeleteRequest("0.0.0.0", apiResponse);
+
+            switch (apiResponse.Message)
+            {
+                case string s when s.StartsWith("["):
+                    return BadRequest(apiResponse);
                 case ("Response messages not deleted."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                    return StatusCode(StatusCodes.Status500InternalServerError, apiResponse);
                 case ("Error deleting message."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
+                    return StatusCode(StatusCodes.Status500InternalServerError, apiResponse);
                 default:
                     return NoContent();
             }
@@ -193,14 +207,19 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         #region PRIVATE METHODS
 
-        private string? GetUserIdClaim()
+        private string? GetJwtUserId(HttpContext context)
         {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
-            {
-                return identity.FindFirst("userId")?.Value;
-            }
+            return _userProvider.GetUserIdClaim(context);
+        }
 
-            return null;
+        private bool UserIdValid(string? jwtUserId)
+        {
+            return jwtUserId.IsNullOrEmpty() ? false : true;
+        }
+
+        private bool UserIdValid(string? jwtUserId, string dtoUserId)
+        {
+            return jwtUserId.IsNullOrEmpty() == true || jwtUserId != dtoUserId ? false : true;
         }
 
         #endregion

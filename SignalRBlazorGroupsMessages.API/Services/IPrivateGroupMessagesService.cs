@@ -7,10 +7,10 @@ namespace SignalRBlazorGroupsMessages.API.Services
     {
         Task<ApiResponse<PrivateGroupMessageDto>> AddAsync(CreatePrivateGroupMessageDto createDto);
         Task<bool> DeleteAllMessagesInGroupAsync(int groupId);
-        Task<ApiResponse<PrivateGroupMessageDto>> DeleteAsync(Guid messageId);
+        Task<ApiResponse<PrivateGroupMessageDto>> DeleteAsync(Guid messageId, string jwtUserId);
         Task<ApiResponse<PrivateGroupMessageDto>> GetDtoByMessageIdAsync(Guid messageId);
         Task<ApiResponse<List<PrivateGroupMessageDto>>> GetDtoListByGroupIdAsync(int groupId, int numberMessagesToSkip);
         Task<ApiResponse<List<PrivateGroupMessageDto>>> GetDtoListByUserIdAsync(string userId, int numberMessagesToSkip);
-        Task<ApiResponse<PrivateGroupMessageDto>> ModifyAsync(ModifyPrivateGroupMessageDto modifyDto);
+        Task<ApiResponse<PrivateGroupMessageDto>> ModifyAsync(ModifyPrivateGroupMessageDto modifyDto, string jwtUserId);
     }
 }

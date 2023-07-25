@@ -18,7 +18,8 @@ namespace JWTGenerator
 
             List<Claim> claimsForToken = new()
             {
-                new("userId", "e08b0077-3c15-477e-84bb-bf9d41196455")
+                new("userId", "e08b0077-3c15-477e-84bb-bf9d41196455"),
+                new("userRole", "Standard")
             };
 
             JwtSecurityToken jwtSecurityToken = new(

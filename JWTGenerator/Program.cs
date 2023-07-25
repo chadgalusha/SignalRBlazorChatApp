@@ -38,7 +38,7 @@
         private static void Menu()
         {
             Console.WriteLine("\nEnter 0 to exit the program");
-            Console.WriteLine("Enter 1 to receive a JWT good for 15 minutes.\n");
+            Console.WriteLine("Enter 1 to receive a JWT good for 1 hour.\n");
         }
 
         private static int UserSelection()
