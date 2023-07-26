@@ -32,8 +32,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.ChatGroupsService", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error getting public chat groups.");
             }
         }
@@ -46,7 +44,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 if (!GroupExists(groupId))
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "invalid groupId");
                 }
 
@@ -57,8 +54,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.GetChatGroupByIdAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error getting chat group.");
             }
         }
@@ -71,27 +66,22 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 if (GroupNameTaken(dto.ChatGroupName) == true)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Chat Group name already taken.");
                 }
 
                 PublicChatGroups newChatGroup = CreateDtoToNewModel(dto);
-                bool isSuccess = await _publicGroupsDataAccess.AddAsync(newChatGroup);
 
-                if (!isSuccess)
+                if (!await _publicGroupsDataAccess.AddAsync(newChatGroup))
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Error creating new chat group.");
                 }
 
-                PublicChatGroupsDto newDto = ModelToDto(newChatGroup, dto.ChatGroupName);
-                return ReturnApiResponse.Success(response, newDto);
+                return ReturnApiResponse.Success(response, 
+                    await _publicGroupsDataAccess.GetDtoByIdAsync(newChatGroup.ChatGroupId));
             }
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.AddAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error creating new chat group.");
             }
         }
@@ -108,7 +98,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 (bool, string) messageChecks = ModifyChatGroupChecks(dtoToModify, existingDto);
                 if (messageChecks.Item1 == false)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, messageChecks.Item2);
                 }
 
@@ -117,7 +106,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (!isSuccess)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Error modifying chat group.");
                 }
 
@@ -126,8 +114,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.ModifyAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error modifying chat group.");
             }
         }
@@ -140,7 +126,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 if (!_publicGroupsDataAccess.GroupExists(groupId))
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Chat Group Id not found");
                 }
 
@@ -148,7 +133,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 bool deleteMessagesResult = await _publicMessagesService.DeleteAllMessagesInGroupAsync(groupId);
                 if (!deleteMessagesResult)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Error deleting messages from this group");
                 }
 
@@ -160,7 +144,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 bool deleteChatGroupResponse = await _publicGroupsDataAccess.DeleteAsync(groupToDelete);
                 if (!deleteChatGroupResponse)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Error deleting the chat group.");
                 }
 
@@ -169,8 +152,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.DeleteAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error deleting chat group.");
             }
         }
@@ -194,11 +175,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             if (dto.ChatGroupName == view.ChatGroupName)
             {
-                return (false, "No change to name. No modification needed.");
+                passesChecks = false;
+                errorMessage += "[No change to name. No modification needed.]";
             }
             if (GroupNameTaken(dto.ChatGroupName) == true)
             {
-                return (false, "Chat Group name alrady taken.");
+                passesChecks = false;
+                errorMessage += "[Chat Group name alrady taken.]";
             }
 
             return (passesChecks, errorMessage);

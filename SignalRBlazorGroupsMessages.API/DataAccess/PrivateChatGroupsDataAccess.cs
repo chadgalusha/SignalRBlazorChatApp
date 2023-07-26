@@ -36,7 +36,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             return listPrivateGroups;
         }
 
-        public async Task<PrivateChatGroupsDto> GetDtoByGroupId(int groupId)
+        public async Task<PrivateChatGroupsDto> GetDtoByGroupIdAsync(int groupId)
         {
             PrivateChatGroupsDto dtoToReturn = new();
 

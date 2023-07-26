@@ -157,10 +157,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             var actionResult = await _controller.DeleteAsync(dtoToDelete.PublicMessageId);
             var objectResult = actionResult.Result as NoContentResult;
 
-            Assert.Multiple(() =>
-            {
-                Assert.True(objectResult!.StatusCode == 204);
-            });
+            Assert.True(objectResult!.StatusCode == 204);
         }
 
         [Fact]
@@ -197,7 +194,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             PublicGroupMessagesController _controller = GetNewController();
 
             var actionResult = await _controller.DeleteAsync(dtoToDelete.PublicMessageId);
-            var objectResult = actionResult.Result as Microsoft.AspNetCore.Mvc.ObjectResult;
+            var objectResult = actionResult.Result as ObjectResult;
             var result = (ApiResponse<PublicGroupMessageDto>)objectResult!.Value!;
 
             Assert.Multiple(() =>

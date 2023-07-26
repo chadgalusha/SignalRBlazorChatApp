@@ -75,6 +75,101 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             });
         }
 
+        [Fact]
+        public async Task GetByMessageIdAsync_IsSuccess()
+        {
+            ApiResponse<PrivateGroupMessageDto> apiResponse = new();
+            PrivateGroupMessageDto dto = GetDtoList().First();
+
+            _mockService.Setup(p => p.GetDtoByMessageIdAsync(dto.PrivateMessageId))
+                .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dto));
+
+            PrivateGroupMessagesController _controller = GetNewController();
+
+            var actionResult = await _controller.GetByMessageIdAsync(dto.PrivateMessageId);
+            var objectResult = actionResult.Result as OkObjectResult;
+            var result = (ApiResponse<PrivateGroupMessageDto>)objectResult!.Value!;
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+                Assert.Equal(dto.UserName, result.Data!.UserName);
+            });
+        }
+
+        [Fact]
+        public async Task AddAsync_IsSuccess()
+        {
+            ApiResponse<PrivateGroupMessageDto> apiResponse = new();
+            CreatePrivateGroupMessageDto dtoToCreate = GetCreateDto();
+            PrivateGroupMessageDto createdDto = CreatedDto();
+            string testJwtUserId = createdDto.UserId;
+
+            PrivateGroupMessagesController _controller = GetNewController();
+
+            _mockUserProvider.Setup(u => u.GetUserIdClaim(_controller.HttpContext))
+                .Returns(testJwtUserId);
+            _mockService.Setup(a => a.AddAsync(dtoToCreate))
+                .ReturnsAsync(ReturnApiResponse.Success(apiResponse, createdDto));
+
+            var actionResult = await _controller.AddAsync(dtoToCreate);
+            var objectResult = actionResult.Result as OkObjectResult;
+            var result = (ApiResponse<PrivateGroupMessageDto>)objectResult!.Value!;
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+                Assert.Equal(createdDto.Text, result.Data!.Text);
+            });
+        }
+
+        [Fact]
+        public async Task ModifyAsync_IsSuccess()
+        {
+            ApiResponse<PrivateGroupMessageDto> apiResponse = new();
+            var modifyDto = GetModifyDto();
+            var responseDto = GetDtoList().First();
+            responseDto.Text = modifyDto.Text;
+            string testJwtUserId = responseDto.UserId;
+
+            PrivateGroupMessagesController _controller = GetNewController();
+
+            _mockUserProvider.Setup(u => u.GetUserIdClaim(_controller.HttpContext))
+                .Returns(testJwtUserId);
+            _mockService.Setup(m => m.ModifyAsync(modifyDto, testJwtUserId))
+                .ReturnsAsync(ReturnApiResponse.Success(apiResponse, responseDto));
+
+            var actionResult = await _controller.ModifyAsync(modifyDto);
+            var objectResult = actionResult.Result as OkObjectResult;
+            var result = (ApiResponse<PrivateGroupMessageDto>)objectResult!.Value!;
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+                Assert.Equal(modifyDto.Text, result.Data!.Text);
+            });
+        }
+
+        [Fact]
+        public async Task DeleteAsync_IsSuccess()
+        {
+            ApiResponse<PrivateGroupMessageDto> apiResponse = new();
+            Guid messageIdToDelete = GetDtoList().First().PrivateMessageId;
+            string testJwtUserId = GetDtoList().First().UserId;
+
+            PrivateGroupMessagesController _controller = GetNewController();
+
+            _mockUserProvider.Setup(u => u.GetUserIdClaim(_controller.HttpContext))
+                .Returns(testJwtUserId);
+            _mockService.Setup(d => d.DeleteAsync(messageIdToDelete, testJwtUserId))
+                .ReturnsAsync(ReturnApiResponse.Success(apiResponse, new()));
+
+            var actionResult = await _controller.DeleteAsync(messageIdToDelete);
+            var objectResult = actionResult.Result as NoContentResult;
+
+            Assert.True(objectResult!.StatusCode == 204);
+        }
+
         #region PRIVATE METHODS
 
         private PrivateGroupMessagesController GetNewController()
@@ -126,6 +221,39 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
                     Text            = "Sample message",
                     MessageDateTime = new DateTime(2023, 6, 15)
                 }
+            };
+        }
+
+        private CreatePrivateGroupMessageDto GetCreateDto()
+        {
+            return new()
+            {
+                UserId      = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                ChatGroupId = 1,
+                Text        = "New message."
+            };
+        }
+
+        private PrivateGroupMessageDto CreatedDto()
+        {
+            return new()
+            {
+                PrivateMessageId = Guid.NewGuid(),
+                UserId           = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                UserName         = "TestUser1",
+                ChatGroupId      = 1,
+                ChatGroupName    = "Test Chat Group 1",
+                Text             = "New message.",
+                MessageDateTime  = DateTime.Now
+            };
+        }
+
+        private ModifyPrivateGroupMessageDto GetModifyDto()
+        {
+            return new()
+            {
+                PrivateMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3"),
+                Text             = "Modified text."
             };
         }
 

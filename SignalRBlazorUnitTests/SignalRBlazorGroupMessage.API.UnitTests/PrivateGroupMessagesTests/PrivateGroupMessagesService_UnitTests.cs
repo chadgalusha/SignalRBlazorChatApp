@@ -110,17 +110,21 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
         public async Task ModifyAsync_IsSucess()
         {
             ModifyPrivateGroupMessageDto dtoToModify = GetModifyDto();
+            var returnDto = GetListPrivateMessagesDto().First();
+            returnDto.Text = dtoToModify.Text;
+            string testJwtUserId = returnDto.UserId;
 
-            _mockDataAccess.Setup(p => p.MessageIdExists(dtoToModify.PrivateMessageId))
-                .ReturnsAsync(true);
+
             _mockDataAccess.Setup(p => p.GetByMessageIdAsync(dtoToModify.PrivateMessageId))
                 .ReturnsAsync(DtoToModel(GetListPrivateMessagesDto().First()));
             _mockDataAccess.Setup(p => p.ModifyAsync(It.IsAny<PrivateGroupMessages>()))
                 .ReturnsAsync(true);
+            _mockDataAccess.Setup(p => p.GetDtoByMessageIdAsync(dtoToModify.PrivateMessageId))
+                .ReturnsAsync(returnDto);
 
             PrivateGroupMessagesService _service = GetNewService();
 
-            var result = await _service.ModifyAsync(dtoToModify);
+            var result = await _service.ModifyAsync(dtoToModify, testJwtUserId);
 
             Assert.Multiple(() =>
             {
@@ -133,9 +137,8 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
         public async Task DeleteAsync_IsSuccess()
         {
             Guid messageId = GetListPrivateMessagesDto().First().PrivateMessageId;
+            string testJwtUserId = GetListPrivateMessagesDto().First().UserId;
 
-            _mockDataAccess.Setup(p => p.MessageIdExists(messageId))
-                .ReturnsAsync(true);
             _mockDataAccess.Setup(p => p.GetByMessageIdAsync(messageId))
                 .ReturnsAsync(DtoToModel(
                     GetListPrivateMessagesDto()
@@ -147,12 +150,12 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
 
             PrivateGroupMessagesService _service = GetNewService();
 
-            var result = await _service.DeleteAsync(messageId);
+            var result = await _service.DeleteAsync(messageId, testJwtUserId);
             
             Assert.Multiple(() =>
             {
                 Assert.True(result.Success);
-                Assert.Equal(messageId, result.Data?.PrivateMessageId);
+                Assert.Equal(new Guid(), result.Data?.PrivateMessageId);
             });
         }
 

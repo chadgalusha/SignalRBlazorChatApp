@@ -186,7 +186,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
             if (!UserIdValid(jwtUserId))
             {
-                return Forbid("requesting userId not valid for this request.");
+                return Forbid("Requesting userId not valid for this request.");
             }
 
             ApiResponse<PrivateGroupMessageDto> apiResponse = await _service.DeleteAsync(messageId, jwtUserId!);
