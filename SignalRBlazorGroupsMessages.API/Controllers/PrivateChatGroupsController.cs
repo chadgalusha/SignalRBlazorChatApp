@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ChatApplicationModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Helpers;
@@ -17,7 +19,8 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         private readonly ISerilogger _serilogger;
         private readonly IUserProvider _userProvider;
 
-        public PrivateChatGroupsController(IPrivateChatGroupsService service, ISerilogger serilogger, IUserProvider userProvider)
+        public PrivateChatGroupsController(IPrivateChatGroupsService service, ISerilogger serilogger, 
+            IUserProvider userProvider)
         {
             _service = service ?? throw new Exception(nameof(service));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
@@ -43,7 +46,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             {
                 return ErrorHttpResponse(apiResponse);
             }
-
+            
             return Ok(apiResponse);
         }
 
@@ -70,6 +73,107 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> AddAsync([FromBody] CreatePrivateChatGroupDto createDto)
+        {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            ApiResponse<PrivateChatGroupsDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId, createDto.GroupOwnerUserId))
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            apiResponse = await _service.AddAsync(createDto);
+            _serilogger.PostRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
+        }
+
+        [HttpPost("groupmember")]
+        public async Task<ActionResult<PrivateGroupMembers>> AddMemberAsync([FromQuery] int groupId, string userToAddId)
+        {
+            ApiResponse<PrivateGroupMembers> apiResponse = await _service.AddPrivateGroupMember(groupId, userToAddId);
+            _serilogger.PostRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<PrivateChatGroupsDto>> ModifyAsync([FromBody] ModifyPrivateChatGroupDto modifyDto)
+        {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            ApiResponse<PrivateChatGroupsDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId))
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            apiResponse = await _service.ModifyAsync(modifyDto, jwtUserId!);
+            _serilogger.PutRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult> DeleteAsync([FromQuery] int groupId)
+        {
+            ApiResponse<PrivateChatGroupsDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId))
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            apiResponse = await _service.DeleteAsync(groupId, jwtUserId!);
+            _serilogger.DeleteRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("groupmember")]
+        public async Task<ActionResult> DeleteMemberAsync([FromQuery] int groupId, string userId)
+        {
+            ApiResponse<PrivateGroupMembers> apiResponse = await _service.RemoveUserFromGroupAsync(groupId, userId);
+            _serilogger.DeleteRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return NoContent();
+        }
+
         #region PRIVATE METHODS
 
         private string? GetJwtUserId()
@@ -94,23 +198,8 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         private ActionResult ErrorHttpResponse<T>(ApiResponse<T> apiResponse)
         {
-            return apiResponse.Message switch
-            {
-                ErrorMessages.AddingItem => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.AddingUser => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.DeletingItem => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.DeletingMessages => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.Deletinguser => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.GroupNameTaken => BadRequest(apiResponse),
-                ErrorMessages.InvalidUserId => StatusCode(StatusCodes.Status403Forbidden, apiResponse),
-                ErrorMessages.ModifyingItem => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.NoModification => BadRequest(apiResponse),
-                ErrorMessages.RecordNotFound => NotFound(apiResponse),
-                ErrorMessages.RemovingUser => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.RetrievingItems => StatusCode(StatusCodes.Status500InternalServerError, apiResponse),
-                ErrorMessages.UserAlreadyInGroup => BadRequest(apiResponse),
-                _ => NotFound(apiResponse)
-            };
+            int errorCode = HttpErrorCodes.Get(apiResponse.Message);
+            return StatusCode(errorCode, apiResponse);
         }
 
         #endregion

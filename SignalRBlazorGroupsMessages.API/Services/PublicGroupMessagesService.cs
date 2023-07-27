@@ -30,8 +30,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByGroupIdAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error getting messages.");
             }
         }
@@ -48,8 +46,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByUserIdAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error getting messages.");
             }
         }
@@ -64,7 +60,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (messageDto.PublicMessageId == new Guid())
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Message Id not found.");
                 }
 
@@ -73,8 +68,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByIdAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error getting message.");
             }
         }
@@ -86,7 +79,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             (bool, string) messageChecks = NewMessageChecks(messageDto);
             if (messageChecks.Item1 == false)
             {
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, messageChecks.Item2);
             }
 
@@ -97,7 +89,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (!isSuccess)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Error saving new message.");
                 }
 
@@ -108,8 +99,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.AddAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error saving new message.");
             }
         }
@@ -134,7 +123,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (!isSuccess)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Error modifying message.");
                 }
 
@@ -145,8 +133,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.ModifyAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error modifying message.");
             }
         }
@@ -162,7 +148,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 // Check message exists
                 if (!await _publicMessageDataAccess.Exists(messageId))
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Message Id not found.");
                 }
 
@@ -173,7 +158,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 bool responseMessagesDeleted = await _publicMessageDataAccess.DeleteMessagesByResponseMessageIdAsync(messageId);
                 if (!responseMessagesDeleted)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Response messages not deleted.");
                 }
 
@@ -181,7 +165,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 bool isSuccess = await _publicMessageDataAccess.DeleteAsync(messageToDelete);
                 if (!isSuccess)
                 {
-                    response.Data = null;
                     return ReturnApiResponse.Failure(response, "Error deleting message.");
                 }
 
@@ -190,8 +173,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.DeleteAsync", ex);
-
-                response.Data = null;
                 return ReturnApiResponse.Failure(response, "Error deleting message.");
             }
         }

@@ -11,7 +11,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
         private readonly IPrivateChatGroupsDataAccess _privateGroupsDataAccess;
         private readonly IPrivateGroupMessagesDataAccess _privateGroupMessagesDataAccess;
         private readonly ISerilogger _serilogger;
-        private readonly ErrorMessages errorMessages;
 
         public PrivateChatGroupsService(IPrivateChatGroupsDataAccess privateGroupsDataAccess,
             IPrivateGroupMessagesDataAccess privateGroupMessagesDataAccess, ISerilogger serilogger)
@@ -45,7 +44,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 if (!await _privateGroupsDataAccess.IsUserInPrivateGroup(groupId, userId))
                 {
-                    return ReturnApiResponse.Failure(apiResponse, "Requesting userId not valid for this request.");
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
                 }
 
                 PrivateChatGroupsDto dto = await _privateGroupsDataAccess.GetDtoByGroupIdAsync(groupId);
@@ -54,7 +53,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.GetDtoByGroupId", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error getting private chat group.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
         }
 
@@ -66,19 +65,19 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 if (GroupNameTaken(createDto.ChatGroupName))
                 {
-                    return ReturnApiResponse.Failure(apiResponse, "Chat Group name already taken.");
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.GroupNameTaken);
                 }
 
                 PrivateChatGroups newGroup = CreateDtoToModel(createDto);
 
                 return await _privateGroupsDataAccess.AddAsync(newGroup) ?
                     ReturnApiResponse.Success(apiResponse, await _privateGroupsDataAccess.GetDtoByGroupIdAsync(newGroup.ChatGroupId)) :
-                    ReturnApiResponse.Failure(apiResponse, "Error saving private chat group.");
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.AddingItem);
             }
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.AddAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error saving private chat group.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.AddingItem);
             }
         }
 
@@ -98,12 +97,12 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 return await _privateGroupsDataAccess.ModifyAsync(groupToModify) ?
                     ReturnApiResponse.Success(apiResponse, await _privateGroupsDataAccess.GetDtoByGroupIdAsync(groupToModify.ChatGroupId)) :
-                    ReturnApiResponse.Failure(apiResponse, "Error modifying private chat group.");
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.ModifyingItem);
             }
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.ModifyAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error modifying private chat group.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.ModifyingItem);
             }
         }
 
@@ -123,12 +122,12 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 return await _privateGroupsDataAccess.DeleteAsync(groupToDelete) ?
                     ReturnApiResponse.Success(apiResponse, new()) :
-                    ReturnApiResponse.Failure(apiResponse, "Error deleting private chat group.");
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
             }
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.DeleteAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error deleting private chat group.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
             }
         }
 
@@ -140,7 +139,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 if (await _privateGroupsDataAccess.IsUserInPrivateGroup(groupId, userId))
                 {
-                    return ReturnApiResponse.Failure(apiResponse, "User is already in the private group.");
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.UserAlreadyInGroup);
                 }
 
                 PrivateGroupMembers newMember = new()
@@ -149,15 +148,14 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     UserId = userId
                 };
 
-                bool result = await _privateGroupsDataAccess.AddUserToGroupAsync(newMember);
-
-                return result ? ReturnApiResponse.Success(apiResponse, newMember) :
-                    ReturnApiResponse.Failure(apiResponse, "Error adding new private group member.");
+                return await _privateGroupsDataAccess.AddUserToGroupAsync(newMember) ? 
+                    ReturnApiResponse.Success(apiResponse, newMember) :
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.AddingUser);
             }
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.AddPrivateGroupMember", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error adding new private group member.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.AddingUser);
             }
         }
 
@@ -171,17 +169,17 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (groupMember == null)
                 {
-                    return ReturnApiResponse.Failure(apiResponse, "Group member record not found.");
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
                 }
 
                 return await _privateGroupsDataAccess.RemoveUserFromPrivateChatGroup(groupMember) ?
                     ReturnApiResponse.Success(apiResponse, new()) :
-                    ReturnApiResponse.Failure(apiResponse, "Error removing private group member.");
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.RemovingUser);
             }
             catch (Exception ex)
             {
                 _serilogger.ChatGroupError("ChatGroupsService.RemoveUserFromPrivateChatGroupAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error removing private group member.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RemovingUser);
             }
         }
 
@@ -209,18 +207,15 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             if (group.GroupOwnerUserId != jwtUserId)
             {
-                passesChecks = false;
-                errorMessage += "[Requesting userId not valid for this request.]";
+                return (false, ErrorMessages.InvalidUserId);
             }
             if (modifyDto.ChatGroupName == group.ChatGroupName)
             {
-                passesChecks = false;
-                errorMessage += "[No change to name. No modification needed.]";
+                return (false, ErrorMessages.NoModification);
             }
             if (GroupNameTaken(modifyDto.ChatGroupName))
             {
-                passesChecks = false;
-                errorMessage += "[Chat Group name alrady taken.]";
+                return (false, ErrorMessages.GroupNameTaken);
             }
 
             return (passesChecks, errorMessage);
@@ -235,17 +230,17 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             if (groupToDelete.GroupOwnerUserId != jwtUserId)
             {
-                return (false, "Requesting userId not valid for this request.");
+                return (false, ErrorMessages.InvalidUserId);
             }
 
             if (!await _privateGroupMessagesDataAccess.DeleteAllMessagesInGroupAsync(groupToDelete.ChatGroupId))
             {
-                return (false, "Error deleting messages from this group.");
+                return (false, ErrorMessages.DeletingMessages);
             }
 
             if (!await _privateGroupsDataAccess.RemoveAllUsersFromGroupAsync(groupToDelete.ChatGroupId))
             {
-                return (false, "Error removing group members from this group.");
+                return (false, ErrorMessages.DeletingUser);
             }
 
             return (passesChecks, errorMessage);

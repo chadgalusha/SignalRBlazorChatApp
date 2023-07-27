@@ -10,7 +10,7 @@
         public const string AddingUser         = "Error adding user.";
         public const string DeletingItem       = "Error deleting item.";
         public const string DeletingMessages   = "Error deleting messages from this group.";
-        public const string Deletinguser       = "Error removing group members from this group.";
+        public const string DeletingUser       = "Error removing group members from this group.";
         public const string GroupNameTaken     = "Group name already taken.";
         public const string InvalidUserId      = "Requesting userId not valid for this request.";
         public const string ModifyingItem      = "Error modifying item.";
