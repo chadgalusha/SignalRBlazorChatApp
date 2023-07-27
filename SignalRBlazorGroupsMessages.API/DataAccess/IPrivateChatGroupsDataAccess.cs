@@ -5,7 +5,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
     public interface IPrivateChatGroupsDataAccess
     {
-        Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember);
+        Task<bool> AddUserToGroupAsync(PrivateGroupMembers privateGroupMember);
         Task<PrivateGroupMembers> GetPrivateGroupMemberRecord(int chatGroupid, string userId);
         Task<List<PrivateChatGroupsDto>> GetDtoListByUserIdAsync(string userId);
         Task<PrivateChatGroupsDto> GetDtoByGroupIdAsync(int groupId);
@@ -17,5 +17,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         Task<bool> AddAsync(PrivateChatGroups newGroup);
         Task<bool> ModifyAsync(PrivateChatGroups modifiedGroup);
         Task<bool> DeleteAsync(PrivateChatGroups deleteGroup);
+        Task<bool> RemoveAllUsersFromGroupAsync(int groupId);
     }
 }

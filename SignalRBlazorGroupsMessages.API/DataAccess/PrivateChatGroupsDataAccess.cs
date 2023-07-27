@@ -79,7 +79,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .SingleAsync(p => p.PrivateChatGroupId == chatGroupid
                     && p.UserId == userId);
         }
-        public async Task<bool> AddUserToPrivateChatGroupAsync(PrivateGroupMembers privateGroupMember)
+        public async Task<bool> AddUserToGroupAsync(PrivateGroupMembers privateGroupMember)
         {
             _context.PrivateGroupsMembers.Add(privateGroupMember);
             return await Save();
@@ -89,6 +89,15 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         {
             _context.PrivateGroupsMembers.Remove(privateGroupMember);
             return await Save();
+        }
+
+        public async Task<bool> RemoveAllUsersFromGroupAsync(int groupId)
+        {
+            int result = await _context.PrivateGroupsMembers
+                .Where(g => g.PrivateChatGroupId == groupId)
+                .ExecuteDeleteAsync();
+
+            return result >= 0;
         }
 
         public async Task<bool> IsUserInPrivateGroup(int groupId, string userId)

@@ -5,5 +5,6 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
     public interface IUserProvider
     {
         string? GetUserIdClaim(HttpContext context);
+        string GetUserIP(HttpContext context);
     }
 }

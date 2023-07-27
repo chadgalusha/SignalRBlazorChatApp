@@ -13,5 +13,10 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
 
             return null;
         }
+
+        public string GetUserIP(HttpContext context)
+        {
+            return context.Connection.RemoteIpAddress!.MapToIPv4().ToString() ?? "0.0.0.0";
+        }
     }
 }

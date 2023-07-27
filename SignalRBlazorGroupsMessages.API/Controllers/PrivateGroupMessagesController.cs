@@ -21,7 +21,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         {
             _service = service ?? throw new Exception(nameof(service));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
-            _userProvider = userProvider;
+            _userProvider = userProvider ?? throw new Exception(nameof(userProvider));
         }
 
         // GET: api/[controller]/bygroupid
