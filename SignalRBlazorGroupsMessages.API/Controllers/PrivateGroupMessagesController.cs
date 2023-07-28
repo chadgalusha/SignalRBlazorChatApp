@@ -5,7 +5,6 @@ using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
-using System.ComponentModel.DataAnnotations;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
@@ -73,7 +72,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             }
 
             // if userId from JWT not userId in query, return unauthorized.
-            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId, userId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
@@ -113,14 +112,19 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         {
             ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
-            if (!ModelState.IsValid || createDto == null) { return BadRequest(ModelState); }
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
 
             // Check that jwt userId matches new message userId.
-            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId, createDto.UserId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
                 return ErrorHttpResponse(apiResponse);
+            }
+            if (createDto.Text.IsNullOrEmpty())
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid item: " + nameof(createDto.Text));
+                return BadRequest(apiResponse);
             }
 
             apiResponse = await _service.AddAsync(createDto);
@@ -138,11 +142,11 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         [HttpPut]
         public async Task<ActionResult<PrivateGroupMessageDto>> ModifyAsync([FromBody] ModifyPrivateGroupMessageDto modifyDto)
         {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
             ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
-            if (!ModelState.IsValid || modifyDto == null) { return BadRequest(ModelState); }
-
-            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
@@ -165,7 +169,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         {
             ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
-            string? jwtUserId = GetJwtUserId(ControllerContext.HttpContext);
+            string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
@@ -185,9 +189,9 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         #region PRIVATE METHODS
 
-        private string? GetJwtUserId(HttpContext context)
+        private string? GetJwtUserId()
         {
-            return _userProvider.GetUserIdClaim(context);
+            return _userProvider.GetUserIdClaim(ControllerContext.HttpContext);
         }
 
         private bool UserIdValid(string? jwtUserId)

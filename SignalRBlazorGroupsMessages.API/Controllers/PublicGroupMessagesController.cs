@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
@@ -14,155 +15,196 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
     {
         private readonly IPublicGroupMessagesService _service;
         private readonly ISerilogger _serilogger;
+        private readonly IUserProvider _userProvider;
 
-        public PublicGroupMessagesController(IPublicGroupMessagesService service, ISerilogger serilogger)
+        public PublicGroupMessagesController(IPublicGroupMessagesService service, ISerilogger serilogger, IUserProvider userProvider)
         {
-            _service    = service ?? throw new Exception(nameof(service));
+            _service = service ?? throw new Exception(nameof(service));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
+            _userProvider = userProvider ?? throw new Exception(nameof(userProvider));
         }
 
         // GET: api/<PublicMessagesController>/bygroupid
         [HttpGet("bygroupid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicGroupMessageDto>>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<List<PublicGroupMessageDto>>>> GetListByGroupIdAsync(
-            [FromQuery] int groupId, int numberItemsToSkip)
+            [FromQuery] int groupId, int numberMessagesToSkip)
         {
+            ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
+
             if (groupId < 0)
-                return BadRequest("Invalid data: " + nameof(groupId));
-            if (numberItemsToSkip < 0)
-                return BadRequest("Invalid data: "+nameof(numberItemsToSkip));
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(groupId));
+                return BadRequest(apiResponse);
+            }
+            if (numberMessagesToSkip < 0)
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberMessagesToSkip));
+                return BadRequest(apiResponse);
+            }
 
-            ApiResponse<List<PublicGroupMessageDto>> dtoList = await _service.GetListByGroupIdAsync(groupId, numberItemsToSkip);
-            _serilogger.GetRequest("0.0.0.0", dtoList);
+            apiResponse = await _service.GetListByGroupIdAsync(groupId, numberMessagesToSkip);
+            _serilogger.GetRequest(GetUserIp(), apiResponse);
 
-            return Ok(dtoList);
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
         }
 
         // GET: api/<PublicMessagesController>/byuserid
         [HttpGet("byuserid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PublicGroupMessageDto>>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<List<PublicGroupMessageDto>>>> GetListByUserIdAsync(
-            [FromQuery] string userId, int numberItemsToSkip)
+            [FromQuery] string userId, int numberMessagesToSkip)
         {
-            if (Guid.Parse(userId) == new Guid())
-                return BadRequest("Invalid data: " + nameof(userId));
-            if (numberItemsToSkip < 0)
-                return BadRequest("Invalid data: " + nameof(numberItemsToSkip));
+            ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
 
-            ApiResponse<List<PublicGroupMessageDto>> listDtoResponse = await _service.GetListByUserIdAsync(userId, numberItemsToSkip);
-            _serilogger.GetRequest("0.0.0.0", listDtoResponse);
+            if (userId.IsNullOrEmpty())
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(userId));
+                return BadRequest(apiResponse);
+            }
+            if (numberMessagesToSkip < 0)
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberMessagesToSkip));
+                return BadRequest(apiResponse);
+            }
 
-            return Ok(listDtoResponse);
+            apiResponse = await _service.GetListByUserIdAsync(userId, numberMessagesToSkip);
+            _serilogger.GetRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
         }
 
         // GET api/<PublicMessagesController>/bymessageid
         [HttpGet("bymessageid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> GetByMessageIdAsync(
             [FromQuery] Guid messageId)
         {
-            if (messageId == new Guid())
-                return BadRequest("Invalid data: " + nameof(messageId));
+            ApiResponse<PublicGroupMessageDto>  apiResponse = await _service.GetByMessageIdAsync(messageId);
+            _serilogger.GetRequest(GetUserIp(), apiResponse);
 
-            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.GetByMessageIdAsync(messageId);
-            _serilogger.GetRequest("0.0.0.0", dtoResponse);
-
-            switch (dtoResponse.Message)
+            if (!apiResponse.Success)
             {
-                case ("Message Id not found."):
-                    return NotFound(dtoResponse);
-                case ("Error getting message."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                default:
-                    return Ok(dtoResponse);
+                return ErrorHttpResponse(apiResponse);
             }
+
+            return Ok(apiResponse);
         }
 
         // POST api/<PublicMessagesController>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> AddAsync([FromBody] PublicGroupMessageDto dtoToCreate)
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> AddAsync([FromBody] CreatePublicGroupMessageDto createDto)
         {
-            if (!ModelState.IsValid || dtoToCreate == null)
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId, createDto.UserId))
             {
-                return BadRequest(ModelState);
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
+            }
+            if (createDto.Text.IsNullOrEmpty())
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid item: " + nameof(createDto.Text));
+                return BadRequest(apiResponse);
             }
 
-            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.AddAsync(dtoToCreate);
-            _serilogger.PostRequest("0.0.0.0", dtoResponse);
+            apiResponse = await _service.AddAsync(createDto);
+            _serilogger.PostRequest(GetUserIp(), apiResponse);
 
-            switch (dtoResponse.Message)
+            if (!apiResponse.Success)
             {
-                case ("Error saving new message."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                default:
-                    return Ok(dtoResponse);
+                return ErrorHttpResponse(apiResponse);
             }
+
+            return Ok(apiResponse);
         }
 
         // PUT api/<PublicMessagesController>/
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicGroupMessageDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> ModifyAsync([FromBody] ModifyPublicGroupMessageDto dtoToModify)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId))
             {
-                return BadRequest(ModelState);
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
             }
 
-            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.ModifyAsync(dtoToModify);
-            _serilogger.PutRequest("0.0.0.0", dtoResponse);
+            apiResponse = await _service.ModifyAsync(dtoToModify, jwtUserId!);
+            _serilogger.PutRequest(GetUserIp(), apiResponse);
 
-            switch (dtoResponse.Message)
+            if (!apiResponse.Success)
             {
-                case ("Message Id not found."):
-                    return NotFound(dtoResponse);
-                case ("Error modifying message."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                default:
-                    return Ok(dtoResponse);
+                return ErrorHttpResponse(apiResponse);
             }
+
+            return Ok(apiResponse);
         }
 
         // DELETE api/<PublicMessagesController>/5
         [HttpDelete]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
         {
-            ApiResponse<PublicGroupMessageDto> dtoResponse = await _service.DeleteAsync(messageId);
-            _serilogger.DeleteRequest("0.0.0.0", dtoResponse);
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
-            switch (dtoResponse.Message)
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId))
             {
-                case ("Message Id not found."):
-                    return NotFound(dtoResponse);
-                case ("Response messages not deleted."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                case ("Error deleting message."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                default:
-                    return NoContent();
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
             }
+
+            apiResponse = await _service.DeleteAsync(messageId, jwtUserId!);
+            _serilogger.DeleteRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return NoContent();
         }
 
         #region PRIVATE METHODS
 
-        private string GetIpv4Address()
+        private string? GetJwtUserId()
         {
-            return HttpContext.Connection.RemoteIpAddress!.MapToIPv4().ToString();
+            return _userProvider.GetUserIdClaim(ControllerContext.HttpContext);
+        }
+
+        private bool UserIdValid(string? jwtUserId)
+        {
+            return jwtUserId.IsNullOrEmpty() ? false : true;
+        }
+
+        private bool UserIdValid(string? jwtUserId, string dtoUserId)
+        {
+            return jwtUserId.IsNullOrEmpty() == true || jwtUserId != dtoUserId ? false : true;
+        }
+
+        private string GetUserIp()
+        {
+            return _userProvider.GetUserIP(ControllerContext.HttpContext);
+        }
+
+        private ActionResult ErrorHttpResponse<T>(ApiResponse<T> apiResponse)
+        {
+            int errorCode = HttpErrorCodes.Get(apiResponse.Message);
+            return StatusCode(errorCode, apiResponse);
         }
 
         #endregion

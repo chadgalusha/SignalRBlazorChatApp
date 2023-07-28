@@ -16,6 +16,7 @@
         public const string ModifyingItem      = "Error modifying item.";
         public const string NoModification     = "No modification needed.";
         public const string RecordNotFound     = "Record not found.";
+        public const string ReplyMessages      = "Error deleting reply messages.";
         public const string RemovingUser       = "Error removing user.";
         public const string RetrievingItems    = "Error retrieving item(s).";
         public const string UserAlreadyInGroup = "User already in the private group.";

@@ -39,7 +39,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             return Ok(apiResponse);
         }
 
-        [HttpGet("byid")]
+        [HttpGet("bygroupid")]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> GetByIdAsync(
             [FromQuery] int groupId)
         {

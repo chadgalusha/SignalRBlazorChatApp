@@ -73,27 +73,33 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
                 .Any(c => c.ChatGroupName == groupName);
         }
 
+        public async Task<bool> GroupExists(int groupId)
+        {
+            return await _context.PrivateChatGroups
+                .AnyAsync(c => c.ChatGroupId == groupId);
+        }
+
         public async Task<PrivateGroupMembers> GetPrivateGroupMemberRecord(int chatGroupid, string userId)
         {
-            return await _context.PrivateGroupsMembers
+            return await _context.PrivateGroupMembers
                 .SingleAsync(p => p.PrivateChatGroupId == chatGroupid
                     && p.UserId == userId);
         }
         public async Task<bool> AddUserToGroupAsync(PrivateGroupMembers privateGroupMember)
         {
-            _context.PrivateGroupsMembers.Add(privateGroupMember);
+            _context.PrivateGroupMembers.Add(privateGroupMember);
             return await Save();
         }
 
         public async Task<bool> RemoveUserFromPrivateChatGroup(PrivateGroupMembers privateGroupMember)
         {
-            _context.PrivateGroupsMembers.Remove(privateGroupMember);
+            _context.PrivateGroupMembers.Remove(privateGroupMember);
             return await Save();
         }
 
         public async Task<bool> RemoveAllUsersFromGroupAsync(int groupId)
         {
-            int result = await _context.PrivateGroupsMembers
+            int result = await _context.PrivateGroupMembers
                 .Where(g => g.PrivateChatGroupId == groupId)
                 .ExecuteDeleteAsync();
 
@@ -102,7 +108,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<bool> IsUserInPrivateGroup(int groupId, string userId)
         {
-            return await _context.PrivateGroupsMembers
+            return await _context.PrivateGroupMembers
                 .Where(g => g.PrivateChatGroupId == groupId)
                 .AnyAsync(u => u.UserId == userId);
         }

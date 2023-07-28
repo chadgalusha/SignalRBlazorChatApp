@@ -26,7 +26,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 if (!await _privateMessageDataAccess.GroupIdExists(groupId))
                 {
-                    return ReturnApiResponse.Failure(apiResponse, "Group Id does not exists.");
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
                 }
 
                 List<PrivateGroupMessageDto> dtoList = await _privateMessageDataAccess.GetDtoListByGroupIdAsync(groupId, numberMessagesToSkip);
@@ -35,7 +35,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PrivateMessageError("PrivateMessagesService.GetListByGroupIdAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error getting messages.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
         }
 
@@ -51,7 +51,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PrivateMessageError("PrivateMessagesService.GetDtoListByUserIdAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error getting messages.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
         }
 
@@ -65,7 +65,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (messageId == new Guid() || dtoMessage.PrivateMessageId == new Guid())
                 {
-                    return ReturnApiResponse.Failure(apiResponse, "Message Id not found.");
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
                 }
                 
                 return ReturnApiResponse.Success(apiResponse, dtoMessage);
@@ -73,7 +73,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PrivateMessageError("PrivateMessagesService.GetDtoByMessageIdAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error getting message.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
         }
 
@@ -81,30 +81,18 @@ namespace SignalRBlazorGroupsMessages.API.Services
         {
             ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
-            (bool, string) messagechecks = NewMessageChecks(createDto);
-            if (messagechecks.Item1 == false)
-            {
-                apiResponse.Data = null;
-                return ReturnApiResponse.Failure(apiResponse, messagechecks.Item2);
-            }
-
             try
             {
                 PrivateGroupMessages newMessage = NewModel(createDto);
-                bool isSuccess = await _privateMessageDataAccess.AddAsync(newMessage);
 
-                if (!isSuccess)
-                {
-                    return ReturnApiResponse.Failure(apiResponse, "Error saving new message.");
-                }
-
-                return ReturnApiResponse.Success(apiResponse, 
-                    await _privateMessageDataAccess.GetDtoByMessageIdAsync(newMessage.PrivateMessageId));
+                return await _privateMessageDataAccess.AddAsync(newMessage) ?
+                    ReturnApiResponse.Success(apiResponse,await _privateMessageDataAccess.GetDtoByMessageIdAsync(newMessage.PrivateMessageId)) :
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
             catch (Exception ex)
             {
                 _serilogger.PrivateMessageError("PrivateMessagesService.AddAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error saving new message.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
         }
 
@@ -116,26 +104,27 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 PrivateGroupMessages messageToModify = await _privateMessageDataAccess.GetByMessageIdAsync(modifyDto.PrivateMessageId);
 
-                // if message not in db or userIds do not match
-                (bool, string) messageChecks = Messagechecks(messageToModify.PrivateMessageId, messageToModify.UserId, jwtUserId);
-                if (messageChecks.Item1 == false)
+                (bool, string) modifyMessageCheck = ModifyMessagechecks(modifyDto, messageToModify, jwtUserId);
+                if (modifyMessageCheck.Item1 == false)
                 {
-                    return ReturnApiResponse.Failure(apiResponse, messageChecks.Item2);
+                    return ReturnApiResponse.Failure(apiResponse, modifyMessageCheck.Item2);
                 }
                 
                 messageToModify = ModifyDtoToModel(modifyDto, messageToModify);
-                if (!await _privateMessageDataAccess.ModifyAsync(messageToModify))
-                {
-                    return ReturnApiResponse.Failure(apiResponse, "Error modifying message.");
-                }
 
-                return ReturnApiResponse.Success(apiResponse, 
-                    await _privateMessageDataAccess.GetDtoByMessageIdAsync(messageToModify.PrivateMessageId));
+                return await _privateMessageDataAccess.ModifyAsync(messageToModify) ?
+                    ReturnApiResponse.Success(apiResponse, await _privateMessageDataAccess.GetDtoByMessageIdAsync(messageToModify.PrivateMessageId)) :
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _serilogger.ChatGroupError("PrivateMessagesService.ModifyAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)
             {
                 _serilogger.PrivateMessageError("PrivateMessagesService.ModifyAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error modifying message.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
         }
 
@@ -145,14 +134,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                // Find message to delete
                 PrivateGroupMessages messageToDelete = await _privateMessageDataAccess.GetByMessageIdAsync(messageId);
 
                 // if message not in db or userIds do not match
-                (bool, string) messageChecks = Messagechecks(messageToDelete.PrivateMessageId, messageToDelete.UserId, jwtUserId);
-                if (messageChecks.Item1 == false)
+                (bool, string) deleteMessageChecks = DeleteMessageChecks(messageToDelete, jwtUserId);
+                if (deleteMessageChecks.Item1 == false)
                 {
-                    return ReturnApiResponse.Failure(apiResponse, messageChecks.Item2);
+                    return ReturnApiResponse.Failure(apiResponse, deleteMessageChecks.Item2);
                 }
 
                 // delete all messages that are a response to this message
@@ -162,19 +150,19 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     return ReturnApiResponse.Failure(apiResponse, "Response messages not deleted.");
                 }
 
-                // delete the message
-                bool isSuccess = await _privateMessageDataAccess.DeleteAsync(messageToDelete);
-                if (!isSuccess)
-                {
-                    return ReturnApiResponse.Failure(apiResponse, "Error deleting message.");
-                }
-
-                return ReturnApiResponse.Success(apiResponse, new());
+                return await _privateMessageDataAccess.DeleteAsync(messageToDelete) ?
+                    ReturnApiResponse.Success(apiResponse, new()) :
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _serilogger.ChatGroupError("PrivateMessagesService.DeleteAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)
             {
                 _serilogger.PrivateMessageError("PrivateMessagesService.DeleteAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, "Error deleting message.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
             }
         }
 
@@ -185,42 +173,23 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
         #region PRIVATE METHODS
 
-        private (bool, string) NewMessageChecks(CreatePrivateGroupMessageDto createDto)
+        private (bool, string) ModifyMessagechecks(ModifyPrivateGroupMessageDto dto, PrivateGroupMessages message, string jwtUserId)
         {
-            bool passesChecks = true;
-            string errorMessage = "";
 
-            if (createDto.UserId.IsNullOrEmpty() || createDto.UserId == new Guid().ToString())
-            {
-                passesChecks = false;
-                errorMessage += "[Invalid userId]";
-            }
-            if (createDto.Text.IsNullOrEmpty())
-            {
-                passesChecks = false;
-                errorMessage += "[Text is empty or null]";
-            }
-
-            return (passesChecks, errorMessage);
+            if (message.UserId != jwtUserId)
+                return (false, ErrorMessages.InvalidUserId);
+            if (dto.Text == message.Text
+                && dto.ReplyMessageId == message.ReplyMessageId
+                && dto.PictureLink == message.PictureLink)
+                return (false, ErrorMessages.NoModification);
+            return (true, "");
         }
 
-        private (bool, string) Messagechecks(Guid messageId, string messageUserId, string jwtUserId)
+        private (bool, string) DeleteMessageChecks()
         {
-            bool result = true;
-            string message = "";
+            // TODO message checks
 
-            if (messageId == new Guid())
-            {
-                result = false;
-                message += "[Message Id not found.]";
-            }
-            if (messageUserId != jwtUserId)
-            {
-                result = false;
-                message += "[Requesting userId not valid for this request.]";
-            }
-
-            return (result, message);
+            return (true, "");
         }
 
         private PrivateGroupMessages NewModel(CreatePrivateGroupMessageDto createDto)

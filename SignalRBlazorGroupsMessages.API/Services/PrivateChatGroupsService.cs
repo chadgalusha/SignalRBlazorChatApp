@@ -3,6 +3,7 @@ using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
+using System.Text.RegularExpressions;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
@@ -42,6 +43,10 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
+                if (!await _privateGroupsDataAccess.GroupExists(groupId))
+                {
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
+                }
                 if (!await _privateGroupsDataAccess.IsUserInPrivateGroup(groupId, userId))
                 {
                     return ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
@@ -87,6 +92,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
+                if (!await _privateGroupsDataAccess.GroupExists(modifyDto.ChatGroupId))
+                {
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
+                }
+
                 PrivateChatGroups groupToModify = _privateGroupsDataAccess.GetByGroupId(modifyDto.ChatGroupId);
 
                 (bool, string) messagechecks = ModifyChatGroupChecks(modifyDto, groupToModify, jwtUserId);
@@ -94,10 +104,19 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 {
                     return ReturnApiResponse.Failure(apiResponse, messagechecks.Item2);
                 }
+                else
+                {
+                    groupToModify.ChatGroupName = modifyDto.ChatGroupName;
+                }
 
                 return await _privateGroupsDataAccess.ModifyAsync(groupToModify) ?
                     ReturnApiResponse.Success(apiResponse, await _privateGroupsDataAccess.GetDtoByGroupIdAsync(groupToModify.ChatGroupId)) :
                     ReturnApiResponse.Failure(apiResponse, ErrorMessages.ModifyingItem);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _serilogger.ChatGroupError("ChatGroupsService.DeleteAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)
             {
@@ -123,6 +142,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 return await _privateGroupsDataAccess.DeleteAsync(groupToDelete) ?
                     ReturnApiResponse.Success(apiResponse, new()) :
                     ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _serilogger.ChatGroupError("ChatGroupsService.DeleteAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)
             {
@@ -202,48 +226,28 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
         private (bool, string) ModifyChatGroupChecks(ModifyPrivateChatGroupDto modifyDto, PrivateChatGroups group, string jwtUserId)
         {
-            bool passesChecks = true;
-            string errorMessage = "";
-
             if (group.GroupOwnerUserId != jwtUserId)
-            {
                 return (false, ErrorMessages.InvalidUserId);
-            }
             if (modifyDto.ChatGroupName == group.ChatGroupName)
-            {
                 return (false, ErrorMessages.NoModification);
-            }
             if (GroupNameTaken(modifyDto.ChatGroupName))
-            {
                 return (false, ErrorMessages.GroupNameTaken);
-            }
 
-            return (passesChecks, errorMessage);
+            return (true, "");
         }
 
         // Return if a condition fails. If one condition fails, we do not want to continue processing
         // as this can cause additional errors.
         private async Task<(bool, string)> DeleteChatGroupChecks(PrivateChatGroups groupToDelete, string jwtUserId)
         {
-            bool passesChecks = true;
-            string errorMessage = "";
-
             if (groupToDelete.GroupOwnerUserId != jwtUserId)
-            {
                 return (false, ErrorMessages.InvalidUserId);
-            }
-
             if (!await _privateGroupMessagesDataAccess.DeleteAllMessagesInGroupAsync(groupToDelete.ChatGroupId))
-            {
                 return (false, ErrorMessages.DeletingMessages);
-            }
-
             if (!await _privateGroupsDataAccess.RemoveAllUsersFromGroupAsync(groupToDelete.ChatGroupId))
-            {
                 return (false, ErrorMessages.DeletingUser);
-            }
 
-            return (passesChecks, errorMessage);
+            return (true, "");
         }
 
         #endregion

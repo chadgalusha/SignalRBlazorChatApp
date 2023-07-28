@@ -18,5 +18,6 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
         Task<bool> ModifyAsync(PrivateChatGroups modifiedGroup);
         Task<bool> DeleteAsync(PrivateChatGroups deleteGroup);
         Task<bool> RemoveAllUsersFromGroupAsync(int groupId);
+        Task<bool> GroupExists(int groupId);
     }
 }

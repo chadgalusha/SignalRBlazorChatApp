@@ -1,6 +1,5 @@
 ﻿using ChatApplicationModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Helpers;
@@ -51,10 +50,16 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpGet("bygroupid")]
-        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> GetDtoByGroupIdAsync([FromQuery] int groupid, string userId)
+        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> GetDtoByGroupIdAsync(
+            [FromQuery] int groupId, [FromQuery] string userId)
         {
             ApiResponse<PrivateChatGroupsDto> apiResponse = new();
 
+            if (groupId < 0)
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(groupId));
+                return BadRequest(apiResponse);
+            }
             string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId, userId))
             {
@@ -62,7 +67,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return ErrorHttpResponse(apiResponse);
             }
 
-            apiResponse = await _service.GetDtoByGroupIdAsync(groupid, userId);
+            apiResponse = await _service.GetDtoByGroupIdAsync(groupId, userId);
             _serilogger.GetRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
@@ -99,7 +104,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpPost("groupmember")]
-        public async Task<ActionResult<PrivateGroupMembers>> AddMemberAsync([FromQuery] int groupId, string userToAddId)
+        public async Task<ActionResult<PrivateGroupMembers>> AddMemberAsync([FromQuery] int groupId, [FromQuery] string userToAddId)
         {
             ApiResponse<PrivateGroupMembers> apiResponse = await _service.AddPrivateGroupMember(groupId, userToAddId);
             _serilogger.PostRequest(GetUserIp(), apiResponse);

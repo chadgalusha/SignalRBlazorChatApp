@@ -1,5 +1,4 @@
 ﻿using ChatApplicationModels;
-using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
@@ -30,7 +29,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByGroupIdAsync", ex);
-                return ReturnApiResponse.Failure(response, "Error getting messages.");
+                return ReturnApiResponse.Failure(response, ErrorMessages.RetrievingItems);
             }
         }
 
@@ -46,13 +45,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.GetByUserIdAsync", ex);
-                return ReturnApiResponse.Failure(response, "Error getting messages.");
+                return ReturnApiResponse.Failure(response, ErrorMessages.RetrievingItems);
             }
         }
 
         public async Task<ApiResponse<PublicGroupMessageDto>> GetByMessageIdAsync(Guid messageId)
         {
-            ApiResponse<PublicGroupMessageDto> response = new();
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
             try
             {
@@ -60,120 +59,104 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 if (messageDto.PublicMessageId == new Guid())
                 {
-                    return ReturnApiResponse.Failure(response, "Message Id not found.");
+                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
                 }
 
-                return ReturnApiResponse.Success(response, messageDto);
+                return ReturnApiResponse.Success(apiResponse, messageDto);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _serilogger.ChatGroupError("PublicMessagesService.GetByMessageIdAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)
             {
-                _serilogger.PublicMessageError("PublicMessagesService.GetByIdAsync", ex);
-                return ReturnApiResponse.Failure(response, "Error getting message.");
+                _serilogger.PublicMessageError("PublicMessagesService.GetByMessageIdAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RetrievingItems);
             }
         }
 
-        public async Task<ApiResponse<PublicGroupMessageDto>> AddAsync(PublicGroupMessageDto messageDto)
+        public async Task<ApiResponse<PublicGroupMessageDto>> AddAsync(CreatePublicGroupMessageDto createDto)
         {
-            ApiResponse<PublicGroupMessageDto> response = new();
-
-            (bool, string) messageChecks = NewMessageChecks(messageDto);
-            if (messageChecks.Item1 == false)
-            {
-                return ReturnApiResponse.Failure(response, messageChecks.Item2);
-            }
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
             try
             {
-                PublicGroupMessages newMessage = NewPublicMessage(messageDto);
-                bool isSuccess = await _publicMessageDataAccess.AddAsync(newMessage);
+                PublicGroupMessages newMessage = CreateDtoToModel(createDto);
 
-                if (!isSuccess)
-                {
-                    return ReturnApiResponse.Failure(response, "Error saving new message.");
-                }
-
-                PublicGroupMessageDto newDto = NewModelToDto(newMessage, messageDto);
-
-                return ReturnApiResponse.Success(response, newDto);
+                return await _publicMessageDataAccess.AddAsync(newMessage) ?
+                    ReturnApiResponse.Success(apiResponse, await _publicMessageDataAccess.GetDtoByMessageIdAsync(newMessage.PublicMessageId)) :
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.AddingItem);
             }
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.AddAsync", ex);
-                return ReturnApiResponse.Failure(response, "Error saving new message.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.AddingItem);
             }
         }
 
-        public async Task<ApiResponse<PublicGroupMessageDto>> ModifyAsync(ModifyPublicGroupMessageDto dtoToModify)
+        public async Task<ApiResponse<PublicGroupMessageDto>> ModifyAsync(ModifyPublicGroupMessageDto dtoToModify, string jwtUserId)
         {
-            ApiResponse<PublicGroupMessageDto> response = new();
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
             try
             {
-                // Check that message exists before proceeding to modify
-                if (await _publicMessageDataAccess.Exists(dtoToModify.PublicMessageId) == false)
+                PublicGroupMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoToModify.PublicMessageId);
+
+                (bool, string) modifyMessageChecks = ModifyMessageChecks(dtoToModify, messageToModify, jwtUserId);
+                if (!modifyMessageChecks.Item1)
                 {
-                    response.Data = null;
-                    return ReturnApiResponse.Failure(response, "Message Id not found.");
+                    return ReturnApiResponse.Failure(apiResponse, modifyMessageChecks.Item2);
                 }
 
-                PublicGroupMessages messageToModify = await _publicMessageDataAccess.GetByMessageIdAsync(dtoToModify.PublicMessageId);
                 messageToModify = ModifyDtoToModel(dtoToModify, messageToModify);
 
-                bool isSuccess = await _publicMessageDataAccess.ModifyAsync(messageToModify);
-
-                if (!isSuccess)
-                {
-                    return ReturnApiResponse.Failure(response, "Error modifying message.");
-                }
-
-                PublicGroupMessageDto returnDto = ModifiedModelToDto(messageToModify);
-
-                return ReturnApiResponse.Success(response, returnDto);
+                return await _publicMessageDataAccess.ModifyAsync(messageToModify) ?
+                    ReturnApiResponse.Success(apiResponse, await _publicMessageDataAccess.GetDtoByMessageIdAsync(messageToModify.PublicMessageId)) :
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _serilogger.ChatGroupError("PublicMessagesService.ModifyAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.ModifyAsync", ex);
-                return ReturnApiResponse.Failure(response, "Error modifying message.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
             }
         }
 
         // Check that message exists. If true, then delete and messages that are a reponse to this message (ReponseMessageId).
         // Finally delete message
-        public async Task<ApiResponse<PublicGroupMessageDto>> DeleteAsync(Guid messageId)
+        public async Task<ApiResponse<PublicGroupMessageDto>> DeleteAsync(Guid messageId, string jwtUserId)
         {
-            ApiResponse<PublicGroupMessageDto> response = new();
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
             try
             {
-                // Check message exists
-                if (!await _publicMessageDataAccess.Exists(messageId))
-                {
-                    return ReturnApiResponse.Failure(response, "Message Id not found.");
-                }
-
-                // Find message to delete
                 PublicGroupMessages messageToDelete = await _publicMessageDataAccess.GetByMessageIdAsync(messageId);
 
                 // Delete all messages that are a response to this message
-                bool responseMessagesDeleted = await _publicMessageDataAccess.DeleteMessagesByResponseMessageIdAsync(messageId);
-                if (!responseMessagesDeleted)
+                (bool, string) deleteMessageChecks = await DeleteMessageChecks(messageToDelete, jwtUserId);
+                if (!deleteMessageChecks.Item1)
                 {
-                    return ReturnApiResponse.Failure(response, "Response messages not deleted.");
+                    return ReturnApiResponse.Failure(apiResponse, deleteMessageChecks.Item2);
                 }
 
-                // Delete the message
-                bool isSuccess = await _publicMessageDataAccess.DeleteAsync(messageToDelete);
-                if (!isSuccess)
-                {
-                    return ReturnApiResponse.Failure(response, "Error deleting message.");
-                }
-
-                return ReturnApiResponse.Success(response, ModelToDto(messageToDelete));
+                return await _publicMessageDataAccess.DeleteAsync(messageToDelete) ?
+                    ReturnApiResponse.Success(apiResponse, new()) :
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _serilogger.ChatGroupError("PublicMessagesService.DeleteAsync", ex);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.DeleteAsync", ex);
-                return ReturnApiResponse.Failure(response, "Error deleting message.");
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
             }
         }
 
@@ -184,67 +167,37 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
         #region PRIVATE METHODS
 
-        private (bool, string) NewMessageChecks(PublicGroupMessageDto messageDto)
+        private (bool, string) ModifyMessageChecks(ModifyPublicGroupMessageDto modifyDto, PublicGroupMessages message, string jwtUserId) 
         {
-            bool passesChecks = true;
-            string errorMessage = "";
-
-            if (Guid.Parse(messageDto.UserId) == new Guid())
-            {
-                passesChecks = false;
-                errorMessage += "[Invalid UserId]";
-            }
-            if (messageDto.Text.IsNullOrEmpty())
-            {
-                passesChecks = false;
-                errorMessage += "[Text is empty or null]";
-            }
-
-            return (passesChecks, errorMessage);
+            if (message.UserId != jwtUserId)
+                return (false, ErrorMessages.InvalidUserId);
+            if (modifyDto.Text == message.Text 
+                && modifyDto.ReplyMessageId == message.ReplyMessageId 
+                && modifyDto.PictureLink == message.PictureLink)
+                return (false, ErrorMessages.NoModification);
+            return (true, "");
         }
 
-        private PublicGroupMessageDto ModelToDto(PublicGroupMessages message)
+        private async Task<(bool, string)> DeleteMessageChecks(PublicGroupMessages message, string jwtUserId)
         {
-            return new()
-            {
-                PublicMessageId = message.PublicMessageId,
-                UserId          = message.UserId,
-                ChatGroupId     = message.ChatGroupId,
-                Text            = message.Text,
-                MessageDateTime = message.MessageDateTime,
-                ReplyMessageId  = message.ReplyMessageId,
-                PictureLink     = message.PictureLink
-            };
+            if (message.UserId != jwtUserId)
+                return (false, ErrorMessages.InvalidUserId);
+            if (!await _publicMessageDataAccess.DeleteMessagesByResponseMessageIdAsync(message.PublicMessageId))
+                return (false, ErrorMessages.DeletingMessages);
+            return (true, "");
         }
 
-        private PublicGroupMessages NewPublicMessage(PublicGroupMessageDto messageDto)
+        private PublicGroupMessages CreateDtoToModel(CreatePublicGroupMessageDto createDto)
         {
             return new()
             {
                 PublicMessageId = Guid.NewGuid(),
-                UserId          = messageDto.UserId.ToString(),
-                ChatGroupId     = messageDto.ChatGroupId,
-                Text            = messageDto.Text,
+                UserId          = createDto.UserId,
+                ChatGroupId     = createDto.ChatGroupId,
+                Text            = createDto.Text,
                 MessageDateTime = DateTime.Now,
-                ReplyMessageId  = messageDto.ReplyMessageId,
-                PictureLink     = messageDto.PictureLink
-            };
-        }
-
-        // Map PublicMessage fields to return dto object. This object should retain dto specific fields
-        private PublicGroupMessageDto NewModelToDto(PublicGroupMessages newMessage, PublicGroupMessageDto dtoMessage)
-        {
-            return new()
-            {
-                PublicMessageId = newMessage.PublicMessageId,
-                UserId          = newMessage.UserId,
-                UserName        = dtoMessage.UserName,
-                ChatGroupId     = newMessage.ChatGroupId,
-                ChatGroupName   = dtoMessage.ChatGroupName,
-                Text            = newMessage.Text,
-                MessageDateTime = newMessage.MessageDateTime,
-                ReplyMessageId  = newMessage.ReplyMessageId,
-                PictureLink     = newMessage.PictureLink
+                ReplyMessageId  = createDto.ReplyMessageId,
+                PictureLink     = createDto.PictureLink
             };
         }
 
@@ -260,21 +213,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
                 MessageDateTime = message.MessageDateTime,
                 ReplyMessageId  = dtoMessage.ReplyMessageId,
                 PictureLink     = dtoMessage.PictureLink
-            };
-        }
-
-        // after modified public message is saved, convert back to a dto
-        private PublicGroupMessageDto ModifiedModelToDto(PublicGroupMessages modifiedMessage)
-        {
-            return new()
-            {
-                PublicMessageId = modifiedMessage.PublicMessageId,
-                UserId          = modifiedMessage.PublicMessageId.ToString(),
-                ChatGroupId     = modifiedMessage.ChatGroupId,
-                MessageDateTime = modifiedMessage.MessageDateTime,
-                Text            = modifiedMessage.Text,
-                ReplyMessageId  = modifiedMessage.ReplyMessageId, 
-                PictureLink     = modifiedMessage.PictureLink
             };
         }
 

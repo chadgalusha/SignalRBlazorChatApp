@@ -18,6 +18,7 @@ namespace SignalRBlazorGroupsMessages.API.Helpers
                 ErrorMessages.ModifyingItem      => StatusCodes.Status500InternalServerError,
                 ErrorMessages.NoModification     => StatusCodes.Status400BadRequest,
                 ErrorMessages.RecordNotFound     => StatusCodes.Status404NotFound,
+                ErrorMessages.ReplyMessages      => StatusCodes.Status500InternalServerError,
                 ErrorMessages.RemovingUser       => StatusCodes.Status500InternalServerError,
                 ErrorMessages.RetrievingItems    => StatusCodes.Status500InternalServerError,
                 ErrorMessages.UserAlreadyInGroup => StatusCodes.Status400BadRequest,
