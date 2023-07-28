@@ -7,6 +7,6 @@ namespace SignalRBlazorGroupsMessages.API.Models.Dtos
         [Required]
         public string ChatGroupName { get; set; } = string.Empty;
         [Required]
-        public Guid GroupOwnerUserId { get; set; }
+        public string GroupOwnerUserId { get; set; } = string.Empty;
     }
 }

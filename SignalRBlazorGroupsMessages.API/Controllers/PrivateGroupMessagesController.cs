@@ -5,6 +5,7 @@ using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
@@ -27,7 +28,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         // GET: api/[controller]/bygroupid
         [HttpGet("bygroupid")]
         public async Task<ActionResult<ApiResponse<List<PrivateGroupMessageDto>>>> GetListByGroupIdAsync(
-            [FromQuery] int groupId, int numberItemsToSkip)
+            [FromQuery] int groupId, [FromQuery] int numberMessagesToSkip)
         {
             ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new();
 
@@ -36,13 +37,13 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(groupId));
                 return BadRequest(apiResponse);
             }
-            if (numberItemsToSkip < 0)
+            if (numberMessagesToSkip < 0)
             {
-                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberItemsToSkip));
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberMessagesToSkip));
                 return BadRequest(apiResponse);
             }
 
-            apiResponse = await _service.GetDtoListByGroupIdAsync(groupId, numberItemsToSkip);
+            apiResponse = await _service.GetDtoListByGroupIdAsync(groupId, numberMessagesToSkip);
             _serilogger.GetRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success) 
@@ -56,7 +57,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         // GET: api/[controller]/byuserid
         [HttpGet("byuserid")]
         public async Task<ActionResult<ApiResponse<List<PrivateGroupMessageDto>>>> GetListByUserIdAsync(
-            [FromQuery] string userId, int numberItemsToSkip)
+            [FromQuery] string userId, [FromQuery] int numberMessagesToSkip)
         {
             ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new();
 
@@ -65,9 +66,9 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(userId));
                 return BadRequest(apiResponse);
             }
-            if (numberItemsToSkip < 0)
+            if (numberMessagesToSkip < 0)
             {
-                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberItemsToSkip));
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberMessagesToSkip));
                 return BadRequest(apiResponse);
             }
 
@@ -79,7 +80,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return ErrorHttpResponse(apiResponse);
             }
 
-            apiResponse = await _service.GetDtoListByUserIdAsync(userId, numberItemsToSkip);
+            apiResponse = await _service.GetDtoListByUserIdAsync(userId, numberMessagesToSkip);
             _serilogger.GetRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success) 

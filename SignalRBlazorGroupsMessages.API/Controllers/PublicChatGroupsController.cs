@@ -15,127 +15,152 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
     {
         private readonly IPublicChatGroupsService _service;
         private readonly ISerilogger _serilogger;
+        private readonly IUserProvider _userProvider;
 
-        public PublicChatGroupsController(IPublicChatGroupsService service, ISerilogger serilogger)
+        public PublicChatGroupsController(IPublicChatGroupsService service, ISerilogger serilogger, 
+            IUserProvider userProvider)
         {
             _service = service ?? throw new Exception(nameof(service));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
+            _userProvider = userProvider ?? throw new Exception(nameof(userProvider));
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<List<PublicChatGroupsDto>>>> GetPublicChatGroupsAsync()
         {
-            ApiResponse<List<PublicChatGroupsDto>> dtoList = await _service.GetListPublicChatGroupsAsync();
-            _serilogger.GetRequest("0.0.0.0", dtoList);
+            ApiResponse<List<PublicChatGroupsDto>> apiResponse = await _service.GetListAsync();
+            _serilogger.GetRequest(GetUserIp(), apiResponse);
 
-            return Ok(dtoList);
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
         }
 
         [HttpGet("byid")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> GetByIdAsync(
             [FromQuery] int groupId)
         {
+            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+
             if (groupId < 0)
-                return BadRequest("Invalid data: " + nameof(groupId));
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(groupId));
+                return BadRequest(apiResponse);
+            }
 
-            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.GetDtoByIdAsync(groupId);
-            _serilogger.GetRequest("0.0.0.0", dtoResponse);
+            apiResponse = await _service.GetByIdAsync(groupId);
+            _serilogger.GetRequest(GetUserIp(), apiResponse);
 
-            return Ok(dtoResponse);
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> AddAsync([FromBody] CreatePublicChatGroupDto dtoToCreate)
         {
-            if (!ModelState.IsValid || !CreateDtoChecks(dtoToCreate))
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId, dtoToCreate.GroupOwnerUserId))
             {
-                return BadRequest(ModelState);
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return BadRequest(apiResponse);
             }
 
-            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.AddAsync(dtoToCreate);
-            _serilogger.PostRequest("0.0.0.0", dtoResponse);
+            apiResponse = await _service.AddAsync(dtoToCreate);
+            _serilogger.PostRequest(GetUserIp(), apiResponse);
 
-            switch (dtoResponse.Message)
+            if (!apiResponse.Success)
             {
-                case ("Chat Group name already taken."):
-                    return BadRequest(dtoResponse);
-                case ("Error creating new chat group."):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                default:
-                    return Ok(dtoResponse);
+                return ErrorHttpResponse(apiResponse);
             }
+
+            return Ok(apiResponse);
         }
 
         [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> ModifyAsync([FromBody] ModifyPublicChatGroupDto dtoToModify)
         {
-            if (!ModelState.IsValid || dtoToModify == null)
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId))
             {
-                return BadRequest(ModelState);
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
             }
 
-            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.ModifyAsync(dtoToModify);
-            _serilogger.PutRequest("0.0.0.0", dtoResponse);
+            apiResponse = await _service.ModifyAsync(dtoToModify, jwtUserId!);
+            _serilogger.PutRequest(GetUserIp(), apiResponse);
 
-            switch (dtoResponse.Message)
+            if (!apiResponse.Success)
             {
-                case ("Error modifying chat group"):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                default:
-                    return Ok(dtoResponse);
+                return ErrorHttpResponse(apiResponse);
             }
+
+            return Ok(apiResponse);
         }
 
         [HttpDelete]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PublicChatGroupsDto>))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> DeleteAsync([FromQuery] int groupId)
         {
-            ApiResponse<PublicChatGroupsDto> dtoResponse = await _service.DeleteAsync(groupId);
-            _serilogger.DeleteRequest("0.0.0.0", dtoResponse);
+            ApiResponse<PublicChatGroupsDto> apiResponse = new();
 
-            switch (dtoResponse.Message)
+            string ? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId))
             {
-                case ("Chat Group Id not found"):
-                    return NotFound(dtoResponse);
-                case ("Error deleting messages from this group"):
-                    return StatusCode(StatusCodes.Status500InternalServerError, dtoResponse);
-                default:
-                    return NoContent();
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
             }
+
+            apiResponse = await _service.DeleteAsync(groupId, jwtUserId!);
+            _serilogger.DeleteRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return NoContent();
         }
 
         #region PRIVATE METHODS
 
-        private string GetIpv4Address()
+        private string? GetJwtUserId()
         {
-            return HttpContext.Connection.RemoteIpAddress!.MapToIPv4().ToString();
+            return _userProvider.GetUserIdClaim(ControllerContext.HttpContext);
         }
 
-        private bool CreateDtoChecks(CreatePublicChatGroupDto createDto)
+        private bool UserIdValid(string? jwtUserId)
         {
-            bool result = true;
+            return jwtUserId.IsNullOrEmpty() ? false : true;
+        }
 
-            if (createDto == null)
-                result = false;
-            if (createDto.ChatGroupName.IsNullOrEmpty())
-                result = false;
-            if (createDto.GroupOwnerUserId == new Guid())
-                result = false;
-            return result;
+        private bool UserIdValid(string? jwtUserId, string dtoUserId)
+        {
+            return jwtUserId.IsNullOrEmpty() == true || jwtUserId != dtoUserId ? false : true;
+        }
+
+        private string GetUserIp()
+        {
+            return _userProvider.GetUserIP(ControllerContext.HttpContext);
+        }
+
+        private ActionResult ErrorHttpResponse<T>(ApiResponse<T> apiResponse)
+        {
+            int errorCode = HttpErrorCodes.Get(apiResponse.Message);
+            return StatusCode(errorCode, apiResponse);
         }
 
         #endregion

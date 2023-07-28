@@ -26,7 +26,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
             ApiResponse<List<PublicChatGroupsDto>> apiResponse = new();
             List<PublicChatGroupsDto> dtoList = GetDtoList();
 
-            _mockService.Setup(p => p.GetListPublicChatGroupsAsync())
+            _mockService.Setup(p => p.GetListAsync())
                 .ReturnsAsync(ReturnApiResponse.Success(apiResponse, dtoList));
 
             PublicChatGroupsController _controller = GetTestController();

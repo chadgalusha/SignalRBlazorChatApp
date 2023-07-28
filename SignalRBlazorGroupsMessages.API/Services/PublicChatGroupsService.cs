@@ -19,14 +19,13 @@ namespace SignalRBlazorGroupsMessages.API.Services
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
         }
 
-        public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetListPublicChatGroupsAsync()
+        public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetListAsync()
         {
             ApiResponse<List<PublicChatGroupsDto>> response = new();
 
             try
             {
                 List<PublicChatGroupsDto> dtoList = await _publicGroupsDataAccess.GetDtoListAsync();
-
                 return ReturnApiResponse.Success(response, dtoList);
             }
             catch (Exception ex)
@@ -36,7 +35,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
-        public async Task<ApiResponse<PublicChatGroupsDto>> GetDtoByIdAsync(int groupId)
+        public async Task<ApiResponse<PublicChatGroupsDto>> GetByIdAsync(int groupId)
         {
             ApiResponse<PublicChatGroupsDto> response = new();
 
@@ -86,7 +85,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
-        public async Task<ApiResponse<PublicChatGroupsDto>> ModifyAsync(ModifyPublicChatGroupDto dtoToModify)
+        public async Task<ApiResponse<PublicChatGroupsDto>> ModifyAsync(ModifyPublicChatGroupDto dtoToModify, string jwtUserId)
         {
             ApiResponse<PublicChatGroupsDto> response = new();
 
@@ -118,7 +117,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
         }
 
-        public async Task<ApiResponse<PublicChatGroupsDto>> DeleteAsync(int groupId)
+        public async Task<ApiResponse<PublicChatGroupsDto>> DeleteAsync(int groupId, string jwtUserId)
         {
             ApiResponse<PublicChatGroupsDto> response = new();
 
@@ -251,7 +250,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        private PublicChatGroups DtoToChatGroup(PublicChatGroupsDto dto)
+        private PublicChatGroups DtoToChatGroup(PublicChatGroupsDto dto, string jwtUserId)
         {
             return new()
             {

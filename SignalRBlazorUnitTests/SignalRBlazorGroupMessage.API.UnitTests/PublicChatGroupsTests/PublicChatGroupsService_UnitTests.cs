@@ -29,7 +29,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
 
             PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
 
-            var result = await _service.GetListPublicChatGroupsAsync();
+            var result = await _service.GetListAsync();
 
             Assert.Multiple(() =>
             {
