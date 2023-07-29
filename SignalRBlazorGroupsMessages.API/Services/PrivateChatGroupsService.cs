@@ -3,7 +3,6 @@ using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using System.Text.RegularExpressions;
 
 namespace SignalRBlazorGroupsMessages.API.Services
 {
@@ -115,7 +114,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             }
             catch (InvalidOperationException ex)
             {
-                _serilogger.ChatGroupError("ChatGroupsService.DeleteAsync", ex);
+                _serilogger.ChatGroupError("ChatGroupsService.ModifyAsync", ex);
                 return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
             }
             catch (Exception ex)

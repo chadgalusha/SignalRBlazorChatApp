@@ -1,5 +1,4 @@
 ﻿using ChatApplicationModels;
-using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
@@ -136,18 +135,11 @@ namespace SignalRBlazorGroupsMessages.API.Services
             {
                 PrivateGroupMessages messageToDelete = await _privateMessageDataAccess.GetByMessageIdAsync(messageId);
 
-                // if message not in db or userIds do not match
-                (bool, string) deleteMessageChecks = DeleteMessageChecks(messageToDelete, jwtUserId);
+                // if message.userId and jwtUserId do not match or if issue delete response messages
+                (bool, string) deleteMessageChecks = await DeleteMessageChecks(messageToDelete, jwtUserId);
                 if (deleteMessageChecks.Item1 == false)
                 {
                     return ReturnApiResponse.Failure(apiResponse, deleteMessageChecks.Item2);
-                }
-
-                // delete all messages that are a response to this message
-                bool responseMessagesDeleted = await _privateMessageDataAccess.DeleteMessagesByReplyMessageIdAsync(messageId);
-                if (!responseMessagesDeleted)
-                {
-                    return ReturnApiResponse.Failure(apiResponse, "Response messages not deleted.");
                 }
 
                 return await _privateMessageDataAccess.DeleteAsync(messageToDelete) ?
@@ -185,10 +177,12 @@ namespace SignalRBlazorGroupsMessages.API.Services
             return (true, "");
         }
 
-        private (bool, string) DeleteMessageChecks()
+        private async Task<(bool, string)> DeleteMessageChecks(PrivateGroupMessages message, string jwtUserId)
         {
-            // TODO message checks
-
+            if (message.UserId != jwtUserId) 
+                return (false, ErrorMessages.InvalidUserId);
+            if (!await _privateMessageDataAccess.DeleteMessagesByReplyMessageIdAsync(message.PrivateMessageId))
+                return (false, ErrorMessages.DeletingMessages);
             return (true, "");
         }
 
@@ -206,7 +200,8 @@ namespace SignalRBlazorGroupsMessages.API.Services
             };
         }
 
-        // retain messageId, userId, chatGroupId, and messageDateTime from original message. only modify text and replymessageid and/or picturelink.
+        // retain messageId, userId, chatGroupId, and messageDateTime from original message.
+        // Only modify text and replymessageid and/or picturelink.
         private PrivateGroupMessages ModifyDtoToModel(ModifyPrivateGroupMessageDto modifyDto, PrivateGroupMessages message)
         {
             return new()
