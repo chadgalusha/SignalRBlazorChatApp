@@ -20,14 +20,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
         }
 
         [Fact]
-        public async Task GetListPublicChatGroupsAsync_ReturnsCorrectResult()
+        public async Task GetListAsync_ReturnsCorrectResult()
         {
-            int excpectedCount = GetDtoListPublicChatGroups().Count;
+            int excpectedCount = GetDtoList().Count;
 
             _mockDataAccess.Setup(p => p.GetDtoListAsync())
-                .ReturnsAsync(GetDtoListPublicChatGroups());
+                .ReturnsAsync(GetDtoList());
 
-            PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
+            PublicChatGroupsService _service = GetNewService();
 
             var result = await _service.GetListAsync();
 
@@ -40,45 +40,45 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
         }
 
         [Fact]
-        public async Task GetViewByIdAsync_ReturnsCorrectResult()
+        public async Task GetByIdAsync_ReturnsCorrectResult()
         {
-            PublicChatGroupsDto dto = GetDtoListPublicChatGroups().First();
+            PublicChatGroupsDto dto = GetDtoList().First();
+            int groupId = dto.ChatGroupId;
 
             _mockDataAccess.Setup(p => p.GetDtoByIdAsync(1))
-                .ReturnsAsync(GetDtoListPublicChatGroups()
-                    .Single(p => p.ChatGroupId == 1));
-            _mockDataAccess.Setup(p => p.GroupExists(1))
+                .ReturnsAsync(GetDtoList()
+                    .Single(p => p.ChatGroupId == groupId));
+            _mockDataAccess.Setup(p => p.GroupExists(groupId))
                 .Returns(true);
 
-            PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
+            PublicChatGroupsService _service = GetNewService();
 
-            var goodResult = await _service.GetDtoByIdAsync(1);
-            var badResult = await _service.GetDtoByIdAsync(999);
+            var result = await _service.GetByIdAsync(groupId);
 
             Assert.Multiple(() =>
             {
-                //Assert.Equal(1, goodResult.Data?.ChatGroupId);
-                Assert.True(goodResult.Success);
-
-                Assert.False(badResult.Success);
-                Assert.Null(badResult.Data);
+                Assert.True(result.Success);
+                Assert.NotNull(result.Data);
             });
         }
 
         [Fact]
         public async Task AddAsync_IsSuccess()
         {
-            CreatePublicChatGroupDto newGroup = GetNewGroup();
-            string expectedGroupName = newGroup.ChatGroupName;
+            CreatePublicChatGroupDto createDto = GetNewGroup();
+            string expectedGroupName = createDto.ChatGroupName;
+            var createdGroup = CreatedGroup();
 
-            _mockDataAccess.Setup(p => p.GroupNameTaken(newGroup.ChatGroupName))
+            _mockDataAccess.Setup(p => p.GroupNameTaken(createDto.ChatGroupName))
                 .Returns(false);
             _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<ChatApplicationModels.PublicChatGroups>()))
                 .ReturnsAsync(true);
+            _mockDataAccess.Setup(g => g.GetDtoByIdAsync(createdGroup.ChatGroupId))
+                .ReturnsAsync(createdGroup);
 
-            PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
+            PublicChatGroupsService _service = GetNewService();
 
-            var result = await _service.AddAsync(newGroup);
+            var result = await _service.AddAsync(createDto);
 
             Assert.Multiple(() =>
             {
@@ -91,22 +91,25 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
         public async Task ModifyAsync_IsSuccess()
         {
             string modifiedGroupName = "Modified Group Name";
-            var groupToModify = GetDtoListPublicChatGroups().First();
-            groupToModify.ChatGroupName = modifiedGroupName;
+            var groupToModify = GetDtoList().First();
+            string jwtUserId = groupToModify.GroupOwnerUserId;
             ModifyPublicChatGroupDto modifiedDto = DtoToModifyDto(groupToModify);
+            modifiedDto.ChatGroupName = modifiedGroupName;
 
-            _mockDataAccess.Setup(p => p.GetDtoByIdAsync(groupToModify.ChatGroupId))
-                .ReturnsAsync(
-                    GetDtoListPublicChatGroups()
-                        .First());
+            _mockDataAccess.Setup(g => g.GetByGroupId(groupToModify.ChatGroupId))
+                .Returns(DtoToModel(groupToModify));
             _mockDataAccess.Setup(p => p.GroupNameTaken(modifiedGroupName))
                 .Returns(false);
             _mockDataAccess.Setup(p => p.ModifyAsync(It.IsAny<ChatApplicationModels.PublicChatGroups>()))
                 .ReturnsAsync(true);
+            // Modify chat group name here to mimic changed property.
+            groupToModify.ChatGroupName = modifiedGroupName;
+            _mockDataAccess.Setup(g => g.GetDtoByIdAsync(groupToModify.ChatGroupId))
+                .ReturnsAsync(groupToModify);
 
-            PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
+            PublicChatGroupsService _service = GetNewService();
 
-            var result = await _service.ModifyAsync(modifiedDto);
+            var result = await _service.ModifyAsync(modifiedDto, jwtUserId);
 
             Assert.Multiple(() =>
             {
@@ -118,11 +121,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
         [Fact]
         public async Task DeleteAsync_IsSuccess()
         {
-            PublicChatGroupsDto groupToDelete = GetDtoListPublicChatGroups().First();
+            PublicChatGroupsDto groupToDelete = GetDtoList().First();
             int idToDelete = groupToDelete.ChatGroupId;
+            string jwtUserId = groupToDelete.GroupOwnerUserId;
 
-            _mockDataAccess.Setup(p => p.GroupExists(idToDelete))
-                .Returns(true);
             _mockDataAccess.Setup(p => p.GetByGroupId(idToDelete))
                 .Returns(DtoToModel(groupToDelete));
             _mockDataAccess.Setup(p => p.DeleteAsync(It.IsAny<ChatApplicationModels.PublicChatGroups>()))
@@ -130,9 +132,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
             _mockMessagesService.Setup(p => p.DeleteAllMessagesInGroupAsync(idToDelete))
                 .ReturnsAsync(true);
 
-            PublicChatGroupsService _service = new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
+            PublicChatGroupsService _service = GetNewService();
 
-            var result = await _service.DeleteAsync(idToDelete);
+            var result = await _service.DeleteAsync(idToDelete, jwtUserId);
 
             Assert.Multiple(() =>
             {
@@ -143,7 +145,12 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
 
         #region PRIVATE METHODS
 
-        private List<PublicChatGroupsDto> GetDtoListPublicChatGroups()
+        private PublicChatGroupsService GetNewService()
+        {
+            return new(_mockDataAccess.Object, _mockMessagesService.Object, _mockSerilogger.Object);
+        }
+
+        private List<PublicChatGroupsDto> GetDtoList()
         {
             List<PublicChatGroupsDto> groupList = new()
             {
@@ -187,20 +194,20 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
         {
             return new()
             {
-                ChatGroupName = "Test Group 5",
-                GroupOwnerUserId = Guid.Parse("e1b9cf9a-ff86-4607-8765-9e47a305062a")
+                ChatGroupName    = "Test Group 5",
+                GroupOwnerUserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a"
             };
         }
 
-        private PublicChatGroupsDto GetNewGroupDto(ChatApplicationModels.PublicChatGroups newGroup)
+        private PublicChatGroupsDto CreatedGroup()
         {
             return new()
             {
-                ChatGroupId = newGroup.ChatGroupId,
-                ChatGroupName = newGroup.ChatGroupName,
-                GroupCreated = newGroup.GroupCreated,
-                GroupOwnerUserId = newGroup.GroupOwnerUserId,
-                UserName = "Test Owner 2"
+                ChatGroupId      = 0,
+                ChatGroupName    = "Test Group 5",
+                GroupCreated     = DateTime.Now,
+                GroupOwnerUserId = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                UserName         = "Test Owner"
             };
         }
 
@@ -208,10 +215,10 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
         {
             return new()
             {
-                ChatGroupId = dto.ChatGroupId,
-                ChatGroupName = dto.ChatGroupName,
-                GroupCreated = dto.GroupCreated,
-                GroupOwnerUserId = dto.GroupOwnerUserId.ToString()
+                ChatGroupId      = dto.ChatGroupId,
+                ChatGroupName    = dto.ChatGroupName,
+                GroupCreated     = dto.GroupCreated,
+                GroupOwnerUserId = dto.GroupOwnerUserId
             };
         }
 

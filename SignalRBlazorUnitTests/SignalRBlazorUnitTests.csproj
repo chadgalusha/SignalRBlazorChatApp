@@ -10,15 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="SignalRBlazorGroupMessage.API.UnitTests\PrivateChatGroupsTests\**" />
     <Compile Remove="SignalRBlazorGroupMessage.API.UnitTests\PrivateGroupMessagesTests\**" />
-    <Compile Remove="SignalRBlazorGroupMessage.API.UnitTests\PublicChatGroupsTests\**" />
-    <EmbeddedResource Remove="SignalRBlazorGroupMessage.API.UnitTests\PrivateChatGroupsTests\**" />
     <EmbeddedResource Remove="SignalRBlazorGroupMessage.API.UnitTests\PrivateGroupMessagesTests\**" />
-    <EmbeddedResource Remove="SignalRBlazorGroupMessage.API.UnitTests\PublicChatGroupsTests\**" />
-    <None Remove="SignalRBlazorGroupMessage.API.UnitTests\PrivateChatGroupsTests\**" />
     <None Remove="SignalRBlazorGroupMessage.API.UnitTests\PrivateGroupMessagesTests\**" />
-    <None Remove="SignalRBlazorGroupMessage.API.UnitTests\PublicChatGroupsTests\**" />
   </ItemGroup>
 
   <ItemGroup>
