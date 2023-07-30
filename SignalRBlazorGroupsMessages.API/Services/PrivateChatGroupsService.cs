@@ -91,15 +91,10 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                if (!await _privateGroupsDataAccess.GroupExists(modifyDto.ChatGroupId))
-                {
-                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
-                }
-
                 PrivateChatGroups groupToModify = _privateGroupsDataAccess.GetByGroupId(modifyDto.ChatGroupId);
 
                 (bool, string) messagechecks = ModifyChatGroupChecks(modifyDto, groupToModify, jwtUserId);
-                if (messagechecks.Item1 == false)
+                if (!messagechecks.Item1)
                 {
                     return ReturnApiResponse.Failure(apiResponse, messagechecks.Item2);
                 }
