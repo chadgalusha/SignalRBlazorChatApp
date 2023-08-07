@@ -166,7 +166,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
                     UserId = userId
                 };
 
-                return await _privateGroupsDataAccess.AddUserToGroupAsync(newMember) ? 
+                return await _privateGroupsDataAccess.AddUserToGroupAsync(newMember) ?
                     ReturnApiResponse.Success(apiResponse, newMember) :
                     ReturnApiResponse.Failure(apiResponse, ErrorMessages.AddingUser);
             }

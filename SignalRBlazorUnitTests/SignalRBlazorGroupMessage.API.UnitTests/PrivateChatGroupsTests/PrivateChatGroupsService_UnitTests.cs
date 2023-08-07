@@ -147,9 +147,42 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             });
         }
 
-        // TODO: AddPrivateGroupMember
+        [Fact]
+        public async Task AddPrivateGroupMember_IsSuccess()
+        {
+            int groupId = 4;
+            string userId = GetListPrivateGroupMembers().First().UserId;
 
-        // TODO: RemoveUserFromGroupAsync
+            _mockGroupsDataAccess.Setup(i => i.IsUserInPrivateGroup(groupId, userId))
+                .ReturnsAsync(false);
+            _mockGroupsDataAccess.Setup(a => a.AddUserToGroupAsync(It.IsAny<PrivateGroupMembers>()))
+                .ReturnsAsync(true);
+
+            var _service = GetNewService();
+
+            var result = await _service.AddPrivateGroupMember(groupId, userId);
+
+            Assert.True(result.Success);
+        }
+
+        [Fact]
+        public async Task RemoveUserFromGroupAsync_IsSuccess()
+        {
+            PrivateGroupMembers member = GetListPrivateGroupMembers().First();
+            int groupId = member.PrivateChatGroupId;
+            string userId = member.UserId;
+
+            _mockGroupsDataAccess.Setup(g => g.GetPrivateGroupMemberRecord(groupId, userId))
+                .ReturnsAsync(member);
+            _mockGroupsDataAccess.Setup(r => r.RemoveUserFromPrivateChatGroup(member))
+                .ReturnsAsync(true);
+
+            var _service = GetNewService();
+
+            var result = await _service.RemoveUserFromGroupAsync(groupId, userId);
+
+            Assert.True(result.Success);
+        }
 
         #region PRIVATE METHODS
 

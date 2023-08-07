@@ -143,7 +143,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpDelete]
-        public async Task<ActionResult> DeleteAsync([FromQuery] int groupId)
+        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> DeleteAsync([FromQuery] int groupId)
         {
             ApiResponse<PrivateChatGroupsDto> apiResponse = new();
 
@@ -166,7 +166,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpDelete("groupmember")]
-        public async Task<ActionResult> DeleteMemberAsync([FromQuery] int groupId, string userId)
+        public async Task<ActionResult<ApiResponse<PrivateGroupMembers>>> DeleteMemberAsync([FromQuery] int groupId, string userId)
         {
             ApiResponse<PrivateGroupMembers> apiResponse = await _service.RemoveUserFromGroupAsync(groupId, userId);
             _serilogger.DeleteRequest(GetUserIp(), apiResponse);
