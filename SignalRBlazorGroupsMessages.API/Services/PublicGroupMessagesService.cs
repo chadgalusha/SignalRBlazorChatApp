@@ -113,7 +113,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
                 return await _publicMessageDataAccess.ModifyAsync(messageToModify) ?
                     ReturnApiResponse.Success(apiResponse, await _publicMessageDataAccess.GetDtoByMessageIdAsync(messageToModify.PublicMessageId)) :
-                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
+                    ReturnApiResponse.Failure(apiResponse, ErrorMessages.ModifyingItem);
             }
             catch (InvalidOperationException ex)
             {
@@ -123,7 +123,7 @@ namespace SignalRBlazorGroupsMessages.API.Services
             catch (Exception ex)
             {
                 _serilogger.PublicMessageError("PublicMessagesService.ModifyAsync", ex);
-                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.DeletingItem);
+                return ReturnApiResponse.Failure(apiResponse, ErrorMessages.ModifyingItem);
             }
         }
 

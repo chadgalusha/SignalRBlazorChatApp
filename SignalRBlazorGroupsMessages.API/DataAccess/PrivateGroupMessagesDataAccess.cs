@@ -103,6 +103,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<bool> ModifyAsync(PrivateGroupMessages modifyMessage)
         {
+            _context.ChangeTracker.Clear();
             _context.PrivateGroupMessages.Update(modifyMessage);
             return await Save();
         }

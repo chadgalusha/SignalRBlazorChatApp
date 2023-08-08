@@ -165,7 +165,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpDelete]
-        public async Task<ActionResult<ApiResponse<PrivateGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
+        public async Task<ActionResult<ApiResponse<PrivateGroupMessageDto>>> DeleteAsync([FromQuery] Guid privateMessageId)
         {
             ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
@@ -176,7 +176,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return ErrorHttpResponse(apiResponse);
             }
 
-            apiResponse = await _service.DeleteAsync(messageId, jwtUserId!);
+            apiResponse = await _service.DeleteAsync(privateMessageId, jwtUserId!);
             _serilogger.DeleteRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
