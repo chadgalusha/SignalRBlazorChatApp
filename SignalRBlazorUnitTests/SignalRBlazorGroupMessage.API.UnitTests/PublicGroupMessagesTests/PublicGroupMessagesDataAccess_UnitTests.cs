@@ -3,34 +3,34 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages.PublicMessagesDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests.PublicGroupMessagesDatabaseFixture;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests
 {
-    public class PublicMessagesDataAccess_UnitTests : IClassFixture<PublicMessagesDatabaseFixture>
+    public class PublicGroupMessagesDataAccess_UnitTests : IClassFixture<PublicGroupMessagesDatabaseFixture>
     {
-        public PublicMessagesDatabaseFixture Fixture { get; }
-        private readonly PublicMessagesDataAccess _dataAccess;
+        public PublicGroupMessagesDatabaseFixture Fixture { get; }
+        private readonly PublicGroupMessagesDataAccess _dataAccess;
         private readonly TestPublicMessagesDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PublicMessagesDataAccess_UnitTests(PublicMessagesDatabaseFixture fixture)
+        public PublicGroupMessagesDataAccess_UnitTests(PublicGroupMessagesDatabaseFixture fixture)
         {
             Fixture = fixture;
             _context = Fixture.CreateContext();
             _configuration = new Mock<IConfiguration>().Object;
-            _dataAccess = new PublicMessagesDataAccess(_context, _configuration);
+            _dataAccess = new PublicGroupMessagesDataAccess(_context, _configuration);
         }
 
         [Fact]
-        public async Task GetViewListByGroupId_ReturnsMessages()
+        public async Task GetDtoListByGroupId_ReturnsMessages()
         {
             int groupId = 2;
             List<PublicGroupMessageDto> publicMessagesDtoList = _context.PublicMessagesDto
                 .Where(p => p.ChatGroupId == groupId)
                 .ToList();
 
-            Mock<IPublicMessagesDataAccess> _mockPublicMessageDataAccess = new();
+            Mock<IPublicGroupMessagesDataAccess> _mockPublicMessageDataAccess = new();
             _mockPublicMessageDataAccess.Setup(x => x.GetDtoListByGroupIdAsync(groupId, 0))
                 .ReturnsAsync(publicMessagesDtoList);
 
@@ -45,14 +45,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         }
 
         [Fact]
-        public async Task GetViewListByUserId_ReturnsMessages()
+        public async Task GetDtoListByUserId_ReturnsMessages()
         {
             string userId = "e1b9cf9a-ff86-4607-8765-9e47a305062a";
             List<PublicGroupMessageDto> listPublicMessageDto = _context.PublicMessagesDto
                 .Where(p => p.UserId == userId)
                 .ToList();
 
-            Mock<IPublicMessagesDataAccess> _mockPublicMessageDataAccess = new();
+            Mock<IPublicGroupMessagesDataAccess> _mockPublicMessageDataAccess = new();
             _mockPublicMessageDataAccess.Setup(x => x.GetDtoListByUserIdAsync(userId, 0))
                 .ReturnsAsync(listPublicMessageDto);
 

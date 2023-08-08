@@ -7,12 +7,12 @@ using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
 namespace SignalRBlazorGroupsMessages.API.DataAccess
 {
-    public class PublicMessagesDataAccess : IPublicMessagesDataAccess
+    public class PublicGroupMessagesDataAccess : IPublicGroupMessagesDataAccess
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PublicMessagesDataAccess(ApplicationDbContext context, IConfiguration configuration)
+        public PublicGroupMessagesDataAccess(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context ?? throw new Exception(nameof(context));
             _configuration = configuration ?? throw new Exception(nameof(configuration));
@@ -47,7 +47,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             {
                 CommandType = System.Data.CommandType.StoredProcedure
             };
-            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId.ToString();
+            command.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar).Value = userId;
             command.Parameters.Add("@numberMessagesToSkip", System.Data.SqlDbType.Int).Value = numberItemsToSkip;
 
             await connection.OpenAsync();
@@ -79,7 +79,8 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<PublicGroupMessages> GetByMessageIdAsync(Guid messageId)
         {
-            return await _context.PublicGroupMessages.SingleAsync(p => p.PublicMessageId == messageId);
+            return await _context.PublicGroupMessages
+                .SingleAsync(p => p.PublicMessageId == messageId);
         }
 
         public async Task<bool> Exists(Guid messageId)
@@ -96,6 +97,8 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
 
         public async Task<bool> ModifyAsync(PublicGroupMessages message)
         {
+            _context.ChangeTracker.Clear();
+            _context.Update(message);
             return await Save();
         }
 
@@ -161,7 +164,7 @@ namespace SignalRBlazorGroupsMessages.API.DataAccess
             while (reader.Read())
             {
                 dto.PublicMessageId = (Guid)reader[0];
-                dto.UserId          =(string)reader[1];
+                dto.UserId          = (string)reader[1];
                 dto.UserName        = (string)reader[2];
                 dto.ChatGroupId     = (int)reader[3];
                 dto.ChatGroupName   = (string)reader[4];

@@ -1,94 +1,231 @@
 ﻿using ChatApplicationModels;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
-using SignalRBlazorGroupsMessages.API.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SignalRBlazorGroupsMessages.API.Models.Dtos;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroupsTests.PrivateChatGroupsDatabaseFixture;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroups
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroupsTests
 {
-    public class PrivateChatGroupsDataAccess_UnitTests
+    public class PrivateChatGroupsDataAccess_UnitTests : IClassFixture<PrivateChatGroupsDatabaseFixture>
     {
-        //[Fact]
-        //public async Task AddUserToPrivateChatGroup_AddsUser()
-        //{
-        //    int groupToJoinId = 4;
-        //    string userIdToJoin = "e08b0077-3c15-477e-84bb-bf9d41196455";
-        //    PrivateGroupMembers newPrivateGroupMember = GetNewPrivateGroupMember(groupToJoinId, userIdToJoin);
+        public PrivateChatGroupsDatabaseFixture Fixture { get; }
+        private readonly PrivateChatGroupsDataAccess _dataAccess;
+        private readonly TestPrivateChatGroupDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        //    _context.Database.BeginTransaction();
-        //    bool resultOfAdd = await _dataAccess.AddUserToPrivateChatGroupAsync(newPrivateGroupMember);
-        //    _context.ChangeTracker.Clear();
+        public PrivateChatGroupsDataAccess_UnitTests(PrivateChatGroupsDatabaseFixture fixture)
+        {
+            Fixture = fixture;
+            _context = Fixture.CreateContext();
+            _configuration = new Mock<IConfiguration>().Object;
+            _dataAccess = new PrivateChatGroupsDataAccess(_context, _configuration);
+        }
 
-        //    List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
-        //        .Where(c => c.UserId == userIdToJoin)
-        //        .ToList();
-        //    bool isUserInGroup = _context.PrivateGroupsMembers
-        //        .Where(p => p.PrivateChatGroupId == groupToJoinId
-        //            && p.UserId == userIdToJoin)
-        //        .Any();
+        [Fact]
+        public async Task GetDtoListByUserIdAsync_ReturnsChatGroups()
+        {
+            List<PrivateChatGroupsDto> dtoList = _context.PrivateChatGroupsDto.ToList();
+            string userId = dtoList.First().GroupOwnerUserId;
 
-        //    Assert.Multiple(() =>
-        //    {
-        //        Assert.True(resultOfAdd);
-        //        Assert.Equal(2, listPrivateGroupMembers.Count);
-        //        Assert.True(isUserInGroup);
-        //    });
-        //}
+            Mock<IPrivateChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
+            _mockChatGroupsDataAccess.Setup(mock => mock.GetDtoListByUserIdAsync(userId))
+                .ReturnsAsync(dtoList);
 
-        //[Fact]
-        //public async void GetPrivateChatGroupsByUserId_ReturnsCorrectList()
-        //{
-        //    Guid userId = Guid.Parse("e08b0077-3c15-477e-84bb-bf9d41196455");
-        //    List<PublicChatGroupsView> listPrivateChatGroups = GetListPrivateChatGroups(userId);
+            var result = await _mockChatGroupsDataAccess.Object.GetDtoListByUserIdAsync(userId);
 
-        //    Mock<IPublicChatGroupsDataAccess> _mockDataAccess = new();
-        //    _mockDataAccess.Setup(x => x.GetViewListPrivateByUserIdAsync(userId))
-        //        .ReturnsAsync(listPrivateChatGroups);
+            Assert.Multiple(() =>
+            {
+                Assert.Equal(dtoList.Count, result.Count);
+                Assert.NotNull(result);
+            });
+        }
 
-        //    var mockedDataAccess = _mockDataAccess.Object;
-        //    var result = await mockedDataAccess
-        //        .GetViewListPrivateByUserIdAsync(userId);
+        [Fact]
+        public async Task GetDtoByGroupIdAsync_ReturnsCorrectGroup()
+        {
+            PrivateChatGroupsDto dto = _context.PrivateChatGroupsDto.First();
+            int groupId = dto.ChatGroupId;
 
-        //    Assert.Equal(listPrivateChatGroups, result);
-        //}
+            Mock<IPrivateChatGroupsDataAccess> _mockChatGroupsDataAccess = new();
+            _mockChatGroupsDataAccess.Setup(mock => mock.GetDtoByGroupIdAsync(groupId))
+                .ReturnsAsync(dto);
 
-        //#region PRIVATE METHODS
+            var result = await _mockChatGroupsDataAccess.Object.GetDtoByGroupIdAsync(groupId);
 
-        //private PrivateGroupMembers GetNewPrivateGroupMember(int groupToJoinId, string userIdToJoin)
-        //{
-        //    return new()
-        //    {
-        //        PrivateChatGroupId = groupToJoinId,
-        //        UserId = userIdToJoin
-        //    };
-        //}
+            Assert.Multiple(() =>
+            {
+                Assert.Equal(dto, result);
+                Assert.NotNull(result);
+            });
+        }
 
-        //// Mock of stored procedure sp_getPrivateChatGroupsForUser @UserId
-        //private List<PublicChatGroupsView> GetListPrivateChatGroups(Guid userId)
-        //{
-        //    List<PrivateGroupMembers> listPrivateGroupMembers = _context.PrivateGroupsMembers
-        //        .Where(p => p.UserId == userId.ToString())
-        //        .ToList();
+        [Fact]
+        public void GetByGroupName_ReturnsCorrectGroup()
+        {
+            var group = _context.PrivateChatGroups.First();
+            string groupName = group.ChatGroupName;
 
-        //    List<PublicChatGroupsView> listPrivateChatGroups = new();
-        //    foreach (var listItem in listPrivateGroupMembers)
-        //    {
-        //        PublicChatGroups chatGroup = _context.PublicChatGroups
-        //            .Single(c => c.ChatGroupId == listItem.PrivateChatGroupId);
+            var result = _dataAccess.GetByGroupname(groupName);
 
-        //        if (chatGroup != null)
-        //        {
-        //            listPrivateChatGroups.Add(ChatGroupToView(chatGroup));
-        //        }
-        //    }
+            Assert.Equal(group, result);
+        }
 
-        //    return listPrivateChatGroups;
-        //}
+        [Fact]
+        public void GetByGroupId_ReturnsCorrectGroup()
+        {
+            var group = _context.PrivateChatGroups.Skip(1).First();
+            int groupId = group.ChatGroupId;
 
-        //#endregion
+            var result = _dataAccess.GetByGroupId(groupId);
+
+            Assert.Equal(group, result);
+        }
+
+        [Fact]
+        public void GroupNameTaken_ReturnsTrue()
+        {
+            var groupName = _context.PrivateChatGroups.First().ChatGroupName;
+
+            bool result = _dataAccess.GroupNameTaken(groupName);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task GroupExists_ReturnsTrue()
+        {
+            var groupId = _context.PrivateChatGroups.Skip(2).First().ChatGroupId;
+
+            bool result = await _dataAccess.GroupExists(groupId);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task GetPrivateGroupMemberRecord_ReturnsCorrectResult()
+        {
+            PrivateGroupMembers member = _context.PrivateGroupMembers.First();
+
+            var result = await _dataAccess.GetPrivateGroupMemberRecord(member.PrivateChatGroupId, member.UserId);
+
+            Assert.Equal(member, result);
+        }
+
+        [Fact]
+        public async Task AddUserToGroupAsync_IsSuccess()
+        {
+            PrivateGroupMembers newMember = new() { PrivateChatGroupId = 1, UserId = Guid.NewGuid().ToString() };
+            int currentCount = _context.PrivateGroupMembers.Where(c => c.PrivateChatGroupId == 1).Count();
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.AddUserToGroupAsync(newMember);
+            _context.ChangeTracker.Clear();
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result);
+                int updatedCount = _context.PrivateGroupMembers.Where(c => c.PrivateChatGroupId == 1).Count();
+                Assert.True(currentCount + 1 == updatedCount);
+            });
+        }
+
+        [Fact]
+        public async Task RemoveUserFromPrivateChatGroup_IsSuccess()
+        {
+            PrivateGroupMembers memberToDelete = _context.PrivateGroupMembers.First();
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.RemoveUserFromPrivateChatGroup(memberToDelete);
+            _context.ChangeTracker.Clear();
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result);
+                Assert.False(_context.PrivateGroupMembers
+                    .Any(id => id.PrivateGroupMemberId == memberToDelete.PrivateGroupMemberId));
+            });
+        }
+
+        [Fact]
+        public async Task RemoveAllUsersFromGroupAsync_RemovesUsers()
+        {
+            int groupId = _context.PrivateGroupMembers.First().PrivateChatGroupId;
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.RemoveAllUsersFromGroupAsync(groupId);
+            _context.ChangeTracker.Clear();
+
+            int resultCount = _context.PrivateGroupMembers.Where(id => id.PrivateChatGroupId == groupId).Count();
+            Assert.Equal(0, resultCount);
+        }
+
+        [Fact]
+        public async Task IsUserInPrivateGroup_IsTrue()
+        {
+            PrivateGroupMembers member = _context.PrivateGroupMembers.First();
+
+            bool result = await _dataAccess.IsUserInPrivateGroup(member.PrivateChatGroupId, member.UserId);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task AddAsync_IsSuccess()
+        {
+            int currentGroupCount = _context.PrivateChatGroups.Count();
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.AddAsync(GetNewGroup());
+            _context.ChangeTracker.Clear();
+
+            Assert.Multiple(() =>
+            {
+                Assert.True(result);
+                Assert.True(currentGroupCount + 1 == _context.PrivateChatGroups.Count());
+            });
+        }
+
+        [Fact]
+        public async Task ModifyAsync_IsSuccess()
+        {
+            var group = _context.PrivateChatGroups.First();
+            string modifiedGroupName = "Modified";
+            group.ChatGroupName = modifiedGroupName;
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.ModifyAsync(group);
+            _context.ChangeTracker.Clear();
+
+            string resultName = _context.PrivateChatGroups.First().ChatGroupName;
+            Assert.Equal(modifiedGroupName, resultName);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_IsSuccess()
+        {
+            var group = _context.PrivateChatGroups.First();
+            int groupId = group.ChatGroupId;
+
+            _context.Database.BeginTransaction();
+            bool result = await _dataAccess.DeleteAsync(group);
+            _context.ChangeTracker.Clear();
+
+            Assert.False(_context.PrivateChatGroups.Any(id => id.ChatGroupId == groupId));
+        }
+
+        #region PRIVATE METHODS
+
+        public ChatApplicationModels.PrivateChatGroups GetNewGroup()
+        {
+            return new()
+            {
+                ChatGroupName    = "NewGroup",
+                GroupCreated     = DateTime.UtcNow,
+                GroupOwnerUserId = Guid.NewGuid().ToString()
+            };
+        }
+
+        #endregion
     }
 }

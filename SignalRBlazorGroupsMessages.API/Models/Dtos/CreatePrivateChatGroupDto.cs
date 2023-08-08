@@ -2,13 +2,11 @@
 
 namespace SignalRBlazorGroupsMessages.API.Models.Dtos
 {
-    public class PrivateChatGroupsDto
+    public class CreatePrivateChatGroupDto
     {
-        [Key]
-        public int ChatGroupId { get; set; }
+        [Required]
         public string ChatGroupName { get; set; } = string.Empty;
-        public DateTime GroupCreated { get; set; }
+        [Required]
         public string GroupOwnerUserId { get; set; } = string.Empty;
-        public string UserName { get; set; } = string.Empty;
     }
 }

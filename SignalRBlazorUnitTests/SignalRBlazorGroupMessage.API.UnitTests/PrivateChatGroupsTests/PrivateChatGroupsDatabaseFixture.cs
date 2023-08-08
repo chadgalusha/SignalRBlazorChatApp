@@ -1,17 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ChatApplicationModels;
+using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroups
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroupsTests
 {
-    public class PublicChatGroupsDatabaseFixture
+    public class PrivateChatGroupsDatabaseFixture
     {
         private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=ChatGroupsTestSample;Trusted_Connection=True";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
 
-        public PublicChatGroupsDatabaseFixture()
+        public PrivateChatGroupsDatabaseFixture()
         {
             lock (_lock)
             {
@@ -22,66 +23,59 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
 
-                        context.AddRange(GetListPublicChatGroups());
-                        context.AddRange(GetListPublicChatGroupsDtos());
+                        context.AddRange(GetListPrivateChatGroups());
+                        context.AddRange(GetListDtos());
+                        context.AddRange(GetListPrivateGroupMembers());
 
                         context.SaveChanges();
                     }
-
                     _databaseInitialized = true;
                 }
             }
         }
 
-        // This class mocks results sent from stored procedures for ChatGroups in the production database
-        public class TestChatGroupsDbContext : ApplicationDbContext
+        public class TestPrivateChatGroupDbContext : ApplicationDbContext
         {
-            public TestChatGroupsDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+            public TestPrivateChatGroupDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-            public virtual DbSet<PublicChatGroupsDto> ChatGroupsDtos { get; set; }
+            public virtual DbSet<PrivateChatGroupsDto> PrivateChatGroupsDto { get; set; }
         }
 
-        public TestChatGroupsDbContext CreateContext()
-            => new TestChatGroupsDbContext(
+        public TestPrivateChatGroupDbContext CreateContext()
+            => new TestPrivateChatGroupDbContext(
                 new DbContextOptionsBuilder<ApplicationDbContext>()
-                    .UseSqlServer(ConnectionString)
-                    .Options);
+                .UseSqlServer(ConnectionString)
+                .Options);
 
-        //public ApplicationDbContext CreateContext()
-        //=> new ApplicationDbContext(
-        //    new DbContextOptionsBuilder<ApplicationDbContext>()
-        //        .UseSqlServer(ConnectionString)
-        //        .Options);
-
-        private List<ChatApplicationModels.PublicChatGroups> GetListPublicChatGroups()
+        private List<ChatApplicationModels.PrivateChatGroups> GetListPrivateChatGroups()
         {
-            List<ChatApplicationModels.PublicChatGroups> chatGroupList = new()
+            List<ChatApplicationModels.PrivateChatGroups> chatGroupList = new()
             {
                 new()
                 {
                     //ChatGroupId      = 1,
-                    ChatGroupName    = "TestPublicGroup1",
+                    ChatGroupName    = "TestPrivateGroup1",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 },
                 new()
                 {
                     //ChatGroupId      = 2,
-                    ChatGroupName    = "TestPublicGroup2",
+                    ChatGroupName    = "TestPrivateGroup2",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 },
                 new()
                 {
                     //ChatGroupId      = 3,
-                    ChatGroupName    = "TestPublicGroup3",
+                    ChatGroupName    = "TestPrivateGroup3",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 },
                 new()
                 {
                     //ChatGroupId      = 4,
-                    ChatGroupName    = "TestPublicGroup4",
+                    ChatGroupName    = "TestPrivateGroup4",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
                 }
@@ -89,9 +83,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
             return chatGroupList;
         }
 
-        private List<PublicChatGroupsDto> GetListPublicChatGroupsDtos()
+        private List<PrivateChatGroupsDto> GetListDtos()
         {
-            List<PublicChatGroupsDto> listDto = new()
+            List<PrivateChatGroupsDto> listDto = new()
             {
                  new()
                 {
@@ -112,7 +106,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
                 new()
                 {
                     //ChatGroupId      = 3,
-                    ChatGroupName    = "TestPrivateGroup1",
+                    ChatGroupName    = "TestPrivateGroup3",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
                     UserName         = "Test Admin"
@@ -120,13 +114,35 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
                 new()
                 {
                     //ChatGroupId      = 4,
-                    ChatGroupName    = "TestPrivateGroup2",
+                    ChatGroupName    = "TestPrivateGroup4",
                     GroupCreated     = DateTime.Now,
                     GroupOwnerUserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071",
                     UserName         = "Test Admin"
                 }
             };
             return listDto;
+        }
+
+        private List<PrivateGroupMembers> GetListPrivateGroupMembers()
+        {
+            return new()
+            {
+                new()
+                {
+                    PrivateChatGroupId = 1,
+                    UserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
+                },
+                new()
+                {
+                    PrivateChatGroupId = 2,
+                    UserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
+                },
+                new()
+                {
+                    PrivateChatGroupId = 3,
+                    UserId = "93eeda54-e362-49b7-8fd0-ab516b7f8071"
+                }
+            };
         }
     }
 }

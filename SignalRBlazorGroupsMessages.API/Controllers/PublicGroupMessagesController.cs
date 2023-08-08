@@ -8,50 +8,41 @@ using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
-    [Route("api/[controller]/")]
     [ApiController]
+    [Route("api/[controller]/")]
     [Authorize]
-    public class PublicChatGroupsController : ControllerBase
+    public class PublicGroupMessagesController : ControllerBase
     {
-        private readonly IPublicChatGroupsService _service;
+        private readonly IPublicGroupMessagesService _service;
         private readonly ISerilogger _serilogger;
         private readonly IUserProvider _userProvider;
 
-        public PublicChatGroupsController(IPublicChatGroupsService service, ISerilogger serilogger, 
-            IUserProvider userProvider)
+        public PublicGroupMessagesController(IPublicGroupMessagesService service, ISerilogger serilogger, IUserProvider userProvider)
         {
             _service = service ?? throw new Exception(nameof(service));
             _serilogger = serilogger ?? throw new Exception(nameof(serilogger));
             _userProvider = userProvider ?? throw new Exception(nameof(userProvider));
         }
 
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<PublicChatGroupsDto>>>> GetPublicChatGroupsAsync()
-        {
-            ApiResponse<List<PublicChatGroupsDto>> apiResponse = await _service.GetListAsync();
-            _serilogger.GetRequest(GetUserIp(), apiResponse);
-
-            if (!apiResponse.Success)
-            {
-                return ErrorHttpResponse(apiResponse);
-            }
-
-            return Ok(apiResponse);
-        }
-
+        // GET: api/<PublicMessagesController>/bygroupid
         [HttpGet("bygroupid")]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> GetByIdAsync(
-            [FromQuery] int groupId)
+        public async Task<ActionResult<ApiResponse<List<PublicGroupMessageDto>>>> GetListByGroupIdAsync(
+            [FromQuery] int groupId, int numberMessagesToSkip)
         {
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+            ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
 
             if (groupId < 0)
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(groupId));
                 return BadRequest(apiResponse);
             }
+            if (numberMessagesToSkip < 0)
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberMessagesToSkip));
+                return BadRequest(apiResponse);
+            }
 
-            apiResponse = await _service.GetByIdAsync(groupId);
+            apiResponse = await _service.GetListByGroupIdAsync(groupId, numberMessagesToSkip);
             _serilogger.GetRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
@@ -62,21 +53,72 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             return Ok(apiResponse);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> AddAsync([FromBody] CreatePublicChatGroupDto dtoToCreate)
+        // GET: api/<PublicMessagesController>/byuserid
+        [HttpGet("byuserid")]
+        public async Task<ActionResult<ApiResponse<List<PublicGroupMessageDto>>>> GetListByUserIdAsync(
+            [FromQuery] string userId, int numberMessagesToSkip)
         {
-            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+            ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
 
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
-
-            string? jwtUserId = GetJwtUserId();
-            if (!UserIdValid(jwtUserId, dtoToCreate.GroupOwnerUserId))
+            if (userId.IsNullOrEmpty())
             {
-                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(userId));
+                return BadRequest(apiResponse);
+            }
+            if (numberMessagesToSkip < 0)
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(numberMessagesToSkip));
                 return BadRequest(apiResponse);
             }
 
-            apiResponse = await _service.AddAsync(dtoToCreate);
+            apiResponse = await _service.GetListByUserIdAsync(userId, numberMessagesToSkip);
+            _serilogger.GetRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
+        }
+
+        // GET api/<PublicMessagesController>/bymessageid
+        [HttpGet("bymessageid")]
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> GetByMessageIdAsync(
+            [FromQuery] Guid messageId)
+        {
+            ApiResponse<PublicGroupMessageDto>  apiResponse = await _service.GetByMessageIdAsync(messageId);
+            _serilogger.GetRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
+        }
+
+        // POST api/<PublicMessagesController>
+        [HttpPost]
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> AddAsync([FromBody] CreatePublicGroupMessageDto createDto)
+        {
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId, createDto.UserId))
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
+            }
+            if (createDto.Text.IsNullOrEmpty())
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid item: " + nameof(createDto.Text));
+                return BadRequest(apiResponse);
+            }
+
+            apiResponse = await _service.AddAsync(createDto);
             _serilogger.PostRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
@@ -87,12 +129,13 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             return Ok(apiResponse);
         }
 
+        // PUT api/<PublicMessagesController>/
         [HttpPut]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> ModifyAsync([FromBody] ModifyPublicChatGroupDto dtoToModify)
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> ModifyAsync([FromBody] ModifyPublicGroupMessageDto dtoToModify)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
 
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
             string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId))
@@ -112,19 +155,20 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             return Ok(apiResponse);
         }
 
+        // DELETE api/<PublicMessagesController>/5
         [HttpDelete]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> DeleteAsync([FromQuery] int groupId)
+        public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
         {
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+            ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
-            string ? jwtUserId = GetJwtUserId();
+            string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
                 return ErrorHttpResponse(apiResponse);
             }
 
-            apiResponse = await _service.DeleteAsync(groupId, jwtUserId!);
+            apiResponse = await _service.DeleteAsync(messageId, jwtUserId!);
             _serilogger.DeleteRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)

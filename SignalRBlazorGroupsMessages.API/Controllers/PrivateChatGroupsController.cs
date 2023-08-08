@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ChatApplicationModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SignalRBlazorGroupsMessages.API.Helpers;
@@ -8,16 +9,16 @@ using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorGroupsMessages.API.Controllers
 {
-    [Route("api/[controller]/")]
     [ApiController]
+    [Route("api/[controller]/")]
     [Authorize]
-    public class PublicChatGroupsController : ControllerBase
+    public class PrivateChatGroupsController : ControllerBase
     {
-        private readonly IPublicChatGroupsService _service;
+        private readonly IPrivateChatGroupsService _service;
         private readonly ISerilogger _serilogger;
         private readonly IUserProvider _userProvider;
 
-        public PublicChatGroupsController(IPublicChatGroupsService service, ISerilogger serilogger, 
+        public PrivateChatGroupsController(IPrivateChatGroupsService service, ISerilogger serilogger, 
             IUserProvider userProvider)
         {
             _service = service ?? throw new Exception(nameof(service));
@@ -25,33 +26,48 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             _userProvider = userProvider ?? throw new Exception(nameof(userProvider));
         }
 
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<PublicChatGroupsDto>>>> GetPublicChatGroupsAsync()
+        [HttpGet("byuserid")]
+        public async Task<ActionResult<ApiResponse<List<PrivateChatGroupsDto>>>> GetDtoListByUserIdAsync([FromQuery] string userId)
         {
-            ApiResponse<List<PublicChatGroupsDto>> apiResponse = await _service.GetListAsync();
+            ApiResponse<List<PrivateChatGroupsDto>> apiResponse = new();
+
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId, userId))
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            apiResponse = await _service.GetDtoListByUserIdAsync(userId);
             _serilogger.GetRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
             {
                 return ErrorHttpResponse(apiResponse);
             }
-
+            
             return Ok(apiResponse);
         }
 
         [HttpGet("bygroupid")]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> GetByIdAsync(
-            [FromQuery] int groupId)
+        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> GetDtoByGroupIdAsync(
+            [FromQuery] int groupId, [FromQuery] string userId)
         {
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+            ApiResponse<PrivateChatGroupsDto> apiResponse = new();
 
             if (groupId < 0)
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, "Invalid data: " + nameof(groupId));
                 return BadRequest(apiResponse);
             }
+            string? jwtUserId = GetJwtUserId();
+            if (!UserIdValid(jwtUserId, userId))
+            {
+                apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                return ErrorHttpResponse(apiResponse);
+            }
 
-            apiResponse = await _service.GetByIdAsync(groupId);
+            apiResponse = await _service.GetDtoByGroupIdAsync(groupId, userId);
             _serilogger.GetRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
@@ -63,20 +79,34 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> AddAsync([FromBody] CreatePublicChatGroupDto dtoToCreate)
+        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> AddAsync([FromBody] CreatePrivateChatGroupDto createDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
 
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+            ApiResponse<PrivateChatGroupsDto> apiResponse = new();
 
             string? jwtUserId = GetJwtUserId();
-            if (!UserIdValid(jwtUserId, dtoToCreate.GroupOwnerUserId))
+            if (!UserIdValid(jwtUserId, createDto.GroupOwnerUserId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
-                return BadRequest(apiResponse);
+                return ErrorHttpResponse(apiResponse);
             }
 
-            apiResponse = await _service.AddAsync(dtoToCreate);
+            apiResponse = await _service.AddAsync(createDto);
+            _serilogger.PostRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return Ok(apiResponse);
+        }
+
+        [HttpPost("groupmember")]
+        public async Task<ActionResult<PrivateGroupMembers>> AddMemberAsync([FromQuery] int groupId, [FromQuery] string userToAddId)
+        {
+            ApiResponse<PrivateGroupMembers> apiResponse = await _service.AddPrivateGroupMember(groupId, userToAddId);
             _serilogger.PostRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
@@ -88,11 +118,11 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> ModifyAsync([FromBody] ModifyPublicChatGroupDto dtoToModify)
+        public async Task<ActionResult<PrivateChatGroupsDto>> ModifyAsync([FromBody] ModifyPrivateChatGroupDto modifyDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
 
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+            ApiResponse<PrivateChatGroupsDto> apiResponse = new();
 
             string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId))
@@ -101,7 +131,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
                 return ErrorHttpResponse(apiResponse);
             }
 
-            apiResponse = await _service.ModifyAsync(dtoToModify, jwtUserId!);
+            apiResponse = await _service.ModifyAsync(modifyDto, jwtUserId!);
             _serilogger.PutRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)
@@ -113,11 +143,11 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpDelete]
-        public async Task<ActionResult<ApiResponse<PublicChatGroupsDto>>> DeleteAsync([FromQuery] int groupId)
+        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> DeleteAsync([FromQuery] int groupId)
         {
-            ApiResponse<PublicChatGroupsDto> apiResponse = new();
+            ApiResponse<PrivateChatGroupsDto> apiResponse = new();
 
-            string ? jwtUserId = GetJwtUserId();
+            string? jwtUserId = GetJwtUserId();
             if (!UserIdValid(jwtUserId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
@@ -125,6 +155,20 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             }
 
             apiResponse = await _service.DeleteAsync(groupId, jwtUserId!);
+            _serilogger.DeleteRequest(GetUserIp(), apiResponse);
+
+            if (!apiResponse.Success)
+            {
+                return ErrorHttpResponse(apiResponse);
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("groupmember")]
+        public async Task<ActionResult<ApiResponse<PrivateGroupMembers>>> DeleteMemberAsync([FromQuery] int groupId, string userId)
+        {
+            ApiResponse<PrivateGroupMembers> apiResponse = await _service.RemoveUserFromGroupAsync(groupId, userId);
             _serilogger.DeleteRequest(GetUserIp(), apiResponse);
 
             if (!apiResponse.Success)

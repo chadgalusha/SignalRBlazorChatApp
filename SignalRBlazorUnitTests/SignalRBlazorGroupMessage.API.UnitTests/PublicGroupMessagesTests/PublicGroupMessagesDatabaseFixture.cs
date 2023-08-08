@@ -2,18 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using SignalRBlazorGroupsMessages.API.Models.Views;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests
 {
-    public class PublicMessagesDatabaseFixture
+    public class PublicGroupMessagesDatabaseFixture
     {
         private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=PublicMessagesTestSample;Trusted_Connection=True";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
 
-        public PublicMessagesDatabaseFixture()
+        public PublicGroupMessagesDatabaseFixture()
         {
             lock (_lock)
             {
@@ -25,7 +24,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
                         context.Database.EnsureCreated();
 
                         context.AddRange(GetListPublicMessages());
-                        context.AddRange(GetListPublicMessagesViews());
+                        context.AddRange(GetListPublicMessagesDto());
                         context.SaveChanges();
                     }
 
@@ -55,7 +54,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
 
         private List<PublicGroupMessages> GetListPublicMessages()
         {
-            List<PublicGroupMessages> messageList = new()
+            return new()
             {
                 new()
                 {
@@ -91,10 +90,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
                     MessageDateTime = new DateTime(2023, 6, 15)
                 }
             };
-            return messageList;
         }
 
-        private List<PublicGroupMessageDto> GetListPublicMessagesViews()
+        private List<PublicGroupMessageDto> GetListPublicMessagesDto()
         {
             List<PublicGroupMessageDto> dtoList = new()
             {

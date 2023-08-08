@@ -5,33 +5,33 @@ using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests
 {
-    public class PublicMessageService_UnitTests
+    public class PublicGroupMessageService_UnitTests
     {
-        private readonly Mock<IPublicMessagesDataAccess> _mockDataAccess;
+        private readonly Mock<IPublicGroupMessagesDataAccess> _mockDataAccess;
         private readonly Mock<ISerilogger> _mockSerilogger;
 
-        public PublicMessageService_UnitTests()
+        public PublicGroupMessageService_UnitTests()
         {
-            _mockDataAccess = new Mock<IPublicMessagesDataAccess>();
+            _mockDataAccess = new Mock<IPublicGroupMessagesDataAccess>();
             _mockSerilogger = new Mock<ISerilogger>();
         }
 
         [Fact]
         public async Task GetListByGroupIdAsync_ReturnsCorrectResults()
         {
-            int expectedCount = GetListPublicMessagesDto()
+            int expectedCount = GetListDto()
                 .Where(p => p.ChatGroupId == 1)
                 .ToList()
                 .Count;
 
             _mockDataAccess.Setup(m => m.GetDtoListByGroupIdAsync(1, 0))
-                .ReturnsAsync(GetListPublicMessagesDto()
+                .ReturnsAsync(GetListDto()
                     .Where(x => x.ChatGroupId == 1)
                     .ToList());
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result1 = await _service.GetListByGroupIdAsync(1, 0);
             var result2 = await _service.GetListByGroupIdAsync(999, 0);
@@ -50,17 +50,17 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         public async Task GetListByUserIdAsync_ReturnsCorrectResults()
         {
             string testUserId = "e8ee70b6-678a-4b86-934e-da7f404a33a3";
-            int expectedCount = GetListPublicMessagesDto()
+            int expectedCount = GetListDto()
                 .Where(u => u.UserId == testUserId)
                 .ToList()
                 .Count;
 
             _mockDataAccess.Setup(m => m.GetDtoListByUserIdAsync(testUserId, 0))
-                .ReturnsAsync(GetListPublicMessagesDto()
+                .ReturnsAsync(GetListDto()
                     .Where(u => u.UserId == testUserId)
                     .ToList());
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result1 = await _service.GetListByUserIdAsync(testUserId, 0);
 
@@ -75,14 +75,14 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         public async Task GetByMessageIdAsync_ReturnsMessage()
         {
             Guid testMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3");
-            PublicGroupMessageDto dtoMessage = GetListPublicMessagesDto()
+            PublicGroupMessageDto dtoMessage = GetListDto()
                 .Single(g => g.PublicMessageId == testMessageId);
 
             _mockDataAccess.Setup(p => p.GetDtoByMessageIdAsync(testMessageId))
-                .ReturnsAsync(GetListPublicMessagesDto()
+                .ReturnsAsync(GetListDto()
                     .Single(m => m.PublicMessageId == testMessageId));
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
             var result = await _service.GetByMessageIdAsync(testMessageId);
 
@@ -97,15 +97,17 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         [Fact]
         public async Task AddAsync_IsSuccess()
         {
-            PublicGroupMessages newMessage = GetNewPublicMessage();
-            string expectedText = newMessage.Text;
+            CreatePublicGroupMessageDto createDto = GetCreateDto();
+            string expectedText = createDto.Text;
 
+            _mockDataAccess.Setup(g => g.GetDtoByMessageIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(CreatedDto());
             _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
-            var result = await _service.AddAsync(NewPublicMessageToDto(newMessage));
+            var result = await _service.AddAsync(createDto);
 
             Assert.Multiple(() =>
             {
@@ -117,19 +119,23 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         [Fact]
         public async Task ModifyAsync_IsSuccess()
         {
-            PublicGroupMessages messageToModify = GetExistingPublicMessage();
+            PublicGroupMessageDto dtoMessage = GetListDto().First();
+            string jwtUserId = dtoMessage.UserId;
+            ModifyPublicGroupMessageDto messageToModify = GetModifyDto(dtoMessage);
             string expectedText = messageToModify.Text;
 
             _mockDataAccess.Setup(p => p.ModifyAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
-            _mockDataAccess.Setup(p => p.Exists(messageToModify.PublicMessageId))
-                .ReturnsAsync(true);
-            _mockDataAccess.Setup(p => p.GetByMessageIdAsync(messageToModify.PublicMessageId))
-                .ReturnsAsync(messageToModify);
+            _mockDataAccess.Setup(p => p.GetByMessageIdAsync(dtoMessage.PublicMessageId))
+                .ReturnsAsync(DtoToModel(dtoMessage));
+            // modify text here for return, only change is Text field
+            dtoMessage.Text = expectedText;
+            _mockDataAccess.Setup(g => g.GetDtoByMessageIdAsync(dtoMessage.PublicMessageId))
+                .ReturnsAsync(dtoMessage);
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
-            var result = await _service.ModifyAsync(ModifiedPublicMessageToDto(messageToModify));
+            var result = await _service.ModifyAsync(messageToModify, jwtUserId);
 
             Assert.Multiple(() =>
             {
@@ -141,20 +147,22 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
         [Fact]
         public async Task DeleteAsync_IsSuccess()
         {
-            PublicGroupMessages messageToDelete = GetExistingPublicMessage();
+            PublicGroupMessageDto messageToDelete = GetListDto().First();
+            string jwtUserId = messageToDelete.UserId;
+            
 
             _mockDataAccess.Setup(p => p.DeleteAsync(It.IsAny<PublicGroupMessages>()))
                 .ReturnsAsync(true);
             _mockDataAccess.Setup(p => p.Exists(messageToDelete.PublicMessageId))
                 .ReturnsAsync(true);
             _mockDataAccess.Setup(p => p.GetByMessageIdAsync(messageToDelete.PublicMessageId))
-                .ReturnsAsync(messageToDelete);
+                .ReturnsAsync(DtoToModel(messageToDelete));
             _mockDataAccess.Setup(p => p.DeleteMessagesByResponseMessageIdAsync(messageToDelete.PublicMessageId))
                 .ReturnsAsync(true);
 
-            PublicMessagesService _service = GetNewService();
+            PublicGroupMessagesService _service = GetNewService();
 
-            var result = await _service.DeleteAsync(messageToDelete.PublicMessageId);
+            var result = await _service.DeleteAsync(messageToDelete.PublicMessageId, jwtUserId);
 
             Assert.True(result.Success);
             Assert.Equal("ok", result.Message);
@@ -162,12 +170,12 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
 
         #region PRIVATE METHODS
 
-        private PublicMessagesService GetNewService()
+        private PublicGroupMessagesService GetNewService()
         {
             return new(_mockDataAccess.Object, _mockSerilogger.Object);
         }
 
-        private List<PublicGroupMessageDto> GetListPublicMessagesDto()
+        private List<PublicGroupMessageDto> GetListDto()
         {
             List<PublicGroupMessageDto> messageList = new()
             {
@@ -225,50 +233,52 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicM
             return messageList;
         }
 
-        private PublicGroupMessages GetNewPublicMessage()
+        private CreatePublicGroupMessageDto GetCreateDto()
         {
             return new()
             {
-                UserId          = "4eb0c266-894a-4c09-a6e2-4a0fb72e9c1c",
+                UserId      = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                ChatGroupId = 1,
+                Text        = "New message"
+            };
+        }
+
+        private PublicGroupMessageDto CreatedDto()
+        {
+            return new()
+            {
+                PublicMessageId = Guid.NewGuid(),
+                UserId          = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
+                UserName        = "TestUser1",
                 ChatGroupId     = 1,
-                Text            = "New Message.",
+                ChatGroupName   = "Test Chat Group 1",
+                Text            = "New message",
                 MessageDateTime = DateTime.Now
             };
         }
 
-        private PublicGroupMessages GetExistingPublicMessage()
+        private ModifyPublicGroupMessageDto GetModifyDto(PublicGroupMessageDto dto)
         {
             return new()
             {
-                PublicMessageId = Guid.Parse("e8ee70b6-678a-4b86-934e-da7f404a33a3"),
-                UserId          = "e1b9cf9a-ff86-4607-8765-9e47a305062a",
-                ChatGroupId     = 1,
-                Text            = "Updated message",
-                MessageDateTime = new DateTime(2023, 6, 15)
+                PublicMessageId = dto.PublicMessageId,
+                Text            = "Modified Text",
+                ReplyMessageId  = dto.ReplyMessageId,
+                PictureLink     = dto.PictureLink
             };
         }
 
-        private PublicGroupMessageDto NewPublicMessageToDto(PublicGroupMessages message)
+        private PublicGroupMessages DtoToModel(PublicGroupMessageDto dto)
         {
             return new()
             {
-                UserId          = message.UserId,
-                ChatGroupId     = message.ChatGroupId,
-                Text            = message.Text,
-                MessageDateTime = message.MessageDateTime,
-                ReplyMessageId  = message.ReplyMessageId,
-                PictureLink     = message.PictureLink
-            };
-        }
-
-        private ModifyPublicGroupMessageDto ModifiedPublicMessageToDto(PublicGroupMessages message)
-        {
-            return new()
-            {
-                PublicMessageId = message.PublicMessageId,
-                Text            = message.Text,
-                ReplyMessageId  = message.ReplyMessageId,
-                PictureLink     = message.PictureLink
+                PublicMessageId = dto.PublicMessageId,
+                UserId          = dto.UserId,
+                ChatGroupId     = dto.ChatGroupId,
+                Text            = dto.Text,
+                MessageDateTime = dto.MessageDateTime,
+                ReplyMessageId  = dto.ReplyMessageId,
+                PictureLink     = dto.PictureLink
             };
         }
 
