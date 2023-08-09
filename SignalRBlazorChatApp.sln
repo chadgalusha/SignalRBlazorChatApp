@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRBlazorRequestsInvita
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SignalRBlazorUnitTests", "SignalRBlazorUnitTests\SignalRBlazorUnitTests.csproj", "{B0F2F3D7-BAF7-41B7-A019-68BFD957BF61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JWTGenerator", "JWTGenerator\JWTGenerator.csproj", "{F0F426E4-A360-44E2-AAF3-BD30F7CD197F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JWTGenerator", "JWTGenerator\JWTGenerator.csproj", "{F0F426E4-A360-44E2-AAF3-BD30F7CD197F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
