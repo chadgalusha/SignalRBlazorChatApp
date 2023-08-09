@@ -33,7 +33,6 @@ namespace SignalRBlazorChatApp
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-            builder.Services.AddSingleton<WeatherForecastService>();
 
             builder.Services.AddMudServices();
 
@@ -60,6 +59,7 @@ namespace SignalRBlazorChatApp
             app.UseAuthorization();
 
             app.MapControllers();
+
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
 
