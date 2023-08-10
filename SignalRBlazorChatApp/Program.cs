@@ -5,6 +5,7 @@ using MudBlazor.Services;
 using Serilog;
 using SignalRBlazorChatApp.Areas.Identity;
 using SignalRBlazorChatApp.Data;
+using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.Models;
 
 namespace SignalRBlazorChatApp
@@ -29,6 +30,9 @@ namespace SignalRBlazorChatApp
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Dependency Injection registration
+            builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();

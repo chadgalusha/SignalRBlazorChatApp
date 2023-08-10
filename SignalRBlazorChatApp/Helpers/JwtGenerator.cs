@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SignalRBlazorChatApp.Helpers
 {
-	public class JwtGenerator
+	public class JwtGenerator : IJwtGenerator
 	{
 		private readonly IConfiguration _configuration;
 
@@ -14,7 +14,7 @@ namespace SignalRBlazorChatApp.Helpers
 			_configuration = configuration ?? throw new Exception(nameof(configuration));
 		}
 
-		public string GetJwtToken()
+		public string GetJwtToken(string userId, string userRole)
 		{
 			Authentication authentication = GetAuthentication();
 
@@ -24,8 +24,8 @@ namespace SignalRBlazorChatApp.Helpers
 
 			List<Claim> claimsForToken = new()
 			{
-				new("userId", ""),
-				new("userRole", "")
+				new("userId", userId),
+				new("userRole", userRole)
 			};
 
 			JwtSecurityToken jwtSecurityToken = new(
@@ -54,8 +54,8 @@ namespace SignalRBlazorChatApp.Helpers
 			return new()
 			{
 				SecretForKey = _configuration["Authentication:SecretForKey"]!,
-				Issuer		 = _configuration["Authentication:Issuer"]!,
-				Audience	 = _configuration["Authentication:Audience"]!
+				Issuer = _configuration["Authentication:Issuer"]!,
+				Audience = _configuration["Authentication:Audience"]!
 			};
 		}
 
