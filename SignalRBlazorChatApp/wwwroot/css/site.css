@@ -74,6 +74,11 @@ a, .btn-link {
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
+.mud-table-button:hover {
+    border: dashed;
+    transform: scale(1.4);
+}
+
 /* Loading Indicator */
 .loadingindicator {
     top: 50%;

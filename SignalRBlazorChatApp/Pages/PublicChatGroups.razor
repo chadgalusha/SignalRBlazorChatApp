@@ -20,12 +20,18 @@ else
 		</HeaderContent>
 		<RowTemplate>
 			<MudTd DataLabel="Group Id" style="display:none;">@context.ChatGroupId</MudTd>
-			<MudTd DataLabel="Group Name">@context.ChatGroupName</MudTd>
+			<MudTd DataLabel="Group Name">
+				<MudButton Variant="Variant.Text" @onclick="(()=>RedirectToGroupMessages(context.ChatGroupId))">@context.ChatGroupName</MudButton>
+			</MudTd>
 			<MudTd DataLabel="Created Date">@context.GroupCreated</MudTd>
 			<MudTd DataLabel="Group Owner Id" style="display:none;">@context.GroupOwnerUserId</MudTd>
 			<MudTd DataLabel="Group Owner">@context.UserName</MudTd>
 			<MudTd>
-
+				@if (UserIdMatch(userId, context.GroupOwnerUserId))
+				{
+					<MudIcon Icon="@Icons.TwoTone.Edit" Title="Edit" class="mud-table-button" Color="Color.Info" />
+					<MudIcon Icon="@Icons.TwoTone.Delete" Title="Delete" class="mud-table-button" Color="Color.Error" />
+				}
 			</MudTd>
 		</RowTemplate>
 		<PagerContent>

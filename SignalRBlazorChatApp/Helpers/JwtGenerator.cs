@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -14,30 +15,10 @@ namespace SignalRBlazorChatApp.Helpers
 			_configuration = configuration ?? throw new Exception(nameof(configuration));
 		}
 
-		public string GetJwtToken(string userId, string userRole)
+		public string GetJwtToken(AuthenticationState authState)
 		{
-			Authentication authentication = GetAuthentication();
-
-			SymmetricSecurityKey securityKey = GetSecurityKey(authentication.SecretForKey);
-
-			SigningCredentials signingCredentials = new(securityKey, SecurityAlgorithms.HmacSha256);
-
-			List<Claim> claimsForToken = new()
-			{
-				new("userId", userId),
-				new("userRole", userRole)
-			};
-
-			JwtSecurityToken jwtSecurityToken = new(
-				authentication.Issuer,
-				authentication.Audience,
-				claimsForToken,
-				DateTime.UtcNow,
-				DateTime.UtcNow.AddSeconds(20),
-				signingCredentials
-				);
-
-			return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+			(string, string) userIdAndRole = GetUserIdAndRole(authState);
+			return CreateJWT(userIdAndRole.Item1, userIdAndRole.Item2);
 		}
 
 		#region PRIVATE METHODS
@@ -63,6 +44,55 @@ namespace SignalRBlazorChatApp.Helpers
 		{
 			return new(Encoding.ASCII.GetBytes(key));
 		}
+
+		public (string, string) GetUserIdAndRole(AuthenticationState authState)
+		{
+            var user = authState.User;
+            var claims = user.Claims;
+
+            string userId = claims.First(c => c.Type == ClaimTypes.NameIdentifier)
+				.ToString();
+
+            string userRole = claims.Where(c => c.Type == ClaimTypes.Role)
+                .Select(_ => _.Value).First();
+
+            if (userId.IsNullOrEmpty())
+            {
+                userId = "";
+            }
+            if (userRole.IsNullOrEmpty())
+            {
+                userRole = "";
+            }
+
+            return (userId, userRole)!;
+        }
+
+		private string CreateJWT(string userId, string userRole)
+		{
+            Authentication authentication = GetAuthentication();
+
+            SymmetricSecurityKey securityKey = GetSecurityKey(authentication.SecretForKey);
+
+            SigningCredentials signingCredentials = new(securityKey, SecurityAlgorithms.HmacSha256);
+
+            List<Claim> claimsForToken = new()
+            {
+                new("userId", userId),
+                new("userRole", userRole)
+            };
+
+            JwtSecurityToken jwtSecurityToken = new(
+                authentication.Issuer,
+                authentication.Audience,
+                claimsForToken,
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddSeconds(20),
+                signingCredentials
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+        }
 
 		#endregion
 	}

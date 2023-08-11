@@ -1,7 +1,9 @@
-﻿namespace SignalRBlazorChatApp.Helpers
+﻿using Microsoft.AspNetCore.Components.Authorization;
+
+namespace SignalRBlazorChatApp.Helpers
 {
 	public interface IJwtGenerator
 	{
-		string GetJwtToken(string userId, string userRole);
+		string GetJwtToken(AuthenticationState authState);
 	}
 }

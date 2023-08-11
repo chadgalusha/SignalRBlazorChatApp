@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Models;
@@ -14,46 +15,49 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 		[Inject] private IJwtGenerator JwtGenerator { get; set; }
 		[Inject] private IPublicChatGroupsApiService PublicChatGroupsApiService { get; set; }
+		[Inject] NavigationManager NavigationManager { get; set; }
 
 		private ApiResponse<List<PublicChatGroupsDto>>? apiResponse;
 		private List<PublicChatGroupsDto>? _listPublicChatGroupsDto;
+		private string userId = string.Empty;
 
 		protected override async Task OnInitializedAsync()
 		{
 			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-			(string, string) userIdAndRole = UserProcessor.GetUserIdAndRole(authState);
-			var jsonWebToken = JwtGenerator.GetJwtToken(userIdAndRole.Item1, userIdAndRole.Item2);
+			userId = GetUserId(authState) ?? string.Empty;
+			
+			string jsonWebToken = GenerateJwt(authState);
 
 			apiResponse = await PublicChatGroupsApiService.GetPublicChatGroupsAsync(jsonWebToken);
 
-			_listPublicChatGroupsDto = GetList(apiResponse.Data);
+			_listPublicChatGroupsDto = GetList(apiResponse.Data!);
 		}
 
-		private async Task<(string, string)> GetAuthenticatedUserIdAndRole()
+		private string? GetUserId(AuthenticationState authState)
 		{
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-			return UserProcessor.GetUserIdAndRole(authState);
+            var user = authState.User;
+            var userId = user.FindFirst(c => c.Type.Contains("nameidentifier"))?.Value;
+			return userId;
         }
+
+		private string GenerateJwt(AuthenticationState authState)
+		{
+			return JwtGenerator.GetJwtToken(authState);
+		}
 
 		private List<PublicChatGroupsDto> GetList(List<PublicChatGroupsDto> data)
 		{
 			List<PublicChatGroupsDto> newList = new();
-			List<PublicChatGroupsDto> dataList = data;
-			foreach (var item in dataList)
-			{
-				PublicChatGroupsDto dto = new()
-				{
-					ChatGroupId = item.ChatGroupId,
-					ChatGroupName = item.ChatGroupName,
-					GroupCreated = item.GroupCreated,
-					GroupOwnerUserId = item.GroupOwnerUserId,
-					UserName = item.UserName
-				};
-				newList.Add(dto);
-			}
-
+			newList.AddRange(data);
 			return newList;
+		}
+
+		private bool UserIdMatch(string userId, string compareId) => userId == compareId;
+
+		private void RedirectToGroupMessages(int groupId)
+		{
+			NavigationManager.NavigateTo($"PublicGroupMessages/{groupId}");
 		}
 	}
 }

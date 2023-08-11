@@ -1,0 +1,13 @@
+﻿@page "/PublicGroupMessages/{GroupId}"
+@using SignalRBlazorChatApp.Components
+
+<h3 style="text-align:center">Public Group Messages</h3>
+
+@if (_listMessagesDto == null)
+{
+	<LoadingIndicator />
+}
+else
+{
+	
+}
