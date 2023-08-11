@@ -6,6 +6,7 @@ using Serilog;
 using SignalRBlazorChatApp.Areas.Identity;
 using SignalRBlazorChatApp.Data;
 using SignalRBlazorChatApp.Helpers;
+using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Models;
 
 namespace SignalRBlazorChatApp
@@ -33,6 +34,8 @@ namespace SignalRBlazorChatApp
 
             // Dependency Injection registration
             builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
+            // HTTP Client registration
+            builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();

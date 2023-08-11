@@ -8,6 +8,28 @@
 	<LoadingIndicator />
 }
 else
-{
+{	
+	<MudTable Items="@_listPublicChatGroupsDto" Class="table-styles" Hover="true" Breakpoint="Breakpoint.Sm" Striped="true" Dense="true">
+		<HeaderContent>
+			<MudTh style="display:none;">Group Id</MudTh>
+			<MudTh>Group Name</MudTh>
+			<MudTh>Created Date</MudTh>
+			<MudTh style="display:none;">Group Owner Id</MudTh>
+			<MudTh>Group Owner</MudTh>
+			<MudTh></MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd DataLabel="Group Id" style="display:none;">@context.ChatGroupId</MudTd>
+			<MudTd DataLabel="Group Name">@context.ChatGroupName</MudTd>
+			<MudTd DataLabel="Created Date">@context.GroupCreated</MudTd>
+			<MudTd DataLabel="Group Owner Id" style="display:none;">@context.GroupOwnerUserId</MudTd>
+			<MudTd DataLabel="Group Owner">@context.UserName</MudTd>
+			<MudTd>
 
+			</MudTd>
+		</RowTemplate>
+		<PagerContent>
+			<MudTablePager />
+		</PagerContent>
+	</MudTable>
 }

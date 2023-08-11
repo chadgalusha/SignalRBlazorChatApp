@@ -33,7 +33,7 @@ namespace SignalRBlazorChatApp.Helpers
 				authentication.Audience,
 				claimsForToken,
 				DateTime.UtcNow,
-				DateTime.UtcNow.AddMinutes(1),
+				DateTime.UtcNow.AddSeconds(20),
 				signingCredentials
 				);
 
