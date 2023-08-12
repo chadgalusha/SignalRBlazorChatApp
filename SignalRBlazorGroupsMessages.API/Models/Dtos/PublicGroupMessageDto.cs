@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel;
 
 namespace SignalRBlazorGroupsMessages.API.Models.Dtos
 {
-    public class PublicGroupMessageDto
+	public class PublicGroupMessageDto
     {
         [Key]
         [Required]

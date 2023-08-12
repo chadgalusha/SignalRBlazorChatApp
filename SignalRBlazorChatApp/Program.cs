@@ -37,6 +37,7 @@ namespace SignalRBlazorChatApp
             builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
             // HTTP Client registration
             builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
+            builder.Services.AddHttpClient<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();

@@ -16,7 +16,7 @@ namespace SignalRBlazorChatApp.Pages
 
 		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 		[Inject] private IJwtGenerator JwtGenerator { get; set; }
-		[Inject] private IPublicChatGroupsApiService PublicChatGroupsApiService { get; set; }
+		[Inject] private IPublicGroupMessagesApiService PublicGroupMessagesApiService { get; set; }
 		[Inject] ISnackbar Snackbar { get; set; }
 
 		private ApiResponse<List<PublicGroupMessageDto>>? apiResponse;
@@ -30,6 +30,10 @@ namespace SignalRBlazorChatApp.Pages
 			userId = GetUserId(authState) ?? string.Empty;
 
 			string jsonWebToken = GenerateJwt(authState);
+
+			apiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
+
+			_listMessagesDto = GetList(apiResponse.Data!);
 		}
 
 		private string? GetUserId(AuthenticationState authState)
