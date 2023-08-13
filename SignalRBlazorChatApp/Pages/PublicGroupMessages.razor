@@ -1,7 +1,7 @@
 ﻿@page "/PublicGroupMessages/{GroupId}"
 @using SignalRBlazorChatApp.Components
 
-<h3 style="text-align:center">Public Group Messages</h3>
+<MudText Typo="Typo.h4" Align="Align.Center">Public Group Messages</MudText>
 
 @if (_listMessagesDto == null)
 {
@@ -9,5 +9,28 @@
 }
 else
 {
-	@_listMessagesDto.First().Text;
+	<MudTable Items="@_listMessagesDto" Class="table-styles" FixedHeader="true" Height="500px">
+		<HeaderContent>
+			<MudTh><MudText Align="Align.Center">Test</MudText></MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			@foreach (var item in _listMessagesDto)
+			{
+				<div>
+				@*<MudTd Style="display:none">@item.PublicMessageId</MudTd>
+				<MudTd Style="display:none">@item.ChatGroupId</MudTd>
+				<MudTd Style="display:none">@item.ChatGroupName</MudTd>
+				<MudTd>@item.Text</MudTd>
+				<MudTd Style="display:none">@item.UserId</MudTd>
+				<MudTd>@item.UserName</MudTd>
+				<MudTd>@item.MessageDateTime</MudTd>*@
+					<p><b>@item.UserName:</b> @item.Text</p>
+					<p><small>@item.MessageDateTime.ToLongDateString() @item.MessageDateTime.ToShortTimeString()</small></p>
+				</div>
+			}
+		</RowTemplate>
+		<PagerContent>
+			<MudText Align="Align.Center">Test</MudText>
+		</PagerContent>
+	</MudTable>
 }

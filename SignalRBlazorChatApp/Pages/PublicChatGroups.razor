@@ -1,7 +1,7 @@
 ﻿@page "/PublicChatGroups"
 @using SignalRBlazorChatApp.Components
 
-<h3 style="text-align:center">Public Chat Groups</h3>
+<MudText Typo="Typo.h4" Align="Align.Center">Public Chat Groups</MudText>
 
 @if (_listPublicChatGroupsDto == null)
 {
@@ -21,7 +21,7 @@ else
 		<RowTemplate>
 			<MudTd DataLabel="Group Id" style="display:none;">@context.ChatGroupId</MudTd>
 			<MudTd DataLabel="Group Name">
-				<MudButton Variant="Variant.Text" @onclick="(()=>RedirectToGroupMessages(context.ChatGroupId))">@context.ChatGroupName</MudButton>
+				<MudButton Variant="Variant.Outlined" @onclick="(()=>RedirectToGroupMessages(context.ChatGroupId))">@context.ChatGroupName</MudButton>
 			</MudTd>
 			<MudTd DataLabel="Created Date">@context.GroupCreated</MudTd>
 			<MudTd DataLabel="Group Owner Id" style="display:none;">@context.GroupOwnerUserId</MudTd>

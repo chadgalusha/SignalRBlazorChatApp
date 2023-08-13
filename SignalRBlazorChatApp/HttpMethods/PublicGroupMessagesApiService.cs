@@ -31,7 +31,6 @@ namespace SignalRBlazorChatApp.HttpMethods
 
 			string baseUri = BaseUri();
 			var uriWithQuery = QueryHelpers.AddQueryString($"{baseUri}bygroupid", query!);
-
 			var dataRequest = await _httpClient.GetAsync(uriWithQuery);
 
 			string jsonContent = await dataRequest.Content.ReadAsStringAsync();

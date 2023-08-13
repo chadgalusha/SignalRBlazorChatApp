@@ -18,25 +18,15 @@ namespace SignalRBlazorChatApp.HttpMethods
 
 		public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetPublicChatGroupsAsync(string jsonWebToken)
 		{
-			ApiResponse<List<PublicChatGroupsDto>> apiResponse = new();
-
 			_httpClient = HttpClientFactory.Create();
 			_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonWebToken);
 
 			string uri = BaseUri();
 			var dataRequest = await _httpClient.GetAsync(uri);
 
-			if (dataRequest.IsSuccessStatusCode)
-			{
-				string jsonContent = await dataRequest.Content.ReadAsStringAsync();
-				apiResponse = JsonConvert.DeserializeObject<ApiResponse<List<PublicChatGroupsDto>>>(jsonContent)!;
-			}
-
-			if (apiResponse.Data == null)
-			{
-				apiResponse.Success = false;
-				apiResponse.Message = "Error retriving data";
-			}
+			string jsonContent = await dataRequest.Content.ReadAsStringAsync();
+			ApiResponse<List<PublicChatGroupsDto>> apiResponse = JsonConvert
+				.DeserializeObject<ApiResponse<List<PublicChatGroupsDto>>>(jsonContent)!;
 
 			return apiResponse;
 		}

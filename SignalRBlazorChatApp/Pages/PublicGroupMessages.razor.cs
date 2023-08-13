@@ -54,5 +54,7 @@ namespace SignalRBlazorChatApp.Pages
 			newList.AddRange(data);
 			return newList;
 		}
+
+		private bool UserIdMatch(string userId, string compareId) => userId == compareId;
 	}
 }
