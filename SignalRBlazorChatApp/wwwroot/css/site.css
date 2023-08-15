@@ -89,3 +89,52 @@ a, .btn-link {
     margin-left: 5em;
     position: fixed;
 }
+
+/* Chat Board Styles */
+.chat-board {
+    border: 1px solid black;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    margin-bottom: 1em;
+}
+
+.chatmessage {
+    border: 1px solid white;
+    border-radius: 6px;
+    background-color: black;
+    color: white;
+    display: inline-block;
+    margin: 0.5em 1em 0.5em 1em;
+    max-width: 70%;
+}
+
+    .chatmessage p {
+        margin: 1px 0px 1px 0px;
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+.mychatmessage {
+    border: 1px solid white;
+    border-radius: 6px;
+    border: thin;
+    background-color: cornflowerblue;
+    color: white;
+    display: inline-block;
+    float: right;
+    clear: both;
+    margin: 0.5em 1em 0.5em 1em;
+    max-width: 70%;
+}
+
+    .mychatmessage p {
+        margin: 1px 0px 1px 0px;
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+.message-form {
+    border: 1px solid white;
+    border-radius: 6px;
+    background-color: white;
+}

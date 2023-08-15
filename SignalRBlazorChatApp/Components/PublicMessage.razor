@@ -1,0 +1,27 @@
+﻿@using SignalRBlazorChatApp.Models.Dtos
+
+@if (Message.UserId == UserId)
+{
+	<div class="mychatmessage">
+		<p><b>@Message.UserName:</b> @Message.Text</p>
+		<p><small>@Message.MessageDateTime.ToLongDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+	</div>
+	<br />
+}
+else
+{
+	<div class="chatmessage">
+		<p><b>@Message.UserName:</b> @Message.Text</p>
+		<p><small>@Message.MessageDateTime.ToLongDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+	</div>
+	<br />
+}
+
+
+@code {
+	[Parameter, EditorRequired]
+	public PublicGroupMessageDto Message { get; set; }
+
+	[Parameter, EditorRequired]
+	public string UserId { get; set; } = string.Empty;
+}

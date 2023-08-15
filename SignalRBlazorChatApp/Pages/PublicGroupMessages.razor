@@ -9,28 +9,39 @@
 }
 else
 {
-	<MudTable Items="@_listMessagesDto" Class="table-styles" FixedHeader="true" Height="500px">
+	@*<MudTable Items="@_listMessagesDto" Class="table-styles" FixedHeader="true" Height="500px">
 		<HeaderContent>
 			<MudTh><MudText Align="Align.Center">Test</MudText></MudTh>
 		</HeaderContent>
 		<RowTemplate>
-			@foreach (var item in _listMessagesDto)
+			@foreach (var message in _listMessagesDto)
 			{
-				<div>
-				@*<MudTd Style="display:none">@item.PublicMessageId</MudTd>
-				<MudTd Style="display:none">@item.ChatGroupId</MudTd>
-				<MudTd Style="display:none">@item.ChatGroupName</MudTd>
-				<MudTd>@item.Text</MudTd>
-				<MudTd Style="display:none">@item.UserId</MudTd>
-				<MudTd>@item.UserName</MudTd>
-				<MudTd>@item.MessageDateTime</MudTd>*@
-					<p><b>@item.UserName:</b> @item.Text</p>
-					<p><small>@item.MessageDateTime.ToLongDateString() @item.MessageDateTime.ToShortTimeString()</small></p>
-				</div>
+				<PublicMessage Message="message" UserId="@userId" />
 			}
 		</RowTemplate>
 		<PagerContent>
 			<MudText Align="Align.Center">Test</MudText>
 		</PagerContent>
-	</MudTable>
+	</MudTable>*@
+
+	<MudCard Class="chat-board" Style="background-color: rgb(43, 45, 48)">
+		<MudCardHeader>
+			<CardHeaderContent>
+				<MudText Align="Align.Center">Test</MudText>
+			</CardHeaderContent>
+		</MudCardHeader>
+		<MudCardContent Style="height:700px;">
+			@foreach (var message in _listMessagesDto)
+			{
+				<PublicMessage Message="message" UserId="@userId" />
+			}
+		</MudCardContent>
+		<MudCardContent Class="message-form">
+			<MudText Align="Align.Center" Style="height:0.3em;"><strong>New Message</strong></MudText>
+			<MudForm>
+				<MudTextField T="string" @bind-Value="NewText" Label="New message..." Required="true" RequiredError="Text is required." />
+				<MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="(() => PostNewMessage(userId, GroupId, NewText))">Submit</MudButton>
+			</MudForm>
+		</MudCardContent>
+	</MudCard>
 }

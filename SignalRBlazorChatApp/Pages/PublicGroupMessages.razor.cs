@@ -19,9 +19,12 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] private IPublicGroupMessagesApiService PublicGroupMessagesApiService { get; set; }
 		[Inject] ISnackbar Snackbar { get; set; }
 
-		private ApiResponse<List<PublicGroupMessageDto>>? apiResponse;
+		private ApiResponse<List<PublicGroupMessageDto>>? initialApiResponse;
 		private List<PublicGroupMessageDto> _listMessagesDto;
 		private string userId = string.Empty;
+
+		// Form variables
+		private string NewText { get; set; } = string.Empty;
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -31,9 +34,9 @@ namespace SignalRBlazorChatApp.Pages
 
 			string jsonWebToken = GenerateJwt(authState);
 
-			apiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
+			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
 
-			_listMessagesDto = GetList(apiResponse.Data!);
+			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
 		}
 
 		private string? GetUserId(AuthenticationState authState)
@@ -48,13 +51,47 @@ namespace SignalRBlazorChatApp.Pages
 			return JwtGenerator.GetJwtToken(authState);
 		}
 
-		private List<PublicGroupMessageDto> GetList(List<PublicGroupMessageDto> data)
+		private List<PublicGroupMessageDto> GetInitialList(List<PublicGroupMessageDto> data)
 		{
 			List<PublicGroupMessageDto> newList = new();
 			newList.AddRange(data);
+			newList.Reverse();
 			return newList;
 		}
 
-		private bool UserIdMatch(string userId, string compareId) => userId == compareId;
+		private async Task PostNewMessage(string userId, string groupId, string text)
+		{
+			CreatePublicGroupMessageDto createDto = new()
+			{
+				UserId		= userId,
+				ChatGroupId = Convert.ToInt32(groupId),
+				Text	    = text
+			};
+
+			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+			string jsonWebToken = GenerateJwt(authState);
+
+			ApiResponse<PublicGroupMessageDto> apiResponse = new();
+
+			try
+			{
+				apiResponse = await PublicGroupMessagesApiService.PostNewMessage(createDto, jsonWebToken);
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add(ex.Message, Severity.Error);
+			}
+
+			if (apiResponse.Success == false)
+			{
+				Snackbar.Add(apiResponse.Message, Severity.Error);
+			}
+			else
+			{
+				// send to SignalR hub
+			}
+
+			NewText = string.Empty;
+		}
 	}
 }

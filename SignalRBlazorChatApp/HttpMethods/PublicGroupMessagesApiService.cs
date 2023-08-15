@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using SignalRBlazorChatApp.Models;
 using SignalRBlazorChatApp.Models.Dtos;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace SignalRBlazorChatApp.HttpMethods
 {
@@ -36,6 +37,25 @@ namespace SignalRBlazorChatApp.HttpMethods
 			string jsonContent = await dataRequest.Content.ReadAsStringAsync();
 			ApiResponse<List<PublicGroupMessageDto>> apiResponse = JsonConvert
 				.DeserializeObject<ApiResponse<List<PublicGroupMessageDto>>>(jsonContent)!;
+
+			return apiResponse;
+		}
+
+		public async Task<ApiResponse<PublicGroupMessageDto>> PostNewMessage(CreatePublicGroupMessageDto createDto, string jsonWebToken)
+		{
+			_httpClient = HttpClientFactory.Create();
+			_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonWebToken);
+
+			string baseUri = BaseUri();
+
+			var bodyMessage = new StringContent(
+				JsonConvert.SerializeObject(createDto), Encoding.UTF8, "application/json");
+
+			var postRequest = await _httpClient.PostAsync(baseUri, bodyMessage);
+
+			string jsonContent = await postRequest.Content.ReadAsStringAsync();
+			ApiResponse<PublicGroupMessageDto> apiResponse = JsonConvert
+				.DeserializeObject<ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
 
 			return apiResponse;
 		}
