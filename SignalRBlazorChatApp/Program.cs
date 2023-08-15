@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
@@ -8,6 +9,7 @@ using SignalRBlazorChatApp.Areas.Identity;
 using SignalRBlazorChatApp.Data;
 using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.HttpMethods;
+using SignalRBlazorChatApp.Hubs;
 using SignalRBlazorChatApp.Models;
 
 namespace SignalRBlazorChatApp
@@ -35,6 +37,7 @@ namespace SignalRBlazorChatApp
 
             // Dependency Injection registration
             builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
+            builder.Services.AddScoped<IHubConnectors, HubConnectors>();
             // HTTP Client registration
             builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
             builder.Services.AddHttpClient<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
@@ -55,7 +58,17 @@ namespace SignalRBlazorChatApp
 				config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 			});
 
+            // SignalR configuration
+            builder.Services.AddResponseCompression(config =>
+            {
+                config.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
+            });
+
             var app = builder.Build();
+
+            // SignalR
+            app.UseResponseCompression();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -80,6 +93,10 @@ namespace SignalRBlazorChatApp
             app.MapControllers();
 
             app.MapBlazorHub();
+
+            // SignalR
+            app.MapHub<PublicMessagesHub>("/publicmessageshub");
+
             app.MapFallbackToPage("/_Host");
 
             app.Run();

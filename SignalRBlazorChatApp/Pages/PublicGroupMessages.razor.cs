@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using SignalRBlazorChatApp.Models;
 using SignalRBlazorChatApp.Models.Dtos;
 using MudBlazor;
+using Microsoft.AspNetCore.SignalR.Client;
+using Humanizer;
 
 namespace SignalRBlazorChatApp.Pages
 {
@@ -18,10 +20,13 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] private IJwtGenerator JwtGenerator { get; set; }
 		[Inject] private IPublicGroupMessagesApiService PublicGroupMessagesApiService { get; set; }
 		[Inject] ISnackbar Snackbar { get; set; }
+		[Inject] IHubConnectors HubConnector { get; set; }
 
 		private ApiResponse<List<PublicGroupMessageDto>>? initialApiResponse;
 		private List<PublicGroupMessageDto> _listMessagesDto;
 		private string userId = string.Empty;
+		private HubConnection? _hubConnection;
+		private PublicGroupMessageDto _sendDto;
 
 		// Form variables
 		private string NewText { get; set; } = string.Empty;
@@ -37,6 +42,44 @@ namespace SignalRBlazorChatApp.Pages
 			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
 
 			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
+
+			_hubConnection = HubConnector.PublicGroupMessagesConnect();
+
+			_hubConnection!.On<PublicGroupMessageDto>("NewMessage", (dto) =>
+			{
+				Snackbar.Add(dto.Text);
+				InvokeAsync(StateHasChanged);
+			});
+
+			await _hubConnection.StartAsync();
+		}
+
+		private async Task TestSignalR()
+		{
+			_sendDto = new()
+			{
+				PublicMessageId = Guid.NewGuid(),
+				ChatGroupId = 99,
+				UserId = Guid.NewGuid().ToString(),
+				Text = "This is a test"
+			};
+			try
+			{
+				await Send();
+			}
+			catch (Exception e)
+			{
+				Snackbar.Add(e.Message, Severity.Error);
+			}
+			
+		}
+
+		private async Task Send()
+		{
+			if (_hubConnection is not null)
+			{
+				await _hubConnection.SendAsync("SendMessage", _sendDto);
+			}
 		}
 
 		private string? GetUserId(AuthenticationState authState)
@@ -92,6 +135,17 @@ namespace SignalRBlazorChatApp.Pages
 			}
 
 			NewText = string.Empty;
+		}
+
+		public bool IsConnected =>
+			_hubConnection?.State == HubConnectionState.Connected;
+
+		public async ValueTask DisposeAsync()
+		{
+			if (_hubConnection is not null)
+			{
+				await _hubConnection.DisposeAsync();
+			}
 		}
 	}
 }

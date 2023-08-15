@@ -9,21 +9,6 @@
 }
 else
 {
-	@*<MudTable Items="@_listMessagesDto" Class="table-styles" FixedHeader="true" Height="500px">
-		<HeaderContent>
-			<MudTh><MudText Align="Align.Center">Test</MudText></MudTh>
-		</HeaderContent>
-		<RowTemplate>
-			@foreach (var message in _listMessagesDto)
-			{
-				<PublicMessage Message="message" UserId="@userId" />
-			}
-		</RowTemplate>
-		<PagerContent>
-			<MudText Align="Align.Center">Test</MudText>
-		</PagerContent>
-	</MudTable>*@
-
 	<MudCard Class="chat-board" Style="background-color: rgb(43, 45, 48)">
 		<MudCardHeader>
 			<CardHeaderContent>
@@ -44,4 +29,9 @@ else
 			</MudForm>
 		</MudCardContent>
 	</MudCard>
+
+	<div>
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(() => TestSignalR())"
+			>TestSignalR</MudButton>
+	</div>
 }
