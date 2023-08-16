@@ -18,5 +18,12 @@ namespace SignalRBlazorChatApp.Helpers
 				.WithUrl(_navigation.ToAbsoluteUri("/publicmessageshub"))
 				.Build();
 		}
+
+		public HubConnection? PrivateGroupMessagesConnect()
+		{
+			return new HubConnectionBuilder()
+				.WithUrl(_navigation.ToAbsoluteUri("/privatemessageshub"))
+				.Build();
+		}
 	}
 }

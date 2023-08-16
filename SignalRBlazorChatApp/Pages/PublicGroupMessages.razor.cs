@@ -7,7 +7,6 @@ using SignalRBlazorChatApp.Models;
 using SignalRBlazorChatApp.Models.Dtos;
 using MudBlazor;
 using Microsoft.AspNetCore.SignalR.Client;
-using Humanizer;
 
 namespace SignalRBlazorChatApp.Pages
 {
@@ -16,14 +15,15 @@ namespace SignalRBlazorChatApp.Pages
 	{
 		[Parameter] public string GroupId { get; set; } = string.Empty;
 
-		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-		[Inject] private IJwtGenerator JwtGenerator { get; set; }
-		[Inject] private IPublicGroupMessagesApiService PublicGroupMessagesApiService { get; set; }
-		[Inject] ISnackbar Snackbar { get; set; }
-		[Inject] IHubConnectors HubConnector { get; set; }
+		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+		[Inject] private IJwtGenerator JwtGenerator { get; set; } = default!;
+		[Inject] private IPublicGroupMessagesApiService PublicGroupMessagesApiService { get; set; } = default!;
+		[Inject] ISnackbar Snackbar { get; set; } = default!;
+		[Inject] IHubConnectors HubConnector { get; set; } = default!;
 
 		private ApiResponse<List<PublicGroupMessageDto>>? initialApiResponse;
 		private List<PublicGroupMessageDto> _listMessagesDto;
+		private string ChatGroupName = string.Empty;
 		private string userId = string.Empty;
 		// SignalR variables
 		private HubConnection? _hubConnection;
@@ -40,28 +40,9 @@ namespace SignalRBlazorChatApp.Pages
 
 			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
 			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
+			ChatGroupName = _listMessagesDto.First().ChatGroupName;
 
 			await StartSignalR();
-		}
-
-		private async Task TestSignalRAdd()
-		{
-			_sendDto = new()
-			{
-				PublicMessageId = Guid.NewGuid(),
-				ChatGroupId = 1,
-				UserId = Guid.NewGuid().ToString(),
-				Text = "This is a test Add"
-			};
-			try
-			{
-				await SendNewMessage();
-			}
-			catch (Exception e)
-			{
-				Snackbar.Add(e.Message, Severity.Error);
-			}
-			
 		}
 
 		private async Task TestSignalREdit()
@@ -145,7 +126,10 @@ namespace SignalRBlazorChatApp.Pages
 			}
 			else
 			{
-				// send to SignalR hub
+				if (apiResponse.Data != null)
+				{
+					await SendNewMessage(apiResponse.Data);
+				}
 			}
 
 			NewText = string.Empty;
@@ -156,32 +140,48 @@ namespace SignalRBlazorChatApp.Pages
 		private async Task StartSignalR()
 		{
 			_hubConnection = HubConnector.PublicGroupMessagesConnect();
-
-			_hubConnection!.On<PublicGroupMessageDto>("NewMessage", (dto) =>
-			{
-				Snackbar.Add(dto.Text);
-				InvokeAsync(StateHasChanged);
-			});
-
-			_hubConnection!.On<PublicGroupMessageDto>("EditMessage", (dto) =>
-			{
-				Snackbar.Add(dto.Text);
-				InvokeAsync(StateHasChanged);
-			});
-
-			_hubConnection!.On<int, Guid>("DeleteMessage", (groupId, deleteMessageId) =>
-			{
-				Snackbar.Add($"delete test: {deleteMessageId}");
-				InvokeAsync(StateHasChanged);
-			});
+			HubListenerMethods(_hubConnection!);
 			await _hubConnection!.StartAsync();
+			await _hubConnection.SendAsync("AddToGroup", GroupId);
 		}
 
-		private async Task SendNewMessage()
+		private void HubListenerMethods(HubConnection hubConnection)
+		{
+			hubConnection!.On<PublicGroupMessageDto>("ReceiveAdd", (dto) =>
+			{
+				_listMessagesDto.Add(dto);
+				InvokeAsync(StateHasChanged);
+			});
+
+			hubConnection!.On<PublicGroupMessageDto>("ReceiveEdit", (dto) =>
+			{
+				Snackbar.Add(dto.Text);
+				InvokeAsync(StateHasChanged);
+			});
+
+			hubConnection!.On<Guid>("ReceiveDelete", (deleteMessageId) =>
+			{
+				Snackbar.Add($"delete test: {deleteMessageId}");
+				var dtoToDelete = _listMessagesDto.SingleOrDefault(id => id.PublicMessageId == deleteMessageId);
+				if (dtoToDelete != null)
+				{
+					_listMessagesDto.Remove(dtoToDelete);
+				}
+				InvokeAsync(StateHasChanged);
+			});
+
+			hubConnection!.On<string>("ReceiveGroupMessage", (message) =>
+			{
+				Snackbar.Add($"Group test: {message}");
+				InvokeAsync(StateHasChanged);
+			});
+		}
+
+		private async Task SendNewMessage(PublicGroupMessageDto dto)
 		{
 			if (_hubConnection is not null)
 			{
-				await _hubConnection.SendAsync("SendMessage", _sendDto);
+				await _hubConnection.SendAsync("SendGroupMessageAdd", GroupId, dto);
 			}
 		}
 
@@ -189,7 +189,7 @@ namespace SignalRBlazorChatApp.Pages
 		{
 			if (_hubConnection is not null)
 			{
-				await _hubConnection.SendAsync("EditMessage", _sendDto);
+				await _hubConnection.SendAsync("SendGroupMessageEdit", GroupId, _sendDto);
 			}
 		}
 
@@ -197,10 +197,26 @@ namespace SignalRBlazorChatApp.Pages
 		{
 			if (_hubConnection is not null)
 			{
-				await _hubConnection.SendAsync("DeleteMessage", Convert.ToInt32(GroupId), _deleteMessageId);
+				await _hubConnection.SendAsync("SendGroupMessageDelete", GroupId, _deleteMessageId);
+			}
+		}
+
+		private async Task SendGroupMessage()
+		{
+			if (_hubConnection is not null)
+			{
+				await _hubConnection.SendAsync("TestGroupMessage", GroupId);
 			}
 		}
 
 		#endregion
+
+		public void Dispose()
+		{
+			if (_hubConnection is not null)
+			{
+				Task.Run(() => _hubConnection.StopAsync());
+			}
+		}
 	}
 }

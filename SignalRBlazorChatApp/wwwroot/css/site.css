@@ -98,12 +98,21 @@ a, .btn-link {
     margin-bottom: 1em;
 }
 
+.chat-container {
+    height: 400px;
+    overflow: auto;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
 .chatmessage {
     border: 1px solid white;
     border-radius: 6px;
     background-color: black;
     color: white;
     display: inline-block;
+    float: left;
+    clear: both;
     margin: 0.5em 1em 0.5em 1em;
     max-width: 70%;
 }

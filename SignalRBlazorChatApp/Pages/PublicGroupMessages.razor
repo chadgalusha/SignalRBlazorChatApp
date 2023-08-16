@@ -1,7 +1,8 @@
 ﻿@page "/PublicGroupMessages/{GroupId}"
 @using SignalRBlazorChatApp.Components
+@implements IDisposable
 
-<MudText Typo="Typo.h4" Align="Align.Center">Public Group Messages</MudText>
+<MudText Typo="Typo.h4" Align="Align.Center">Group @ChatGroupName Messages</MudText>
 
 @if (_listMessagesDto == null)
 {
@@ -10,12 +11,12 @@
 else
 {
 	<MudCard Class="chat-board" Style="background-color: rgb(43, 45, 48)">
-		<MudCardHeader>
+		<MudCardHeader Style="border: solid white;">
 			<CardHeaderContent>
 				<MudText Align="Align.Center">Test</MudText>
 			</CardHeaderContent>
 		</MudCardHeader>
-		<MudCardContent Style="height:700px;">
+		<MudCardContent Class="chat-container">
 			@foreach (var message in _listMessagesDto)
 			{
 				<PublicMessage Message="message" UserId="@userId" />
@@ -31,13 +32,12 @@ else
 	</MudCard>
 
 	<div>
-		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(() => TestSignalRAdd())"
-			>TestSignalR Add</MudButton>
-	</div>
-	<div>
 		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(() => TestSignalREdit())">TestSignalR Edit</MudButton>
 	</div>
 	<div>
 		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(() => TestSignalRDelete())">TestSignalR Delete</MudButton>
+	</div>
+	<div>
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(() => SendGroupMessage())">Send Group Message</MudButton>
 	</div>
 }

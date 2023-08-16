@@ -4,6 +4,7 @@ namespace SignalRBlazorChatApp.Helpers
 {
 	public interface IHubConnectors
 	{
+		HubConnection? PrivateGroupMessagesConnect();
 		HubConnection? PublicGroupMessagesConnect();
 	}
 }

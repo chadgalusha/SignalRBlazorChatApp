@@ -3,16 +3,16 @@
 @if (Message.UserId == UserId)
 {
 	<div class="mychatmessage">
-		<p><b>@Message.UserName:</b> @Message.Text</p>
-		<p><small>@Message.MessageDateTime.ToLongDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+		<p><b>@Message.UserName</b> <small>@Message.MessageDateTime.ToShortDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+		<p>@Message.Text</p>
 	</div>
 	<br />
 }
 else
 {
 	<div class="chatmessage">
-		<p><b>@Message.UserName:</b> @Message.Text</p>
-		<p><small>@Message.MessageDateTime.ToLongDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+		<p><b>@Message.UserName</b> <small>@Message.MessageDateTime.ToShortDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+		<p>@Message.Text</p>
 	</div>
 	<br />
 }
@@ -20,7 +20,7 @@ else
 
 @code {
 	[Parameter, EditorRequired]
-	public PublicGroupMessageDto Message { get; set; }
+	public PublicGroupMessageDto Message { get; set; } = default!;
 
 	[Parameter, EditorRequired]
 	public string UserId { get; set; } = string.Empty;

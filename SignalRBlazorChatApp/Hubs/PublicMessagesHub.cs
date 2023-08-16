@@ -5,19 +5,34 @@ namespace SignalRBlazorChatApp.Hubs
 {
 	public class PublicMessagesHub : Hub
 	{
-		public async Task SendMessage(PublicGroupMessageDto dto)
+		public async Task AddToGroup(string groupId)
 		{
-			await Clients.All.SendAsync("NewMessage", dto);
+			await Groups.AddToGroupAsync(Context.ConnectionId, groupId);
 		}
 
-		public async Task EditMessage(PublicGroupMessageDto dto)
+		public async Task RemoveFromGroup(string groupName)
 		{
-			await Clients.All.SendAsync("EditMessage", dto);
+			await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 		}
 
-		public async Task DeleteMessage(int groupId, Guid messageId)
+		public async Task SendGroupMessageAdd(string groupId, PublicGroupMessageDto dto)
 		{
-			await Clients.All.SendAsync("DeleteMessage", groupId, messageId);
+			await Clients.Group(groupId).SendAsync("ReceiveAdd", dto);
+		}
+
+		public async Task SendGroupMessageEdit(string groupId, PublicGroupMessageDto dto)
+		{
+			await Clients.Group(groupId).SendAsync("ReceiveEdit", dto);
+		}
+
+		public async Task SendGroupMessageDelete(string groupId, Guid messageId)
+		{
+			await Clients.Group(groupId).SendAsync("ReceiveDelete", messageId);
+		}
+
+		public async Task TestGroupMessage(string groupId)
+		{
+			await Clients.Group(groupId).SendAsync("ReceiveGroupMessage", "Test Group Message");
 		}
 	}
 }
