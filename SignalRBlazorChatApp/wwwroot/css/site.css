@@ -147,3 +147,7 @@ a, .btn-link {
     border-radius: 6px;
     background-color: white;
 }
+
+.chat-editdelete-button:hover {
+    border: dashed;
+}

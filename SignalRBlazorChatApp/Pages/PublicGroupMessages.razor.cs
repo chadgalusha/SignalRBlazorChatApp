@@ -19,62 +19,46 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] private IJwtGenerator JwtGenerator { get; set; } = default!;
 		[Inject] private IPublicGroupMessagesApiService PublicGroupMessagesApiService { get; set; } = default!;
 		[Inject] ISnackbar Snackbar { get; set; } = default!;
+		[Inject] IDialogService DialogService { get; set; } = default!;
 		[Inject] IHubConnectors HubConnector { get; set; } = default!;
 
 		private ApiResponse<List<PublicGroupMessageDto>>? initialApiResponse;
 		private List<PublicGroupMessageDto> _listMessagesDto;
 		private string ChatGroupName = string.Empty;
 		private string userId = string.Empty;
+		bool ShowEditPopup = false;
 		// SignalR variables
 		private HubConnection? _hubConnection;
-		private PublicGroupMessageDto _sendDto;
-		private Guid _deleteMessageId;
 		// Form variables
 		private string NewText { get; set; } = string.Empty;
+		private PublicGroupMessageDto editDto;
+		private string tempText;
 
 		protected override async Task OnInitializedAsync()
 		{
-			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-			userId = GetUserId(authState) ?? string.Empty;
-			string jsonWebToken = GenerateJwt(authState);
-
-			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
-			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
-			ChatGroupName = _listMessagesDto.First().ChatGroupName;
-
+			string jsonWebToken = await LoadUserData();
+			await LoadData(jsonWebToken);
 			await StartSignalR();
 		}
 
-		private async Task TestSignalREdit()
+		private async Task<string> LoadUserData()
 		{
-			_sendDto = new()
-			{
-				PublicMessageId = Guid.NewGuid(),
-				ChatGroupId = 1,
-				UserId = Guid.NewGuid().ToString(),
-				Text = "This is a test Edit"
-			};
-			try
-			{
-				await SendEditMessage();
-			}
-			catch (Exception e)
-			{
-				Snackbar.Add(e.Message, Severity.Error);
-			}
+			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+			userId = GetUserId(authState) ?? string.Empty;
+			return GenerateJwt(authState);
 		}
 
-		private async Task TestSignalRDelete()
+		private async Task<string> RegenerateJWT()
 		{
-			try
-			{
-				_deleteMessageId = Guid.NewGuid();
-				await SendDeleteMessage();
-			}
-			catch (Exception e)
-			{
-				Snackbar.Add(e.Message, Severity.Error);
-			}
+			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+			return GenerateJwt(authState);
+		}
+
+		private async Task LoadData(string jsonWebToken)
+		{
+			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
+			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
+			ChatGroupName = _listMessagesDto.First().ChatGroupName;
 		}
 
 		private string? GetUserId(AuthenticationState authState)
@@ -97,6 +81,8 @@ namespace SignalRBlazorChatApp.Pages
 			return newList;
 		}
 
+		#region CRUD methods -R
+
 		private async Task PostNewMessage(string userId, string groupId, string text)
 		{
 			CreatePublicGroupMessageDto createDto = new()
@@ -106,35 +92,102 @@ namespace SignalRBlazorChatApp.Pages
 				Text	    = text
 			};
 
-			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-			string jsonWebToken = GenerateJwt(authState);
+			string jsonWebToken = await RegenerateJWT();
 
 			ApiResponse<PublicGroupMessageDto> apiResponse = new();
 
 			try
 			{
 				apiResponse = await PublicGroupMessagesApiService.PostNewMessage(createDto, jsonWebToken);
+
+				if (!apiResponse.Success)
+					Snackbar.Add(apiResponse.Message, Severity.Error);
+				if (apiResponse.Success && apiResponse.Data != null)
+					await SendNewMessage(apiResponse.Data);
 			}
 			catch (Exception ex)
 			{
 				Snackbar.Add(ex.Message, Severity.Error);
 			}
 
-			if (apiResponse.Success == false)
-			{
-				Snackbar.Add(apiResponse.Message, Severity.Error);
-			}
-			else
-			{
-				if (apiResponse.Data != null)
-				{
-					await SendNewMessage(apiResponse.Data);
-				}
-			}
-
 			NewText = string.Empty;
 		}
 
+		void ShowEditForm(PublicGroupMessageDto dto)
+		{
+			tempText = dto.Text;
+			editDto = dto;
+			ShowEditPopup = true;
+		}
+
+		void CancelEdit(Guid messageId)
+		{
+			_listMessagesDto.First(id => id.PublicMessageId == messageId).Text = tempText;
+			ShowEditPopup = false;
+		}
+
+		async Task EditMessage()
+		{
+			ShowEditPopup = false;
+
+			ModifyPublicGroupMessageDto modifyDto = new()
+			{
+				PublicMessageId = editDto.PublicMessageId, 
+				Text = editDto.Text
+			};
+
+			string jsonWebToken = await RegenerateJWT();
+
+			ApiResponse<PublicGroupMessageDto> apiResponse = new();
+
+			try
+			{
+				apiResponse = await PublicGroupMessagesApiService.UpdateMessage(modifyDto, jsonWebToken);
+
+				if (!apiResponse.Success)
+					Snackbar.Add(apiResponse.Message, Severity.Error);
+				if (apiResponse.Success && apiResponse.Data != null)
+					await SendEditMessage(apiResponse.Data);
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add(ex.Message, Severity.Error);
+			}
+		}
+
+		async Task DeleteConfirm(PublicGroupMessageDto dto)
+		{
+			bool? confirmed = await DialogService.ShowMessageBox(
+				"Warning", 
+				$"Permanently Delete Your Message: {dto.Text} - from {dto.MessageDateTime.ToShortDateString()}",
+				yesText: "Delete",
+				cancelText: "Cancel");
+
+			if (confirmed is true) { await DeleteMessage(dto.PublicMessageId); }
+		}
+
+		private async Task DeleteMessage(Guid messageId)
+		{
+			string jsonWebToken = await RegenerateJWT();
+
+			ApiResponse<PublicGroupMessageDto> apiResponse = new();
+
+			try
+			{
+				apiResponse = await PublicGroupMessagesApiService.DeleteMessage(messageId, jsonWebToken);
+
+				if (!apiResponse.Success)
+					Snackbar.Add(apiResponse.Message, Severity.Error);
+				else
+					await SendDeleteMessage(messageId);
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add(ex.Message, Severity.Error);
+			}
+		}
+
+		#endregion
 		#region SignalR Methods
 
 		private async Task StartSignalR()
@@ -155,24 +208,18 @@ namespace SignalRBlazorChatApp.Pages
 
 			hubConnection!.On<PublicGroupMessageDto>("ReceiveEdit", (dto) =>
 			{
-				Snackbar.Add(dto.Text);
+				var dtoToEdit = _listMessagesDto.Single(id => id.PublicMessageId == dto.PublicMessageId);
+				dtoToEdit.Text = dto.Text;
 				InvokeAsync(StateHasChanged);
 			});
 
 			hubConnection!.On<Guid>("ReceiveDelete", (deleteMessageId) =>
 			{
-				Snackbar.Add($"delete test: {deleteMessageId}");
 				var dtoToDelete = _listMessagesDto.SingleOrDefault(id => id.PublicMessageId == deleteMessageId);
 				if (dtoToDelete != null)
 				{
 					_listMessagesDto.Remove(dtoToDelete);
 				}
-				InvokeAsync(StateHasChanged);
-			});
-
-			hubConnection!.On<string>("ReceiveGroupMessage", (message) =>
-			{
-				Snackbar.Add($"Group test: {message}");
 				InvokeAsync(StateHasChanged);
 			});
 		}
@@ -185,27 +232,19 @@ namespace SignalRBlazorChatApp.Pages
 			}
 		}
 
-		private async Task SendEditMessage()
+		private async Task SendEditMessage(PublicGroupMessageDto dto)
 		{
 			if (_hubConnection is not null)
 			{
-				await _hubConnection.SendAsync("SendGroupMessageEdit", GroupId, _sendDto);
+				await _hubConnection.SendAsync("SendGroupMessageEdit", GroupId, dto);
 			}
 		}
 
-		private async Task SendDeleteMessage()
+		private async Task SendDeleteMessage(Guid messageId)
 		{
 			if (_hubConnection is not null)
 			{
-				await _hubConnection.SendAsync("SendGroupMessageDelete", GroupId, _deleteMessageId);
-			}
-		}
-
-		private async Task SendGroupMessage()
-		{
-			if (_hubConnection is not null)
-			{
-				await _hubConnection.SendAsync("TestGroupMessage", GroupId);
+				await _hubConnection.SendAsync("SendGroupMessageDelete", GroupId, messageId);
 			}
 		}
 

@@ -21,8 +21,7 @@ namespace SignalRBlazorChatApp.HttpMethods
 		public async Task<ApiResponse<List<PublicGroupMessageDto>>> GetMessagesByGroupId(
 			int groupId, int numberItemsToSkip, string jsonWebToken)
 		{
-			_httpClient = HttpClientFactory.Create();
-			_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonWebToken);
+			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 
 			var query = new Dictionary<string, string>()
 			{
@@ -43,8 +42,7 @@ namespace SignalRBlazorChatApp.HttpMethods
 
 		public async Task<ApiResponse<PublicGroupMessageDto>> PostNewMessage(CreatePublicGroupMessageDto createDto, string jsonWebToken)
 		{
-			_httpClient = HttpClientFactory.Create();
-			_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonWebToken);
+			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 
 			string baseUri = BaseUri();
 
@@ -60,11 +58,60 @@ namespace SignalRBlazorChatApp.HttpMethods
 			return apiResponse;
 		}
 
+		public async Task<ApiResponse<PublicGroupMessageDto>> UpdateMessage(ModifyPublicGroupMessageDto modifyDto, string jsonWebToken)
+		{
+			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
+
+			string baseUri = BaseUri();
+
+			var bodyMessage = new StringContent(
+				JsonConvert.SerializeObject(modifyDto), Encoding.UTF8, "application/json");
+
+			var updateRequest = await _httpClient.PutAsync(baseUri, bodyMessage);
+
+			string jsonContent = await updateRequest.Content.ReadAsStringAsync();
+			ApiResponse<PublicGroupMessageDto> apiResponse = JsonConvert
+				.DeserializeObject< ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
+
+			return apiResponse;
+		}
+
+		public async Task<ApiResponse<PublicGroupMessageDto>> DeleteMessage(Guid messageId, string jsonWebToken)
+		{
+			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
+
+			var query = new Dictionary<string, string>()
+			{
+				["messageId"] = messageId.ToString()
+			};
+
+			string baseUri = BaseUri();
+			var uriWithQuery = QueryHelpers.AddQueryString($"{baseUri}", query!);
+			var deleteRequest = await _httpClient.DeleteAsync(uriWithQuery);
+
+			if (!deleteRequest.IsSuccessStatusCode)
+			{
+				string jsonContent = await deleteRequest.Content.ReadAsStringAsync();
+				ApiResponse<PublicGroupMessageDto> apiResponse = JsonConvert
+					.DeserializeObject<ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
+				return apiResponse;
+			}
+
+			return new() { Success = true, Message = "ok" };
+		}
+
 		#region PRIVATE METHODS
 
 		private string BaseUri()
 		{
 			return _configuration["ApiEndpointsConfig:PublicGroupMessagesUri"]!;
+		}
+
+		private HttpClient GetNewHttpClient(HttpClient httpClient, string jsonWebToken)
+		{
+			httpClient = HttpClientFactory.Create();
+			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonWebToken);
+			return httpClient;
 		}
 
 		#endregion

@@ -158,7 +158,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             return Ok(apiResponse);
         }
 
-        // DELETE api/<PublicMessagesController>/5
+        // DELETE api/<PublicMessagesController>/
         [HttpDelete]
         public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
         {
