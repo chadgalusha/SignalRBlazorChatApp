@@ -10,7 +10,7 @@
 }
 else
 {
-	<MudCard Class="chat-board" Style="background-color: rgb(43, 45, 48)">
+	<MudCard Class="chat-board" Style="background-color: rgb(43, 45, 48);">
 		<MudCardHeader Style="border: solid white;background: rgb(206, 206, 206);">
 			<CardHeaderContent>
 				<MudText Align="Align.Center">Placeholder Header</MudText>
@@ -21,6 +21,7 @@ else
 			{
 				<PublicMessage Message="message" UserId="@userId" UpdateMessage="() => ShowEditForm(message)" DeleteMessage="() => DeleteConfirm(message)"/>
 			}
+			<div id="anchor" style="height:1px;"></div>
 		</MudCardContent>
 		<MudCardContent Class="message-form">
 			<MudText Align="Align.Center" Style="height:0.3em;"><strong>New Message</strong></MudText>
@@ -38,12 +39,12 @@ else
 			<MudCard Class="modal-content">
 					<MudText Align="Align.Center"><b>Edit Message</b></MudText>
 				<MudCardContent>
-					<MudTextField T="DateTime" Label="Message Date" @bind-Value="editDto.MessageDateTime" ReadOnly="true" />
-					<MudTextField T="string" Label="Text" @bind-Text="editDto.Text" MaxLength="5000" />
+					<MudTextField T="DateTime" Label="Message Date" @bind-Value="editDto.MessageDateTime" ReadOnly="true" Variant="Variant.Outlined" />
+						<MudTextField T="string" Label="Text" @bind-Text="editDto.Text" MaxLength="5000" Lines="5" Variant="Variant.Outlined" />
 				</MudCardContent>
 				<MudCardActions>
 					<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info">Submit</MudButton>
-					<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => CancelEdit(editDto.PublicMessageId)" Style="margin-left:auto;">Cancel</MudButton>
+					<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CancelEdit" Style="margin-left:auto;">Cancel</MudButton>
 				</MudCardActions>
 			</MudCard>
 			</div>

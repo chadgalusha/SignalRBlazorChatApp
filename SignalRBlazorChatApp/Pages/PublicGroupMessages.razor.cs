@@ -32,7 +32,6 @@ namespace SignalRBlazorChatApp.Pages
 		// Form variables
 		private string NewText { get; set; } = string.Empty;
 		private PublicGroupMessageDto editDto;
-		private string tempText;
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -115,14 +114,24 @@ namespace SignalRBlazorChatApp.Pages
 
 		void ShowEditForm(PublicGroupMessageDto dto)
 		{
-			tempText = dto.Text;
-			editDto = dto;
+			editDto = new()
+			{
+				PublicMessageId = dto.PublicMessageId,
+				UserId		    = dto.UserId,
+				UserName		= dto.UserName,
+				ChatGroupId		= dto.ChatGroupId,
+				ChatGroupName	= dto.ChatGroupName,
+				Text			= dto.Text,
+				MessageDateTime = dto.MessageDateTime,
+				ReplyMessageId	= dto.ReplyMessageId,
+				PictureLink		= dto.PictureLink
+			};
+
 			ShowEditPopup = true;
 		}
 
-		void CancelEdit(Guid messageId)
+		void CancelEdit()
 		{
-			_listMessagesDto.First(id => id.PublicMessageId == messageId).Text = tempText;
 			ShowEditPopup = false;
 		}
 

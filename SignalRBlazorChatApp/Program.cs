@@ -45,7 +45,8 @@ namespace SignalRBlazorChatApp
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-
+            
+            // MudBlazor Snackbar configuration
             builder.Services.AddMudServices(config =>
             {
 				config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopCenter;

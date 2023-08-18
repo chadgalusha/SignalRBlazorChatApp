@@ -29,10 +29,5 @@ namespace SignalRBlazorChatApp.Hubs
 		{
 			await Clients.Group(groupId).SendAsync("ReceiveDelete", messageId);
 		}
-
-		public async Task TestGroupMessage(string groupId)
-		{
-			await Clients.Group(groupId).SendAsync("ReceiveGroupMessage", "Test Group Message");
-		}
 	}
 }
