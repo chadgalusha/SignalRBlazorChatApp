@@ -7,6 +7,7 @@ using SignalRBlazorChatApp.Models;
 using SignalRBlazorChatApp.Models.Dtos;
 using MudBlazor;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.JSInterop;
 
 namespace SignalRBlazorChatApp.Pages
 {
