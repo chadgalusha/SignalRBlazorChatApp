@@ -71,7 +71,7 @@ namespace SignalRBlazorChatApp.HttpMethods
 
 			string jsonContent = await updateRequest.Content.ReadAsStringAsync();
 			ApiResponse<PublicGroupMessageDto> apiResponse = JsonConvert
-				.DeserializeObject< ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
+				.DeserializeObject<ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
 
 			return apiResponse;
 		}

@@ -16,7 +16,7 @@ else
 				<MudText Align="Align.Center">Placeholder Header</MudText>
 			</CardHeaderContent>
 		</MudCardHeader>
-		<MudCardContent Class="chat-container">
+		<MudCardContent Class="chat-container" id="chatanchor">
 			@foreach (var message in _listMessagesDto)
 			{
 				<PublicMessage Message="message" UserId="@userId" UpdateMessage="() => ShowEditForm(message)" DeleteMessage="() => DeleteConfirm(message)"/>

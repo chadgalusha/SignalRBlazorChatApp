@@ -22,6 +22,11 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] ISnackbar Snackbar { get; set; } = default!;
 		[Inject] IDialogService DialogService { get; set; } = default!;
 		[Inject] IHubConnectors HubConnector { get; set; } = default!;
+		// Javascript functionality
+		[Inject] IJSRuntime JSRuntime { get; set; }
+		private Task<IJSObjectReference> _module;
+		private Task<IJSObjectReference> Module => _module ??= JSRuntime
+			.InvokeAsync<IJSObjectReference>("import", "./js/chatfunctions.js").AsTask();
 
 		private ApiResponse<List<PublicGroupMessageDto>>? initialApiResponse;
 		private List<PublicGroupMessageDto> _listMessagesDto;
@@ -39,6 +44,18 @@ namespace SignalRBlazorChatApp.Pages
 			string jsonWebToken = await LoadUserData();
 			await LoadData(jsonWebToken);
 			await StartSignalR();
+		}
+
+		protected override Task OnAfterRenderAsync(bool firstRender)
+		{
+			Task.Run(() => ScrollToBottom());
+			return base.OnAfterRenderAsync(firstRender);
+		}
+
+		private async Task ScrollToBottom()
+		{
+			var module = await Module;
+			await module.InvokeVoidAsync("scrollToBottom");
 		}
 
 		private async Task<string> LoadUserData()
@@ -214,6 +231,7 @@ namespace SignalRBlazorChatApp.Pages
 			{
 				_listMessagesDto.Add(dto);
 				InvokeAsync(StateHasChanged);
+				Task.Run(() => ScrollToBottom());
 			});
 
 			hubConnection!.On<PublicGroupMessageDto>("ReceiveEdit", (dto) =>
