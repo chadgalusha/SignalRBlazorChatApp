@@ -19,14 +19,14 @@ namespace SignalRBlazorChatApp.HttpMethods
 		}
 
 		public async Task<ApiResponse<List<PublicGroupMessageDto>>> GetMessagesByGroupId(
-			int groupId, int numberItemsToSkip, string jsonWebToken)
+			int groupId, int numberMessagesToSkip, string jsonWebToken)
 		{
 			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 
 			var query = new Dictionary<string, string>()
 			{
 				["groupId"] = groupId.ToString(),
-				["numberItemsToSkip"] = numberItemsToSkip.ToString()
+				["numberMessagesToSkip"] = numberMessagesToSkip.ToString()
 			};
 
 			string baseUri = BaseUri();

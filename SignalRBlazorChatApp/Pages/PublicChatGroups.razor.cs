@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
 using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Models;
@@ -12,10 +11,10 @@ namespace SignalRBlazorChatApp.Pages
 	[Authorize]
 	public partial class PublicChatGroups
 	{
-		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-		[Inject] private IJwtGenerator JwtGenerator { get; set; }
-		[Inject] private IPublicChatGroupsApiService PublicChatGroupsApiService { get; set; }
-		[Inject] NavigationManager NavigationManager { get; set; }
+		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+		[Inject] private IJwtGenerator JwtGenerator { get; set; } = default!;
+		[Inject] private IPublicChatGroupsApiService PublicChatGroupsApiService { get; set; } = default!;
+		[Inject] NavigationManager NavigationManager { get; set; } = default!;
 
 		private ApiResponse<List<PublicChatGroupsDto>>? apiResponse;
 		private List<PublicChatGroupsDto>? _listPublicChatGroupsDto;
@@ -59,5 +58,14 @@ namespace SignalRBlazorChatApp.Pages
 		{
 			NavigationManager.NavigateTo($"PublicGroupMessages/{groupId}");
 		}
+
+		#region CRUD -R METHODS
+
+		private async Task PostNewGroup()
+		{
+
+		}
+
+		#endregion
 	}
 }

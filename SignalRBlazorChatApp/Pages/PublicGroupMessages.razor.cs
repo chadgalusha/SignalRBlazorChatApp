@@ -23,7 +23,7 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] IDialogService DialogService { get; set; } = default!;
 		[Inject] IHubConnectors HubConnector { get; set; } = default!;
 		// Javascript functionality
-		[Inject] IJSRuntime JSRuntime { get; set; }
+		[Inject] IJSRuntime JSRuntime { get; set; } = default!;
 		private Task<IJSObjectReference> _module;
 		private Task<IJSObjectReference> Module => _module ??= JSRuntime
 			.InvokeAsync<IJSObjectReference>("import", "./js/chatfunctions.js").AsTask();
@@ -46,10 +46,10 @@ namespace SignalRBlazorChatApp.Pages
 			await StartSignalR();
 		}
 
-		protected override Task OnAfterRenderAsync(bool firstRender)
+		protected override Task OnParametersSetAsync()
 		{
-			Task.Run(() => ScrollToBottom());
-			return base.OnAfterRenderAsync(firstRender);
+			Task.Run(ScrollToBottom);
+			return base.OnParametersSetAsync();
 		}
 
 		private async Task ScrollToBottom()
@@ -65,6 +65,13 @@ namespace SignalRBlazorChatApp.Pages
 			return GenerateJwt(authState);
 		}
 
+		private string? GetUserId(AuthenticationState authState)
+		{
+			var user = authState.User;
+			var userId = user.FindFirst(c => c.Type.Contains("nameidentifier"))?.Value;
+			return userId;
+		}
+
 		private async Task<string> RegenerateJWT()
 		{
 			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -78,13 +85,6 @@ namespace SignalRBlazorChatApp.Pages
 			ChatGroupName = _listMessagesDto.First().ChatGroupName;
 		}
 
-		private string? GetUserId(AuthenticationState authState)
-		{
-			var user = authState.User;
-			var userId = user.FindFirst(c => c.Type.Contains("nameidentifier"))?.Value;
-			return userId;
-		}
-
 		private string GenerateJwt(AuthenticationState authState)
 		{
 			return JwtGenerator.GetJwtToken(authState);
@@ -96,6 +96,28 @@ namespace SignalRBlazorChatApp.Pages
 			newList.AddRange(data);
 			newList.Reverse();
 			return newList;
+		}
+
+		private async Task LoadAdditionalData()
+		{
+			int listCount = _listMessagesDto.Count;
+
+			string jsonWebToken = await LoadUserData();
+
+			var apiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), listCount, jsonWebToken);
+
+			if (!apiResponse.Success)
+			{
+				Snackbar.Add("Error loading data", Severity.Error);
+			}
+			if (apiResponse.Data != null)
+			{
+				var additionalDataList = apiResponse.Data
+					.OrderBy(d => d.MessageDateTime)
+					.ToList();
+
+				_listMessagesDto.InsertRange(0, additionalDataList);
+			}
 		}
 
 		#region CRUD methods -R

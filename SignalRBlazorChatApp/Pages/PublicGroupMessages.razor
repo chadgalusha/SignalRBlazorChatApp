@@ -13,7 +13,9 @@ else
 	<MudCard Class="chat-board" Style="background-color: rgb(43, 45, 48);">
 		<MudCardHeader Style="border: solid white;background: rgb(206, 206, 206);">
 			<CardHeaderContent>
-				<MudText Align="Align.Center">Placeholder Header</MudText>
+				<MudText Align="Align.Center">
+					<MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="() => LoadAdditionalData()">Load Previous Messages</MudButton>
+				</MudText>
 			</CardHeaderContent>
 		</MudCardHeader>
 		<MudCardContent Class="chat-container" id="chatanchor">
