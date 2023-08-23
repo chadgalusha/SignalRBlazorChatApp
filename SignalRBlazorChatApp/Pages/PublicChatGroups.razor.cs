@@ -24,7 +24,6 @@ namespace SignalRBlazorChatApp.Pages
 		private string UserId = string.Empty;
 
 		// Form variables
-		private string newGroupName = string.Empty;
 		private CreatePublicChatGroupDto createDto;
 		private PublicChatGroupsDto editDto;
 		private bool ShowNewPopup = false;
@@ -73,9 +72,9 @@ namespace SignalRBlazorChatApp.Pages
 
 		private bool UserIdMatch(string userId, string compareId) => userId == compareId;
 
-		private void RedirectToGroupMessages(int groupId)
+		private void RedirectToGroupMessages(int groupId, string groupName)
 		{
-			NavigationManager.NavigateTo($"PublicGroupMessages/{groupId}");
+			NavigationManager.NavigateTo($"PublicGroupMessages/{groupId}/{groupName}");
 		}
 
 		#region CRUD -R METHODS
@@ -123,7 +122,6 @@ namespace SignalRBlazorChatApp.Pages
 		void CancelNew()
 		{
 			ShowNewPopup = false;
-			createDto = new();
 		}
 
 		void ShowEditForm(PublicChatGroupsDto dto)
@@ -145,7 +143,6 @@ namespace SignalRBlazorChatApp.Pages
 		void CancelEdit()
 		{
 			ShowEditPopup = false;
-			editDto = new();
 		}
 
 		async Task EditGroup()

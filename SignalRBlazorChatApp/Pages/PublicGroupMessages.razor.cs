@@ -15,6 +15,7 @@ namespace SignalRBlazorChatApp.Pages
 	public partial class PublicGroupMessages
 	{
 		[Parameter] public string GroupId { get; set; } = string.Empty;
+		[Parameter] public string ChatGroupName {get; set; } = string.Empty;
 
 		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 		[Inject] private IJwtGenerator JwtGenerator { get; set; } = default!;
@@ -22,6 +23,7 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] ISnackbar Snackbar { get; set; } = default!;
 		[Inject] IDialogService DialogService { get; set; } = default!;
 		[Inject] IHubConnectors HubConnector { get; set; } = default!;
+
 		// Javascript functionality
 		[Inject] IJSRuntime JSRuntime { get; set; } = default!;
 		private Task<IJSObjectReference> _module;
@@ -30,11 +32,14 @@ namespace SignalRBlazorChatApp.Pages
 
 		private ApiResponse<List<PublicGroupMessageDto>>? initialApiResponse;
 		private List<PublicGroupMessageDto> _listMessagesDto;
-		private string ChatGroupName = string.Empty;
+
+		//private string ChatGroupName = string.Empty;
 		private string userId = string.Empty;
 		bool ShowEditPopup = false;
+
 		// SignalR variables
 		private HubConnection? _hubConnection;
+
 		// Form variables
 		private string NewText { get; set; } = string.Empty;
 		private PublicGroupMessageDto editDto;
@@ -82,11 +87,6 @@ namespace SignalRBlazorChatApp.Pages
 		{
 			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
 			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
-			if (_listMessagesDto.Count > 0)
-			{
-				ChatGroupName = _listMessagesDto.First().ChatGroupName;
-			}
-			
 		}
 
 		private string GenerateJwt(AuthenticationState authState)
