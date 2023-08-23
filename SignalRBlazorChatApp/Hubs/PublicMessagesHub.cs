@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using SignalRBlazorChatApp.Models.Dtos;
+using ChatApplicationModels.Dtos;
 
 namespace SignalRBlazorChatApp.Hubs
 {

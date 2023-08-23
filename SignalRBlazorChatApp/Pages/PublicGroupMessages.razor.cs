@@ -4,10 +4,10 @@ using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.HttpMethods;
 using Microsoft.AspNetCore.Authorization;
 using SignalRBlazorChatApp.Models;
-using SignalRBlazorChatApp.Models.Dtos;
 using MudBlazor;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
+using ChatApplicationModels.Dtos;
 
 namespace SignalRBlazorChatApp.Pages
 {
@@ -82,7 +82,11 @@ namespace SignalRBlazorChatApp.Pages
 		{
 			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
 			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
-			ChatGroupName = _listMessagesDto.First().ChatGroupName;
+			if (_listMessagesDto.Count > 0)
+			{
+				ChatGroupName = _listMessagesDto.First().ChatGroupName;
+			}
+			
 		}
 
 		private string GenerateJwt(AuthenticationState authState)

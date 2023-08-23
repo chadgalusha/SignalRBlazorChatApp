@@ -151,3 +151,8 @@ a, .btn-link {
 .chat-editdelete-button:hover {
     border: dashed;
 }
+
+.mudbutton {
+    margin-top: 2em;
+    margin-bottom: 2em;
+}

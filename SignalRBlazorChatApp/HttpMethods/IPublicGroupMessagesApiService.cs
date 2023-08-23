@@ -1,5 +1,5 @@
-﻿using SignalRBlazorChatApp.Models;
-using SignalRBlazorChatApp.Models.Dtos;
+﻿using ChatApplicationModels.Dtos;
+using SignalRBlazorChatApp.Models;
 
 namespace SignalRBlazorChatApp.HttpMethods
 {
