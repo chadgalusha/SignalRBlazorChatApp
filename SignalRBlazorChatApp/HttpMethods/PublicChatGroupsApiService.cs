@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using ChatApplicationModels.Dtos;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using SignalRBlazorChatApp.Models;
-using SignalRBlazorChatApp.Models.Dtos;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -68,7 +68,7 @@ namespace SignalRBlazorChatApp.HttpMethods
 			return apiResponse;
 		}
 
-		public async Task<ApiResponse<PublicChatGroupsDto>> DeleteMessage(Guid groupId, string jsonWebToken)
+		public async Task<ApiResponse<PublicChatGroupsDto>> DeleteGroup(int groupId, string jsonWebToken)
 		{
 			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 

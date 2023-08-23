@@ -38,10 +38,10 @@ else
 		<EditForm Model="@editDto" OnValidSubmit="EditMessage" class="modal" style="display:block;">
 			<div class="modal-dialog" style="vertical-align:central;">
 			<MudCard Class="modal-content">
-					<MudText Align="Align.Center"><b>Edit Message</b></MudText>
+				<MudText Align="Align.Center"><b>Edit Message</b></MudText>
 				<MudCardContent>
 					<MudTextField T="DateTime" Label="Message Date" @bind-Value="editDto.MessageDateTime" ReadOnly="true" Variant="Variant.Outlined" />
-						<MudTextField T="string" Label="Text" @bind-Text="editDto.Text" MaxLength="5000" Lines="5" Variant="Variant.Outlined" />
+					<MudTextField T="string" Label="Text" @bind-Text="editDto.Text" MaxLength="5000" Lines="5" Variant="Variant.Outlined" />
 				</MudCardContent>
 				<MudCardActions>
 					<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info">Submit</MudButton>

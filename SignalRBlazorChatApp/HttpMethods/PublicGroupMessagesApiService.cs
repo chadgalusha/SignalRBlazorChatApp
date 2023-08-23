@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using ChatApplicationModels.Dtos;
+using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 using SignalRBlazorChatApp.Models;
-using SignalRBlazorChatApp.Models.Dtos;
 using System.Net.Http.Headers;
 using System.Text;
 

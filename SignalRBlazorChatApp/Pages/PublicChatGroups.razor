@@ -27,10 +27,10 @@ else
 			<MudTd DataLabel="Group Owner Id" style="display:none;">@context.GroupOwnerUserId</MudTd>
 			<MudTd DataLabel="Group Owner">@context.UserName</MudTd>
 			<MudTd>
-				@if (UserIdMatch(userId, context.GroupOwnerUserId))
+				@if (UserIdMatch(UserId, context.GroupOwnerUserId))
 				{
-					<MudIcon Icon="@Icons.TwoTone.Edit" Title="Edit" class="mud-table-button" Color="Color.Info" />
-					<MudIcon Icon="@Icons.TwoTone.Delete" Title="Delete" class="mud-table-button" Color="Color.Error" />
+					<MudIcon Icon="@Icons.TwoTone.Edit" Title="Edit" class="mud-table-button" Color="Color.Info" @onclick="()=> ShowEditForm(context)" />
+					<MudIcon Icon="@Icons.TwoTone.Delete" Title="Delete" class="mud-table-button" Color="Color.Error" @onclick="() => DeleteConfirm(context)" />
 				}
 			</MudTd>
 		</RowTemplate>
@@ -38,4 +38,46 @@ else
 			<MudTablePager />
 		</PagerContent>
 	</MudTable>
+	<div>
+		<MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="ShowNewForm" Style="margin-top:1em;margin-bottom:1em;">Create New</MudButton>
+	</div>
+
+	@if (ShowNewPopup)
+	{
+		<EditForm Model="@createDto" OnValidSubmit="PostNewGroup" class="modal" style="display:block;">
+			<div class="modal-dialog" style="vertical-align:central;">
+				<MudCard Class="modal-content">
+					<MudText Align="Align.Center"><b>New Chat Group</b></MudText>
+					<MudCardContent>
+						<MudTextField T="string" @bind-Value="createDto.GroupOwnerUserId" ReadOnly="true" Style="visibility:hidden;" />
+						<MudTextField T="string" Label="Chat Group Name" @bind-Text="createDto.ChatGroupName" MaxLength="200" Lines="2" Variant="Variant.Outlined" />
+					</MudCardContent>
+					<MudCardActions>
+						<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info">Submit</MudButton>
+						<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CancelNew" Style="margin-left:auto;">Cancel</MudButton>
+					</MudCardActions>
+				</MudCard>
+			</div>
+		</EditForm>
+	}	
+
+	@if (ShowEditPopup)
+	{
+		<EditForm Model="@editDto" OnValidSubmit="EditGroup" class="modal" style="display:block;">
+			<div class="modal-dialog" style="vertical-align:central;">
+				<MudCard Class="modal-content">
+					<MudText Align="Align.Center"><b>Edit Chat Group</b></MudText>
+					<MudCardContent>
+						<MudTextField T="string" Label="Chat Group Owner" @bind-Value="editDto.UserName" ReadOnly="true" Variant="Variant.Outlined" />
+						<MudTextField T="DateTime" Label="Date Created" @bind-Value="editDto.GroupCreated" ReadOnly="true" Variant="Variant.Outlined"/>
+						<MudTextField T="string" Label="Chat Group Name" @bind-Text="editDto.ChatGroupName" MaxLength="200" Lines="2" Variant="Variant.Outlined" />
+					</MudCardContent>
+					<MudCardActions>
+						<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info">Submit</MudButton>
+						<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CancelEdit" Style="margin-left:auto;">Cancel</MudButton>
+					</MudCardActions>
+				</MudCard>
+			</div>
+		</EditForm>
+	}
 }

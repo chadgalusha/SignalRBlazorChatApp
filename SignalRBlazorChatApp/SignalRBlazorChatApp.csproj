@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Dtos\**" />
+    <Content Remove="Models\Dtos\**" />
+    <EmbeddedResource Remove="Models\Dtos\**" />
+    <None Remove="Models\Dtos\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Areas\Identity\Pages\Account\LogOut.cshtml" />
     <None Include="Areas\Identity\Pages\Shared\_LoginPartial.cshtml" />
   </ItemGroup>
