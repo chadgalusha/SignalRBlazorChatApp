@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using ChatApplicationModels.Dtos;
+﻿using ChatApplicationModels.Dtos;
+using Microsoft.AspNetCore.SignalR;
 
 namespace SignalRBlazorChatApp.Hubs
 {
-	public class PublicMessagesHub : Hub
+	public class PrivateMessagesHub : Hub
 	{
 		public async Task AddToGroup(string groupId)
 		{
@@ -15,12 +15,12 @@ namespace SignalRBlazorChatApp.Hubs
 			await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 		}
 
-		public async Task SendGroupMessageAdd(string groupId, PublicGroupMessageDto dto)
+		public async Task SendGroupMessageAdd(string groupId, PrivateGroupMessageDto dto)
 		{
 			await Clients.Group(groupId).SendAsync("ReceiveAdd", dto);
 		}
 
-		public async Task SendGroupMessageEdit(string groupId, PublicGroupMessageDto dto)
+		public async Task SendGroupMessageEdit(string groupId, PrivateGroupMessageDto dto)
 		{
 			await Clients.Group(groupId).SendAsync("ReceiveEdit", dto);
 		}

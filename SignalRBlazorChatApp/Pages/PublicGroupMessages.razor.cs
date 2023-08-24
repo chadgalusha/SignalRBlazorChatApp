@@ -23,6 +23,7 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] ISnackbar Snackbar { get; set; } = default!;
 		[Inject] IDialogService DialogService { get; set; } = default!;
 		[Inject] IHubConnectors HubConnector { get; set; } = default!;
+		[Inject] NavigationManager NavigationManager { get; set; } = default!;
 
 		// Javascript functionality
 		[Inject] IJSRuntime JSRuntime { get; set; } = default!;
@@ -63,6 +64,8 @@ namespace SignalRBlazorChatApp.Pages
 			await module.InvokeVoidAsync("scrollToBottom");
 		}
 
+		#region USER METHODS
+
 		private async Task<string> LoadUserData()
 		{
 			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -77,21 +80,24 @@ namespace SignalRBlazorChatApp.Pages
 			return userId;
 		}
 
+		private string GenerateJwt(AuthenticationState authState)
+		{
+			return JwtGenerator.GetJwtToken(authState);
+		}
+
 		private async Task<string> RegenerateJWT()
 		{
 			var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 			return GenerateJwt(authState);
 		}
 
+		#endregion
+		#region DATA METHODS
+
 		private async Task LoadData(string jsonWebToken)
 		{
 			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
 			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
-		}
-
-		private string GenerateJwt(AuthenticationState authState)
-		{
-			return JwtGenerator.GetJwtToken(authState);
 		}
 
 		private List<PublicGroupMessageDto> GetInitialList(List<PublicGroupMessageDto> data)
@@ -124,6 +130,7 @@ namespace SignalRBlazorChatApp.Pages
 			}
 		}
 
+		#endregion
 		#region CRUD methods -R
 
 		private async Task PostNewMessage(string userId, string groupId, string text)
@@ -276,6 +283,15 @@ namespace SignalRBlazorChatApp.Pages
 				}
 				InvokeAsync(StateHasChanged);
 			});
+
+			hubConnection!.On<string>("GroupDeleted", (groupId) =>
+			{
+				if (GroupId == groupId)
+				{
+					NavigationManager.NavigateTo("/PublicChatGroups");
+				}
+			});
+			
 		}
 
 		private async Task SendNewMessage(PublicGroupMessageDto dto)

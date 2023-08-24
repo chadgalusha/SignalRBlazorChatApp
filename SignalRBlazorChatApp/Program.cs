@@ -97,6 +97,7 @@ namespace SignalRBlazorChatApp
 
             // SignalR
             app.MapHub<PublicMessagesHub>("/publicmessageshub");
+            app.MapHub<PrivateMessagesHub>("/privatemessageshub");
 
             app.MapFallbackToPage("/_Host");
 

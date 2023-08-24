@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.SignalR.Client;
 using MudBlazor;
 using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.HttpMethods;
@@ -16,6 +17,7 @@ namespace SignalRBlazorChatApp.Pages
 		[Inject] private IJwtGenerator JwtGenerator { get; set; } = default!;
 		[Inject] private IPublicChatGroupsApiService PublicChatGroupsApiService { get; set; } = default!;
 		[Inject] NavigationManager NavigationManager { get; set; } = default!;
+		[Inject] IHubConnectors HubConnector { get; set; } = default!;
 		[Inject] ISnackbar Snackbar { get; set; } = default!;
 		[Inject] IDialogService DialogService { get; set; } = default!;
 
@@ -28,6 +30,9 @@ namespace SignalRBlazorChatApp.Pages
 		private PublicChatGroupsDto editDto;
 		private bool ShowNewPopup = false;
 		private bool ShowEditPopup = false;
+
+		// SignalR variables
+		private HubConnection? _hubConnection;
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -206,12 +211,46 @@ namespace SignalRBlazorChatApp.Pages
 				else
 				{
 					var groupToRemove = _listPublicChatGroupsDto!.Single(id => id.ChatGroupId == groupId);
+					await SendSignalRDeleteMessage(groupToRemove.ChatGroupId.ToString());
 					_listPublicChatGroupsDto!.Remove(groupToRemove);
 				}
 			}
 			catch (Exception ex)
 			{
 				Snackbar.Add(ex.Message, Severity.Error);
+			}
+		}
+
+		#endregion
+		#region SignalR methods
+		
+		// If a user is in the chat group being deleted, re-route to public groups page
+		private async Task SendSignalRDeleteMessage(string groupId)
+		{
+			await StartSignalR();
+			await SendGroupDeleted(groupId);
+			await StopSignalR();
+		}
+
+		private async Task StartSignalR()
+		{
+			_hubConnection = HubConnector.PublicGroupMessagesConnect();
+			await _hubConnection!.StartAsync();
+		}
+
+		private async Task StopSignalR()
+		{
+			if (_hubConnection is not null)
+			{
+				await _hubConnection.StopAsync();
+			}
+		}
+
+		private async Task SendGroupDeleted(string groupId)
+		{
+			if (_hubConnection is not null)
+			{
+				await _hubConnection.SendAsync("ChatGroupDeleted", groupId);
 			}
 		}
 
