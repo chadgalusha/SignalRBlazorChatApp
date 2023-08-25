@@ -1,7 +1,68 @@
 ﻿@page "/PrivateChatGroups"
+@using SignalRBlazorChatApp.Components
 
-<h3 style="text-align:center">Private Chat Groups</h3>
+<MudText Typo="Typo.h4" Align="Align.Center">Private Chat Groups</MudText>
 
-@code {
+@if (_ListPrivateChatGroupsDto == null)
+{
+	<LoadingIndicator />
+}
+else
+{
+	<MudTable Items="@_ListPrivateChatGroupsDto" Class="table-styles" Hover="true" Breakpoint="Breakpoint.Sm" Striped="true" Dense="true">
+		<HeaderContent>
+			<MudTh style="display:none;">Group Id</MudTh>
+			<MudTh>Group Name</MudTh>
+			<MudTh>Created Date</MudTh>
+			<MudTh style="display:none;">Group Owner Id</MudTh>
+			<MudTh>Group Owner</MudTh>
+			<MudTh></MudTh>
+		</HeaderContent>
+		<RowTemplate>
+			<MudTd DataLabel="Group Id" style="display:none;">@context.ChatGroupId</MudTd>
+			<MudTd DataLabel="Group Name">
+				<MudButton Variant="Variant.Outlined" @onclick="(()=>RedirectToGroupMessages(context.ChatGroupId, context.ChatGroupName))">@context.ChatGroupName</MudButton>
+			</MudTd>
+			<MudTd DataLabel="Created Date">@context.GroupCreated</MudTd>
+			<MudTd DataLabel="Group Owner Id" style="display:none;">@context.GroupOwnerUserId</MudTd>
+			<MudTd DataLabel="Group Owner">@context.UserName</MudTd>
+			<MudTd>
+				@if (UserIdMatch(UserId, context.GroupOwnerUserId))
+				{
+					<MudIcon Icon="@Icons.TwoTone.Edit" Title="Edit" class="mud-table-button" Color="Color.Info" />
+					<MudIcon Icon="@Icons.TwoTone.Delete" Title="Delete" class="mud-table-button" Color="Color.Error" @onclick="() => DeleteConfirm(context)" />
+				}
+			</MudTd>
+		</RowTemplate>
+		<PagerContent>
+			<MudTablePager />
+		</PagerContent>
+	</MudTable>
+	<div>
+		<MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="ShowNewForm" Style="margin-top:1em;margin-bottom:1em;">Create New</MudButton>
+	</div>
 
+	@if (ShowNewPopup)
+	{
+		<EditForm Model="@createDto" OnValidSubmit="PostNewGroup" class="modal" style="display:block;">
+			<div class="modal-dialog" style="vertical-align:central;">
+				<MudCard Class="modal-content">
+					<MudText Align="Align.Center"><b>New Chat Group</b></MudText>
+					<MudCardContent>
+						<MudTextField T="string" @bind-Value="createDto.GroupOwnerUserId" ReadOnly="true" Style="visibility:hidden;" />
+						<MudTextField T="string" Label="Chat Group Name" @bind-Text="createDto.ChatGroupName" MaxLength="200" Lines="2" Variant="Variant.Outlined" />
+					</MudCardContent>
+					<MudCardActions>
+						<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Info">Submit</MudButton>
+						<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="CancelNew" Style="margin-left:auto;">Cancel</MudButton>
+					</MudCardActions>
+				</MudCard>
+			</div>
+		</EditForm>
+	}
+
+	@if (ShowEditPopup)
+	{
+
+	}		
 }
