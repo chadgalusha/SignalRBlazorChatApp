@@ -7,18 +7,18 @@ using System.Text;
 
 namespace SignalRBlazorChatApp.HttpMethods
 {
-	public class PublicGroupMessagesApiService : IPublicGroupMessagesApiService
+	public class PrivateGroupMessagesApiService : IPrivateGroupMessagesApiService
 	{
 		private HttpClient _httpClient;
 		private readonly IConfiguration _configuration;
 
-		public PublicGroupMessagesApiService(HttpClient httpClient, IConfiguration configuration)
+		public PrivateGroupMessagesApiService(HttpClient httpClient, IConfiguration configuration)
 		{
 			_httpClient = httpClient ?? throw new Exception(nameof(httpClient));
 			_configuration = configuration ?? throw new Exception(nameof(configuration));
 		}
 
-		public async Task<ApiResponse<List<PublicGroupMessageDto>>> GetMessagesByGroupId(
+		public async Task<ApiResponse<List<PrivateGroupMessageDto>>> GetMessagesByGroupId(
 			int groupId, int numberMessagesToSkip, string jsonWebToken)
 		{
 			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
@@ -34,14 +34,14 @@ namespace SignalRBlazorChatApp.HttpMethods
 			var dataRequest = await _httpClient.GetAsync(uriWithQuery);
 
 			string jsonContent = await dataRequest.Content.ReadAsStringAsync();
-			ApiResponse<List<PublicGroupMessageDto>> apiResponse = JsonConvert
-				.DeserializeObject<ApiResponse<List<PublicGroupMessageDto>>>(jsonContent)!;
+			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = JsonConvert
+				.DeserializeObject<ApiResponse<List<PrivateGroupMessageDto>>>(jsonContent)!;
 
 			return apiResponse;
 		}
 
-		public async Task<ApiResponse<PublicGroupMessageDto>> PostNewMessage(
-			CreatePublicGroupMessageDto createDto, string jsonWebToken)
+		public async Task<ApiResponse<PrivateGroupMessageDto>> PostNewMessage(
+			CreatePrivateGroupMessageDto createDto, string jsonWebToken)
 		{
 			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 
@@ -53,14 +53,14 @@ namespace SignalRBlazorChatApp.HttpMethods
 			var postRequest = await _httpClient.PostAsync(baseUri, bodyMessage);
 
 			string jsonContent = await postRequest.Content.ReadAsStringAsync();
-			ApiResponse<PublicGroupMessageDto> apiResponse = JsonConvert
-				.DeserializeObject<ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
+			ApiResponse<PrivateGroupMessageDto> apiResponse = JsonConvert
+				.DeserializeObject<ApiResponse<PrivateGroupMessageDto>>(jsonContent)!;
 
 			return apiResponse;
 		}
 
-		public async Task<ApiResponse<PublicGroupMessageDto>> UpdateMessage(
-			ModifyPublicGroupMessageDto modifyDto, string jsonWebToken)
+		public async Task<ApiResponse<PrivateGroupMessageDto>> UpdateMessage(
+			ModifyPrivateGroupMessageDto modifyDto, string jsonWebToken)
 		{
 			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 
@@ -72,19 +72,19 @@ namespace SignalRBlazorChatApp.HttpMethods
 			var updateRequest = await _httpClient.PutAsync(baseUri, bodyMessage);
 
 			string jsonContent = await updateRequest.Content.ReadAsStringAsync();
-			ApiResponse<PublicGroupMessageDto> apiResponse = JsonConvert
-				.DeserializeObject<ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
+			ApiResponse<PrivateGroupMessageDto> apiResponse = JsonConvert
+				.DeserializeObject<ApiResponse<PrivateGroupMessageDto>>(jsonContent)!;
 
 			return apiResponse;
 		}
 
-		public async Task<ApiResponse<PublicGroupMessageDto>> DeleteMessage(Guid messageId, string jsonWebToken)
+		public async Task<ApiResponse<PrivateGroupMessageDto>> DeleteMessage(Guid messageId, string jsonWebToken)
 		{
 			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 
 			var query = new Dictionary<string, string>()
 			{
-				["messageId"] = messageId.ToString()
+				["privateMessageId"] = messageId.ToString()
 			};
 
 			string baseUri = BaseUri();
@@ -94,8 +94,8 @@ namespace SignalRBlazorChatApp.HttpMethods
 			if (!deleteRequest.IsSuccessStatusCode)
 			{
 				string jsonContent = await deleteRequest.Content.ReadAsStringAsync();
-				ApiResponse<PublicGroupMessageDto> apiResponse = JsonConvert
-					.DeserializeObject<ApiResponse<PublicGroupMessageDto>>(jsonContent)!;
+				ApiResponse<PrivateGroupMessageDto> apiResponse = JsonConvert
+					.DeserializeObject<ApiResponse<PrivateGroupMessageDto>>(jsonContent)!;
 				return apiResponse;
 			}
 
@@ -106,7 +106,7 @@ namespace SignalRBlazorChatApp.HttpMethods
 
 		private string BaseUri()
 		{
-			return _configuration["ApiEndpointsConfig:PublicGroupMessagesUri"]!;
+			return _configuration["ApiEndpointsConfig:PrivateGroupMessagesUri"]!;
 		}
 
 		private HttpClient GetNewHttpClient(HttpClient httpClient, string jsonWebToken)

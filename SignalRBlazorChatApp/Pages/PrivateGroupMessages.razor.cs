@@ -1,25 +1,25 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components;
-using SignalRBlazorChatApp.Helpers;
-using SignalRBlazorChatApp.HttpMethods;
+﻿using ChatApplicationModels.Dtos;
 using Microsoft.AspNetCore.Authorization;
-using SignalRBlazorChatApp.Models;
-using MudBlazor;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
-using ChatApplicationModels.Dtos;
+using MudBlazor;
+using SignalRBlazorChatApp.Helpers;
+using SignalRBlazorChatApp.HttpMethods;
+using SignalRBlazorChatApp.Models;
 
 namespace SignalRBlazorChatApp.Pages
 {
 	[Authorize]
-	public partial class PublicGroupMessages
+	public partial class PrivateGroupMessages
 	{
 		[Parameter] public string GroupId { get; set; } = string.Empty;
-		[Parameter] public string ChatGroupName {get; set; } = string.Empty;
+		[Parameter] public string ChatGroupName { get; set; } = string.Empty;
 
 		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 		[Inject] private IJwtGenerator JwtGenerator { get; set; } = default!;
-		[Inject] private IPublicGroupMessagesApiService PublicGroupMessagesApiService { get; set; } = default!;
+		[Inject] private IPrivateGroupMessagesApiService PrivateGroupMessagesApiService { get; set; } = default!;
 		[Inject] ISnackbar Snackbar { get; set; } = default!;
 		[Inject] IDialogService DialogService { get; set; } = default!;
 		[Inject] IHubConnectors HubConnector { get; set; } = default!;
@@ -31,18 +31,18 @@ namespace SignalRBlazorChatApp.Pages
 		private Task<IJSObjectReference> Module => _module ??= JSRuntime
 			.InvokeAsync<IJSObjectReference>("import", "./js/chatfunctions.js").AsTask();
 
-		private ApiResponse<List<PublicGroupMessageDto>>? initialApiResponse;
-		private List<PublicGroupMessageDto> _listMessagesDto;
+		private ApiResponse<List<PrivateGroupMessageDto>>? initialApiResponse;
+		private List<PrivateGroupMessageDto> _listMessagesDto;
 
 		private string userId = string.Empty;
 		bool ShowEditPopup = false;
 
-		// SignalR variables
+		// Signal R variables
 		private HubConnection? _hubConnection;
 
 		// Form variables
 		private string NewText { get; set; } = string.Empty;
-		private PublicGroupMessageDto editDto;
+		private PrivateGroupMessageDto editDto;
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -95,13 +95,13 @@ namespace SignalRBlazorChatApp.Pages
 
 		private async Task LoadData(string jsonWebToken)
 		{
-			initialApiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
+			initialApiResponse = await PrivateGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), 0, jsonWebToken);
 			_listMessagesDto = GetInitialList(initialApiResponse.Data!);
 		}
 
-		private List<PublicGroupMessageDto> GetInitialList(List<PublicGroupMessageDto> data)
+		private List<PrivateGroupMessageDto> GetInitialList(List<PrivateGroupMessageDto> data)
 		{
-			List<PublicGroupMessageDto> newList = new();
+			List<PrivateGroupMessageDto> newList = new();
 			newList.AddRange(data);
 			newList.Reverse();
 			return newList;
@@ -113,12 +113,10 @@ namespace SignalRBlazorChatApp.Pages
 
 			string jsonWebToken = await LoadUserData();
 
-			var apiResponse = await PublicGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), listCount, jsonWebToken);
+			var apiResponse = await PrivateGroupMessagesApiService.GetMessagesByGroupId(Convert.ToInt32(GroupId), listCount, jsonWebToken);
 
 			if (!apiResponse.Success)
-			{
 				Snackbar.Add("Error loading data", Severity.Error);
-			}
 			if (apiResponse.Data != null)
 			{
 				var additionalDataList = apiResponse.Data
@@ -134,20 +132,20 @@ namespace SignalRBlazorChatApp.Pages
 
 		private async Task PostNewMessage(string userId, string groupId, string text)
 		{
-			CreatePublicGroupMessageDto createDto = new()
+			CreatePrivateGroupMessageDto createDto = new()
 			{
 				UserId		= userId,
-				ChatGroupId = Convert.ToInt32(groupId),
-				Text	    = text
+				ChatGroupId = Convert.ToInt32(GroupId),
+				Text		= text
 			};
 
 			string jsonWebToken = await RegenerateJWT();
 
-			ApiResponse<PublicGroupMessageDto> apiResponse = new();
+			ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
 			try
 			{
-				apiResponse = await PublicGroupMessagesApiService.PostNewMessage(createDto, jsonWebToken);
+				apiResponse = await PrivateGroupMessagesApiService.PostNewMessage(createDto, jsonWebToken);
 
 				if (!apiResponse.Success)
 					Snackbar.Add(apiResponse.Message, Severity.Error);
@@ -162,19 +160,19 @@ namespace SignalRBlazorChatApp.Pages
 			NewText = string.Empty;
 		}
 
-		void ShowEditForm(PublicGroupMessageDto dto)
+		void ShowEditForm(PrivateGroupMessageDto dto)
 		{
 			editDto = new()
 			{
-				PublicMessageId = dto.PublicMessageId,
-				UserId		    = dto.UserId,
-				UserName		= dto.UserName,
-				ChatGroupId		= dto.ChatGroupId,
-				ChatGroupName	= dto.ChatGroupName,
-				Text			= dto.Text,
-				MessageDateTime = dto.MessageDateTime,
-				ReplyMessageId	= dto.ReplyMessageId,
-				PictureLink		= dto.PictureLink
+				PrivateMessageId = dto.PrivateMessageId,
+				UserId			 = dto.UserId,
+				UserName		 = dto.UserName,
+				ChatGroupId		 = dto.ChatGroupId,
+				ChatGroupName	 = dto.ChatGroupName,
+				Text		     = dto.Text,
+				MessageDateTime  = dto.MessageDateTime,
+				ReplyMessageId   = dto.ReplyMessageId,
+				PictureLink		 = dto.PictureLink
 			};
 
 			ShowEditPopup = true;
@@ -185,23 +183,23 @@ namespace SignalRBlazorChatApp.Pages
 			ShowEditPopup = false;
 		}
 
-		async Task EditMessage()
+		private async Task EditMessage()
 		{
 			ShowEditPopup = false;
 
-			ModifyPublicGroupMessageDto modifyDto = new()
+			ModifyPrivateGroupMessageDto modifyDto = new()
 			{
-				PublicMessageId = editDto.PublicMessageId, 
+				PrivateMessageId = editDto.PrivateMessageId,
 				Text = editDto.Text
 			};
 
 			string jsonWebToken = await RegenerateJWT();
 
-			ApiResponse<PublicGroupMessageDto> apiResponse = new();
+			ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
 			try
 			{
-				apiResponse = await PublicGroupMessagesApiService.UpdateMessage(modifyDto, jsonWebToken);
+				apiResponse = await PrivateGroupMessagesApiService.UpdateMessage(modifyDto, jsonWebToken);
 
 				if (!apiResponse.Success)
 					Snackbar.Add(apiResponse.Message, Severity.Error);
@@ -214,26 +212,26 @@ namespace SignalRBlazorChatApp.Pages
 			}
 		}
 
-		async Task DeleteConfirm(PublicGroupMessageDto dto)
+		async Task DeleteConfirm(PrivateGroupMessageDto dto)
 		{
 			bool? confirmed = await DialogService.ShowMessageBox(
-				"Warning", 
+				"Warning",
 				$"Permanently Delete Your Message: {dto.Text} - from {dto.MessageDateTime.ToShortDateString()}",
 				yesText: "Delete",
 				cancelText: "Cancel");
 
-			if (confirmed is true) { await DeleteMessage(dto.PublicMessageId); }
+			if (confirmed is true) { await DeleteMessage(dto.PrivateMessageId); }
 		}
 
 		private async Task DeleteMessage(Guid messageId)
 		{
 			string jsonWebToken = await RegenerateJWT();
 
-			ApiResponse<PublicGroupMessageDto> apiResponse = new();
+			ApiResponse<PrivateGroupMessageDto> apiResponse = new();
 
 			try
 			{
-				apiResponse = await PublicGroupMessagesApiService.DeleteMessage(messageId, jsonWebToken);
+				apiResponse = await PrivateGroupMessagesApiService.DeleteMessage(messageId, jsonWebToken);
 
 				if (!apiResponse.Success)
 					Snackbar.Add(apiResponse.Message, Severity.Error);
@@ -245,13 +243,12 @@ namespace SignalRBlazorChatApp.Pages
 				Snackbar.Add(ex.Message, Severity.Error);
 			}
 		}
-
 		#endregion
 		#region SignalR Methods
 
 		private async Task StartSignalR()
 		{
-			_hubConnection = HubConnector.PublicGroupMessagesConnect();
+			_hubConnection = HubConnector.PrivateGroupMessagesConnect();
 			HubListenerMethods(_hubConnection!);
 			await _hubConnection!.StartAsync();
 			await _hubConnection.SendAsync("AddToGroup", GroupId);
@@ -259,23 +256,23 @@ namespace SignalRBlazorChatApp.Pages
 
 		private void HubListenerMethods(HubConnection hubConnection)
 		{
-			hubConnection!.On<PublicGroupMessageDto>("ReceiveAdd", (dto) =>
+			hubConnection!.On<PrivateGroupMessageDto>("ReceiveAdd", (dto) =>
 			{
 				_listMessagesDto.Add(dto);
 				InvokeAsync(StateHasChanged);
 				Task.Run(() => ScrollToBottom());
 			});
 
-			hubConnection!.On<PublicGroupMessageDto>("ReceiveEdit", (dto) =>
+			hubConnection!.On<PrivateGroupMessageDto>("ReceiveEdit", (dto) =>
 			{
-				var dtoToEdit = _listMessagesDto.Single(id => id.PublicMessageId == dto.PublicMessageId);
+				var dtoToEdit = _listMessagesDto.Single(id => id.PrivateMessageId == dto.PrivateMessageId);
 				dtoToEdit.Text = dto.Text;
 				InvokeAsync(StateHasChanged);
 			});
 
 			hubConnection!.On<Guid>("ReceiveDelete", (deleteMessageId) =>
 			{
-				var dtoToDelete = _listMessagesDto.SingleOrDefault(id => id.PublicMessageId == deleteMessageId);
+				var dtoToDelete = _listMessagesDto.SingleOrDefault(id => id.PrivateMessageId == deleteMessageId);
 				if (dtoToDelete != null)
 				{
 					_listMessagesDto.Remove(dtoToDelete);
@@ -287,13 +284,12 @@ namespace SignalRBlazorChatApp.Pages
 			{
 				if (GroupId == groupId)
 				{
-					NavigationManager.NavigateTo("/PublicChatGroups");
+					NavigationManager.NavigateTo("/PrivateChatGroups");
 				}
 			});
-			
 		}
 
-		private async Task SendNewMessage(PublicGroupMessageDto dto)
+		private async Task SendNewMessage(PrivateGroupMessageDto dto)
 		{
 			if (_hubConnection is not null)
 			{
@@ -301,7 +297,7 @@ namespace SignalRBlazorChatApp.Pages
 			}
 		}
 
-		private async Task SendEditMessage(PublicGroupMessageDto dto)
+		private async Task SendEditMessage(PrivateGroupMessageDto dto)
 		{
 			if (_hubConnection is not null)
 			{

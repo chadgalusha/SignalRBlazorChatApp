@@ -138,6 +138,40 @@ namespace SignalRBlazorChatApp.Pages
 			}
 		}
 
+		private async Task EditGroup()
+		{
+			ShowEditPopup = false;
+
+			ModifyPrivateChatGroupDto modifyDto = new()
+			{
+				ChatGroupId	  = editDto.ChatGroupId,
+				ChatGroupName = editDto.ChatGroupName
+			};
+
+			string jsonWebToken = await RegenerateJWT();
+
+			ApiResponse<PrivateChatGroupsDto> apiResponse = new();
+
+			try
+			{
+				apiResponse = await PrivateChatGroupsApiService.UpdateGroup(modifyDto, jsonWebToken);
+
+				if (!apiResponse.Success)
+					Snackbar.Add(apiResponse.Message, Severity.Error);
+				if (apiResponse.Success && apiResponse.Data != null)
+				{
+					var group = _ListPrivateChatGroupsDto!.Single(id => id.ChatGroupId == apiResponse.Data.ChatGroupId);
+					group.ChatGroupName = apiResponse.Data.ChatGroupName;
+				}
+			}
+			catch (Exception ex)
+			{
+				Snackbar.Add(ex.Message, Severity.Error);
+			}
+
+			editDto = new();
+		}
+
 		async Task DeleteConfirm(PrivateChatGroupsDto dto)
 		{
 			bool? confirmed = await DialogService.ShowMessageBox(
@@ -147,7 +181,7 @@ namespace SignalRBlazorChatApp.Pages
 				cancelText: "Cancel"
 				);
 
-			if (confirmed is true) {await DeleteGroup(dto.ChatGroupId); }
+			if (confirmed is true) { await DeleteGroup(dto.ChatGroupId); }
 		}
 
 		private async Task DeleteGroup(int groupId)

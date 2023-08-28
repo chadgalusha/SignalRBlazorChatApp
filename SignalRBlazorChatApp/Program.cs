@@ -42,6 +42,7 @@ namespace SignalRBlazorChatApp
             builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
             builder.Services.AddHttpClient<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
             builder.Services.AddHttpClient<IPrivateChatGroupsApiService, PrivateChatGroupsApiService>();
+            builder.Services.AddHttpClient<IPrivateGroupMessagesApiService, PrivateGroupMessagesApiService>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
