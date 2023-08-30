@@ -199,7 +199,7 @@ namespace SignalRBlazorChatApp.Pages
 				else
 				{
 					var groupToRemove = _ListPrivateChatGroupsDto!.Single(id => id.ChatGroupId == groupId);
-					// SignalR functionality
+					await SendSignalRDeleteMessage(groupToRemove.ChatGroupId.ToString());
 					_ListPrivateChatGroupsDto!.Remove(groupToRemove);
 				}
 			}
@@ -246,6 +246,39 @@ namespace SignalRBlazorChatApp.Pages
 		void CancelEdit()
 		{
 			ShowEditPopup = false;
+		}
+
+		#endregion
+		#region SignalR Methods
+
+		// re-route user in a deleted chat group to private groups page
+		private async Task SendSignalRDeleteMessage(string groupId)
+		{
+			await StartSignalR();
+			await SendGroupDeleted(groupId);
+			await StopSignalR();
+		}
+
+		private async Task StartSignalR()
+		{
+			_hubConnection = HubConnector.PrivateGroupMessagesConnect();
+			await _hubConnection!.StartAsync();
+		}
+
+		private async Task StopSignalR()
+		{
+			if (_hubConnection is not null)
+			{
+				await _hubConnection.StopAsync();
+			}
+		}
+
+		private async Task SendGroupDeleted(string groupId)
+		{
+			if (_hubConnection is not null)
+			{
+				await _hubConnection.SendAsync("ChatGroupDeleted", groupId);
+			}
 		}
 
 		#endregion
