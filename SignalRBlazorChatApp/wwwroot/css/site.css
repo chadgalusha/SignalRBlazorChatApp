@@ -66,3 +66,93 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+/* Table Styles */
+.table-styles {
+    border: 1px solid black;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.mud-table-button:hover {
+    border: dashed;
+    transform: scale(1.4);
+}
+
+/* Loading Indicator */
+.loadingindicator {
+    top: 50%;
+    left: 50%;
+    width: 10em;
+    height: 10em;
+    margin-top: -9em;
+    margin-left: 5em;
+    position: fixed;
+}
+
+/* Chat Board Styles */
+.chat-board {
+    border: 1px solid black;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    margin-bottom: 1em;
+}
+
+.chat-container {
+    height: 400px;
+    overflow: auto;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.chatmessage {
+    border: 1px solid white;
+    border-radius: 6px;
+    background-color: black;
+    color: white;
+    display: inline-block;
+    float: left;
+    clear: both;
+    margin: 0.5em 1em 0.5em 1em;
+    max-width: 70%;
+}
+
+    .chatmessage p {
+        margin: 1px 0px 1px 0px;
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+.mychatmessage {
+    border: 1px solid white;
+    border-radius: 6px;
+    border: thin;
+    background-color: cornflowerblue;
+    color: white;
+    display: inline-block;
+    float: right;
+    clear: both;
+    margin: 0.5em 1em 0.5em 1em;
+    max-width: 70%;
+}
+
+    .mychatmessage p {
+        margin: 1px 0px 1px 0px;
+        padding-left: 1em;
+        padding-right: 1em;
+    }
+
+.message-form {
+    border: 1px solid white;
+    border-radius: 6px;
+    background-color: white;
+}
+
+.chat-editdelete-button:hover {
+    border: dashed;
+}
+
+.mudbutton {
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
