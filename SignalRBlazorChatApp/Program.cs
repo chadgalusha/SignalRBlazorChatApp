@@ -1,10 +1,15 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 using Serilog;
 using SignalRBlazorChatApp.Areas.Identity;
 using SignalRBlazorChatApp.Data;
+using SignalRBlazorChatApp.Helpers;
+using SignalRBlazorChatApp.HttpMethods;
+using SignalRBlazorChatApp.Hubs;
 using SignalRBlazorChatApp.Models;
 
 namespace SignalRBlazorChatApp
@@ -30,14 +35,43 @@ namespace SignalRBlazorChatApp
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            // Dependency Injection registration
+            builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
+            builder.Services.AddScoped<IHubConnectors, HubConnectors>();
+            // HTTP Client registration
+            builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
+            builder.Services.AddHttpClient<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
+            builder.Services.AddHttpClient<IPrivateChatGroupsApiService, PrivateChatGroupsApiService>();
+            builder.Services.AddHttpClient<IPrivateGroupMessagesApiService, PrivateGroupMessagesApiService>();
+
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-            builder.Services.AddSingleton<WeatherForecastService>();
+            
+            // MudBlazor Snackbar configuration
+            builder.Services.AddMudServices(config =>
+            {
+				config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopCenter;
+				config.SnackbarConfiguration.PreventDuplicates = false;
+				config.SnackbarConfiguration.NewestOnTop = false;
+				config.SnackbarConfiguration.ShowCloseIcon = true;
+				config.SnackbarConfiguration.VisibleStateDuration = 10000;
+				config.SnackbarConfiguration.HideTransitionDuration = 500;
+				config.SnackbarConfiguration.ShowTransitionDuration = 500;
+				config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+			});
 
-            builder.Services.AddMudServices();
+            // SignalR configuration
+            builder.Services.AddResponseCompression(config =>
+            {
+                config.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                    new[] { "application/octet-stream" });
+            });
 
             var app = builder.Build();
+
+            // SignalR
+            app.UseResponseCompression();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -60,7 +94,13 @@ namespace SignalRBlazorChatApp
             app.UseAuthorization();
 
             app.MapControllers();
+
             app.MapBlazorHub();
+
+            // SignalR
+            app.MapHub<PublicMessagesHub>("/publicmessageshub");
+            app.MapHub<PrivateMessagesHub>("/privatemessageshub");
+
             app.MapFallbackToPage("/_Host");
 
             app.Run();

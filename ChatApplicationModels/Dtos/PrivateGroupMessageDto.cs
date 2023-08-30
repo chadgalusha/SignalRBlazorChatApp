@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SignalRBlazorGroupsMessages.API.Models.Dtos
+namespace ChatApplicationModels.Dtos
 {
-	public class PublicGroupMessageDto
+    public class PrivateGroupMessageDto
     {
         [Key]
         [Required]
-        public Guid PublicMessageId { get; set; }
+        public Guid PrivateMessageId { get; set; }
         [Required]
         public string UserId { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;

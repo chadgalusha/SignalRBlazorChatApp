@@ -104,7 +104,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpPost("groupmember")]
-        public async Task<ActionResult<PrivateGroupMembers>> AddMemberAsync([FromQuery] int groupId, [FromQuery] string userToAddId)
+        public async Task<ActionResult<ApiResponse<PrivateGroupMembers>>> AddMemberAsync([FromQuery] int groupId, [FromQuery] string userToAddId)
         {
             ApiResponse<PrivateGroupMembers> apiResponse = await _service.AddPrivateGroupMember(groupId, userToAddId);
             _serilogger.PostRequest(GetUserIp(), apiResponse);
@@ -118,7 +118,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<PrivateChatGroupsDto>> ModifyAsync([FromBody] ModifyPrivateChatGroupDto modifyDto)
+        public async Task<ActionResult<ApiResponse<PrivateChatGroupsDto>>> ModifyAsync([FromBody] ModifyPrivateChatGroupDto modifyDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
 

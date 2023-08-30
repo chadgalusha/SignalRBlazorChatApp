@@ -1,0 +1,54 @@
+﻿@using ChatApplicationModels.Dtos
+
+@if (Message.UserId == UserId)
+{
+	<div class="mychatmessage">
+		<p><b>@Message.UserName</b> <small>@Message.MessageDateTime.ToShortDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+		<p>
+			@Message.Text
+			<div style="float:right;margin-left: 0.4em;">
+				<MudIcon @onclick="() => CallUpdateMessage(Message)" Icon="@Icons.TwoTone.Edit" Color="Color.Dark" Title="Edit" Size="Size.Small" Class="chat-editdelete-button" />
+				<MudIcon @onclick="() => CallDeleteMessage(Message)" Icon="@Icons.TwoTone.Delete" Color="Color.Dark" Title="Delete" Size="Size.Small" Class="chat-editdelete-button" />
+			</div>
+		</p>
+	</div>
+	<br />
+}
+else
+{
+	<div class="chatmessage">
+		<p><b>@Message.UserName</b> <small>@Message.MessageDateTime.ToShortDateString() @Message.MessageDateTime.ToLongTimeString()</small></p>
+		<p>@Message.Text</p>
+	</div>
+	<br />
+}
+
+@code {
+	[Parameter, EditorRequired]
+	public PrivateGroupMessageDto Message { get; set; } = default!;
+
+	[Parameter, EditorRequired]
+	public string UserId { get; set; } = string.Empty;
+
+	[Parameter]
+	public EventCallback<PrivateGroupMessageDto> UpdateMessage { get; set; }
+
+	[Parameter, EditorRequired]
+	public EventCallback<PrivateGroupMessageDto> DeleteMessage { get; set; }
+
+	private async Task CallUpdateMessage(PrivateGroupMessageDto message)
+	{
+		if (UpdateMessage.HasDelegate)
+		{
+			await UpdateMessage.InvokeAsync(message);
+		}
+	}
+
+	private async Task CallDeleteMessage(PrivateGroupMessageDto message)
+	{
+		if (DeleteMessage.HasDelegate)
+		{
+			await DeleteMessage.InvokeAsync(message);
+		}
+	}
+}

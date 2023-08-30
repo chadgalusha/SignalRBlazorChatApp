@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SignalRBlazorGroupsMessages.API.Models.Dtos
+namespace ChatApplicationModels.Dtos
 {
 	public class PublicGroupMessageDto
     {

@@ -23,11 +23,6 @@ namespace SignalRBlazorGroupsMessages.API.Services
 
             try
             {
-                if (!await _privateMessageDataAccess.GroupIdExists(groupId))
-                {
-                    return ReturnApiResponse.Failure(apiResponse, ErrorMessages.RecordNotFound);
-                }
-
                 List<PrivateGroupMessageDto> dtoList = await _privateMessageDataAccess.GetDtoListByGroupIdAsync(groupId, numberMessagesToSkip);
                 return ReturnApiResponse.Success(apiResponse, dtoList);
             }

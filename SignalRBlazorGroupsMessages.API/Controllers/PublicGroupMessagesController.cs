@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
@@ -110,6 +112,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             if (!UserIdValid(jwtUserId, createDto.UserId))
             {
                 apiResponse = ReturnApiResponse.Failure(apiResponse, ErrorMessages.InvalidUserId);
+                Log.Information($"jsonUserId is {jwtUserId} and userId is {createDto.UserId}");
                 return ErrorHttpResponse(apiResponse);
             }
             if (createDto.Text.IsNullOrEmpty())
@@ -155,7 +158,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
             return Ok(apiResponse);
         }
 
-        // DELETE api/<PublicMessagesController>/5
+        // DELETE api/<PublicMessagesController>/
         [HttpDelete]
         public async Task<ActionResult<ApiResponse<PublicGroupMessageDto>>> DeleteAsync([FromQuery] Guid messageId)
         {
@@ -193,7 +196,7 @@ namespace SignalRBlazorGroupsMessages.API.Controllers
 
         private bool UserIdValid(string? jwtUserId, string dtoUserId)
         {
-            return jwtUserId.IsNullOrEmpty() == true || jwtUserId != dtoUserId ? false : true;
+            return jwtUserId == dtoUserId;
         }
 
         private string GetUserIp()

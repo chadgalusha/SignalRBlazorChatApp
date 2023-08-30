@@ -118,7 +118,8 @@ namespace ChatApplication.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    var userId = await _userManager.GetUserIdAsync(user);
+                    // Add new user to Standard role
+                    await _userManager.AddToRoleAsync(user, "Standard");
 
 					await _signInManager.SignInAsync(user, isPersistent: false);
 					return LocalRedirect(returnUrl);
