@@ -20,7 +20,7 @@ namespace SignalRBlazorChatApp
         {
             // Add Serilog
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
+                //.MinimumLevel.Debug()
                 .WriteTo.File("Logs/SignalBlazorChatApp.txt", rollingInterval: RollingInterval.Month)
                 .CreateLogger();
 
@@ -38,16 +38,25 @@ namespace SignalRBlazorChatApp
             // Dependency Injection registration
             builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
             builder.Services.AddScoped<IHubConnectors, HubConnectors>();
-            // HTTP Client registration
-            builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
+            // Service registration
+            builder.Services.AddScoped<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
+			// HTTP Client registration
+			//builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
             builder.Services.AddHttpClient<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
             builder.Services.AddHttpClient<IPrivateChatGroupsApiService, PrivateChatGroupsApiService>();
             builder.Services.AddHttpClient<IPrivateGroupMessagesApiService, PrivateGroupMessagesApiService>();
+            // trying the below
+            builder.Services.AddScoped<IChatHttpMethods, ChatHttpMethods>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-            
+
+            builder.Services.AddHttpClient("publicGroupApi", client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PublicChatGroupsUri")!);
+            });
+
             // MudBlazor Snackbar configuration
             builder.Services.AddMudServices(config =>
             {

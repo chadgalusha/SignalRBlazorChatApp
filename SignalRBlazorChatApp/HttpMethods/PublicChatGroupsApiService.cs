@@ -11,19 +11,29 @@ namespace SignalRBlazorChatApp.HttpMethods
 	{
 		private HttpClient _httpClient;
 		private readonly IConfiguration _configuration;
+		private readonly IChatHttpMethods _httpMethods;
 
-		public PublicChatGroupsApiService(HttpClient httpClient, IConfiguration configuration)
+		public PublicChatGroupsApiService(HttpClient httpClient, IConfiguration configuration, IChatHttpMethods httpMethods)
 		{
 			_httpClient = httpClient ?? throw new Exception(nameof(httpClient));
 			_configuration = configuration ?? throw new Exception(nameof(configuration));
+			_httpMethods = httpMethods;
 		}
 
 		public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetPublicChatGroupsAsync(string jsonWebToken)
 		{
-			_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
+			//_httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
 
-			string uri = BaseUri();
-			var dataRequest = await _httpClient.GetAsync(uri);
+			//string uri = BaseUri();
+			//var dataRequest = await _httpClient.GetAsync(uri);
+
+			//string jsonContent = await dataRequest.Content.ReadAsStringAsync();
+			//ApiResponse<List<PublicChatGroupsDto>> apiResponse = JsonConvert
+			//	.DeserializeObject<ApiResponse<List<PublicChatGroupsDto>>>(jsonContent)!;
+
+			//return apiResponse;
+
+			var dataRequest = await _httpMethods.GetAsync(jsonWebToken, "publicGroupApi");
 
 			string jsonContent = await dataRequest.Content.ReadAsStringAsync();
 			ApiResponse<List<PublicChatGroupsDto>> apiResponse = JsonConvert
