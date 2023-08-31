@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using SignalRBlazorGroupsMessages.API.Controllers;
 using SignalRBlazorGroupsMessages.API.Helpers;
@@ -9,7 +8,7 @@ using SignalRBlazorGroupsMessages.API.Services;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroups
 {
-    public class PublicChatGroupsController_UnitTests
+	public class PublicChatGroupsController_UnitTests
     {
         private readonly Mock<IPublicChatGroupsService> _mockService;
         private readonly Mock<ISerilogger> _mockSerilogger;

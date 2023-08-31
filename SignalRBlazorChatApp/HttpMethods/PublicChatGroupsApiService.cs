@@ -97,6 +97,7 @@ namespace SignalRBlazorChatApp.HttpMethods
 		private string BaseUri()
 		{
 			return _configuration["ApiEndpointsConfig:PublicChatGroupsUri"]!;
+			//return _configuration.GetValue<string>("ApiEndpointsConfig:PublicChatGroupsUri")!;
 		}
 
 		private HttpClient GetNewHttpClient(HttpClient httpClient, string jsonWebToken)

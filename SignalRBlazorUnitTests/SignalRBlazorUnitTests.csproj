@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChatApplicationModels\ChatApplicationModels.csproj" />
+    <ProjectReference Include="..\SignalRBlazorChatApp\SignalRBlazorChatApp.csproj" />
     <ProjectReference Include="..\SignalRBlazorGroupsMessages.API\SignalRBlazorGroupsMessages.API.csproj" />
   </ItemGroup>
 

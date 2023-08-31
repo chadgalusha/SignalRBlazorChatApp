@@ -35,8 +35,8 @@ namespace SignalRBlazorChatApp.Helpers
 			return new()
 			{
 				SecretForKey = _configuration["Authentication:SecretForKey"]!,
-				Issuer = _configuration["Authentication:Issuer"]!,
-				Audience = _configuration["Authentication:Audience"]!
+				Issuer		 = _configuration["Authentication:Issuer"]!,
+				Audience	 = _configuration["Authentication:Audience"]!
 			};
 		}
 
