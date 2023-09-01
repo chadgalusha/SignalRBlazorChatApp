@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
 using SignalRBlazorChatApp.Helpers;
-using SignalRBlazorChatApp.HttpMethods;
 using Microsoft.AspNetCore.Authorization;
 using SignalRBlazorChatApp.Models;
 using MudBlazor;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using ChatApplicationModels.Dtos;
+using SignalRBlazorChatApp.Services;
 
 namespace SignalRBlazorChatApp.Pages
 {
-	[Authorize]
+    [Authorize]
 	public partial class PublicGroupMessages
 	{
 		[Parameter] public string GroupId { get; set; } = string.Empty;

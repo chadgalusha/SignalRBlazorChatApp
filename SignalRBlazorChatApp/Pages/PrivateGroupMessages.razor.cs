@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 using MudBlazor;
 using SignalRBlazorChatApp.Helpers;
-using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Models;
+using SignalRBlazorChatApp.Services;
 
 namespace SignalRBlazorChatApp.Pages
 {
-	[Authorize]
+    [Authorize]
 	public partial class PrivateGroupMessages
 	{
 		[Parameter] public string GroupId { get; set; } = string.Empty;

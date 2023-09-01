@@ -2,14 +2,14 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
-using SignalRBlazorChatApp.HttpMethods;
 using System.Net;
 using SignalRBlazorGroupsMessages.API.Models;
 using System.Reflection;
+using SignalRBlazorChatApp.Services;
 
 namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 {
-	public class PublicChatGroupsApiService_UnitTests
+    public class PublicChatGroupsApiService_UnitTests
 	{
 		private Mock<HttpClient> _mockHttpClient;
 		private readonly Mock<IConfiguration> _mockIConfiguration;

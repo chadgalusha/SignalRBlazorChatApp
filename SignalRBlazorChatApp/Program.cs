@@ -11,6 +11,7 @@ using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Hubs;
 using SignalRBlazorChatApp.Models;
+using SignalRBlazorChatApp.Services;
 
 namespace SignalRBlazorChatApp
 {
@@ -40,25 +41,38 @@ namespace SignalRBlazorChatApp
             builder.Services.AddScoped<IHubConnectors, HubConnectors>();
             // Service registration
             builder.Services.AddScoped<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
-			// HTTP Client registration
-			//builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
-            builder.Services.AddHttpClient<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
-            builder.Services.AddHttpClient<IPrivateChatGroupsApiService, PrivateChatGroupsApiService>();
-            builder.Services.AddHttpClient<IPrivateGroupMessagesApiService, PrivateGroupMessagesApiService>();
-            // trying the below
+            builder.Services.AddScoped<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
+            builder.Services.AddScoped<IPrivateChatGroupsApiService, PrivateChatGroupsApiService>();
+            builder.Services.AddScoped<IPrivateGroupMessagesApiService, PrivateGroupMessagesApiService>();
             builder.Services.AddScoped<IChatHttpMethods, ChatHttpMethods>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
 
-            builder.Services.AddHttpClient("publicGroupApi", client =>
+			// HTTP Client registration
+			builder.Services.AddHttpClient(NamedHttpClients.PublicGroupApi, client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PublicChatGroupsUri")!);
             });
 
-            // MudBlazor Snackbar configuration
-            builder.Services.AddMudServices(config =>
+			builder.Services.AddHttpClient(NamedHttpClients.PublicMessageApi, client =>
+			{
+				client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PublicGroupMessagesUri")!);
+			});
+
+			builder.Services.AddHttpClient(NamedHttpClients.PrivateGroupApi, client =>
+			{
+				client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PrivateChatGroupsUri")!);
+			});
+
+			builder.Services.AddHttpClient(NamedHttpClients.PrivateMessageApi, client =>
+			{
+				client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PrivateGroupMessagesUri")!);
+			});
+
+			// MudBlazor Snackbar configuration
+			builder.Services.AddMudServices(config =>
             {
 				config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopCenter;
 				config.SnackbarConfiguration.PreventDuplicates = false;

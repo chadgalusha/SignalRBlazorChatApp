@@ -3,15 +3,15 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
 using SignalRBlazorChatApp.Helpers;
 using MudBlazor;
-using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Models;
 using ChatApplicationModels.Dtos;
 using Microsoft.AspNetCore.SignalR.Client;
 using ChatApplicationModels;
+using SignalRBlazorChatApp.Services;
 
 namespace SignalRBlazorChatApp.Pages
 {
-	[Authorize]
+    [Authorize]
 	public partial class PrivateChatGroups
 	{
 		[Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
