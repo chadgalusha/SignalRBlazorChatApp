@@ -11,6 +11,7 @@ using SignalRBlazorChatApp.Helpers;
 using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Hubs;
 using SignalRBlazorChatApp.Models;
+using SignalRBlazorChatApp.Services;
 
 namespace SignalRBlazorChatApp
 {
@@ -20,7 +21,7 @@ namespace SignalRBlazorChatApp
         {
             // Add Serilog
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
+                //.MinimumLevel.Debug()
                 .WriteTo.File("Logs/SignalBlazorChatApp.txt", rollingInterval: RollingInterval.Month)
                 .CreateLogger();
 
@@ -38,18 +39,40 @@ namespace SignalRBlazorChatApp
             // Dependency Injection registration
             builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
             builder.Services.AddScoped<IHubConnectors, HubConnectors>();
-            // HTTP Client registration
-            builder.Services.AddHttpClient<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
-            builder.Services.AddHttpClient<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
-            builder.Services.AddHttpClient<IPrivateChatGroupsApiService, PrivateChatGroupsApiService>();
-            builder.Services.AddHttpClient<IPrivateGroupMessagesApiService, PrivateGroupMessagesApiService>();
+            // Service registration
+            builder.Services.AddScoped<IPublicChatGroupsApiService, PublicChatGroupsApiService>();
+            builder.Services.AddScoped<IPublicGroupMessagesApiService, PublicGroupMessagesApiService>();
+            builder.Services.AddScoped<IPrivateChatGroupsApiService, PrivateChatGroupsApiService>();
+            builder.Services.AddScoped<IPrivateGroupMessagesApiService, PrivateGroupMessagesApiService>();
+            builder.Services.AddScoped<IChatHttpMethods, ChatHttpMethods>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
-            
-            // MudBlazor Snackbar configuration
-            builder.Services.AddMudServices(config =>
+
+			// HTTP Client registration
+			builder.Services.AddHttpClient(NamedHttpClients.PublicGroupApi, client =>
+            {
+                client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PublicChatGroupsUri")!);
+            });
+
+			builder.Services.AddHttpClient(NamedHttpClients.PublicMessageApi, client =>
+			{
+				client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PublicGroupMessagesUri")!);
+			});
+
+			builder.Services.AddHttpClient(NamedHttpClients.PrivateGroupApi, client =>
+			{
+				client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PrivateChatGroupsUri")!);
+			});
+
+			builder.Services.AddHttpClient(NamedHttpClients.PrivateMessageApi, client =>
+			{
+				client.BaseAddress = new Uri(builder.Configuration.GetValue<string>("ApiEndpointsConfig:PrivateGroupMessagesUri")!);
+			});
+
+			// MudBlazor Snackbar configuration
+			builder.Services.AddMudServices(config =>
             {
 				config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopCenter;
 				config.SnackbarConfiguration.PreventDuplicates = false;
