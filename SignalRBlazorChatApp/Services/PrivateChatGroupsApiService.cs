@@ -2,37 +2,34 @@
 using ChatApplicationModels.Dtos;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
+using SignalRBlazorChatApp.HttpMethods;
 using SignalRBlazorChatApp.Models;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace SignalRBlazorChatApp.Services
 {
-    public class PrivateChatGroupsApiService : IPrivateChatGroupsApiService
+	public class PrivateChatGroupsApiService : IPrivateChatGroupsApiService
     {
-        private HttpClient _httpClient;
-        private readonly IConfiguration _configuration;
+		private readonly IChatHttpMethods _httpMethods;
 
-        public PrivateChatGroupsApiService(HttpClient httpClient, IConfiguration configuration)
+		public PrivateChatGroupsApiService(IChatHttpMethods httpMethods)
         {
-            _httpClient = httpClient ?? throw new Exception(nameof(httpClient));
-            _configuration = configuration ?? throw new Exception(nameof(configuration));
-        }
+			_httpMethods = httpMethods ?? throw new Exception(nameof(httpMethods));
+		}
 
         public async Task<ApiResponse<List<PrivateChatGroupsDto>>> GetPrivateChatGroupsAsync(string userId, string jsonWebToken)
         {
-            _httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
-
             var query = new Dictionary<string, string>()
             {
                 ["userId"] = userId
             };
 
-            string uri = BaseUri();
-            var uriWithQuery = QueryHelpers.AddQueryString($"{uri}byuserid", query!);
-            var dataRequest = await _httpClient.GetAsync(uriWithQuery);
+            var pathWithQuery = QueryHelpers.AddQueryString($"byuserid", query!);
+
+            var dataRequest = await _httpMethods.GetAsync(jsonWebToken, NamedHttpClients.PrivateGroupApi, pathWithQuery);
 
             string jsonContent = await dataRequest.Content.ReadAsStringAsync();
+
             ApiResponse<List<PrivateChatGroupsDto>> apiResponse = JsonConvert
                 .DeserializeObject<ApiResponse<List<PrivateChatGroupsDto>>>(jsonContent)!;
 
@@ -41,16 +38,13 @@ namespace SignalRBlazorChatApp.Services
 
         public async Task<ApiResponse<PrivateChatGroupsDto>> PostNewGroup(CreatePrivateChatGroupDto createDto, string jsonWebToken)
         {
-            _httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
-
-            string baseUri = BaseUri();
-
             var bodyMessage = new StringContent(
                 JsonConvert.SerializeObject(createDto), Encoding.UTF8, "application/json");
 
-            var postRequest = await _httpClient.PostAsync(baseUri, bodyMessage);
+            var postRequest = await _httpMethods.PostAsync(jsonWebToken, NamedHttpClients.PrivateGroupApi, bodyMessage);
 
             string jsonContent = await postRequest.Content.ReadAsStringAsync();
+
             ApiResponse<PrivateChatGroupsDto> apiResponse = JsonConvert
                 .DeserializeObject<ApiResponse<PrivateChatGroupsDto>>(jsonContent)!;
 
@@ -59,16 +53,13 @@ namespace SignalRBlazorChatApp.Services
 
         public async Task<ApiResponse<PrivateChatGroupsDto>> UpdateGroup(ModifyPrivateChatGroupDto modifyDto, string jsonWebToken)
         {
-            _httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
-
-            string baseUri = BaseUri();
-
             var bodyMessage = new StringContent(
                 JsonConvert.SerializeObject(modifyDto), Encoding.UTF8, "application/json");
 
-            var updateRequest = await _httpClient.PutAsync(baseUri, bodyMessage);
+            var updateRequest = await _httpMethods.PutAsync(jsonWebToken, NamedHttpClients.PrivateGroupApi, bodyMessage);
 
-            var jsonContent = await updateRequest.Content.ReadAsStringAsync();
+			var jsonContent = await updateRequest.Content.ReadAsStringAsync();
+
             ApiResponse<PrivateChatGroupsDto> apiResponse = JsonConvert
                 .DeserializeObject<ApiResponse<PrivateChatGroupsDto>>(jsonContent)!;
 
@@ -77,21 +68,19 @@ namespace SignalRBlazorChatApp.Services
 
         public async Task<ApiResponse<PrivateChatGroupsDto>> DeleteGroup(int groupId, string jsonWebToken)
         {
-            _httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
-
             var query = new Dictionary<string, string>()
             {
                 ["groupId"] = groupId.ToString()
             };
 
-            string baseUri = BaseUri();
-            var uriWithQuery = QueryHelpers.AddQueryString(baseUri, query!);
+            var queryString = QueryHelpers.AddQueryString("", query!);
 
-            var deleteRequest = await _httpClient.DeleteAsync(uriWithQuery);
+            var deleteRequest = await _httpMethods.DeleteAsync(jsonWebToken, NamedHttpClients.PrivateGroupApi, queryString);
 
             if (!deleteRequest.IsSuccessStatusCode)
             {
                 string jsonContent = await deleteRequest.Content.ReadAsStringAsync();
+
                 ApiResponse<PrivateChatGroupsDto> apiResponse = JsonConvert
                     .DeserializeObject<ApiResponse<PrivateChatGroupsDto>>(jsonContent)!;
                 return apiResponse;
@@ -102,22 +91,20 @@ namespace SignalRBlazorChatApp.Services
 
         public async Task<ApiResponse<PrivateGroupMembers>> PostGroupMember(int groupId, string userId, string jsonWebToken)
         {
-            _httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
-
             var query = new Dictionary<string, string>()
             {
                 ["groupId"] = groupId.ToString(),
                 ["userToAddId"] = userId
             };
 
-            string baseUri = BaseUri();
-            var uriWithQuery = QueryHelpers.AddQueryString($"{baseUri}groupmember", query!);
+            var pathWithQuery = QueryHelpers.AddQueryString($"groupmember", query!);
 
             var bodyMessage = new StringContent("", Encoding.UTF8, "application/json");
 
-            var postRequest = await _httpClient.PostAsync(uriWithQuery, bodyMessage);
+            var postRequest = await _httpMethods.PostAsync(jsonWebToken, NamedHttpClients.PrivateGroupApi, bodyMessage, pathWithQuery);
 
             var jsonContent = await postRequest.Content.ReadAsStringAsync();
+
             ApiResponse<PrivateGroupMembers> apiResponse = JsonConvert
                 .DeserializeObject<ApiResponse<PrivateGroupMembers>>(jsonContent)!;
 
@@ -126,44 +113,27 @@ namespace SignalRBlazorChatApp.Services
 
         public async Task<ApiResponse<PrivateGroupMembers>> DeleteGroupMember(int groupId, string userId, string jsonWebToken)
         {
-            _httpClient = GetNewHttpClient(_httpClient, jsonWebToken);
-
             var query = new Dictionary<string, string>()
             {
                 ["groupId"] = groupId.ToString(),
                 ["userToAddId"] = userId
             };
 
-            string baseUri = BaseUri();
-            var uriWithQuery = QueryHelpers.AddQueryString($"{baseUri}groupmember", query!);
+            var pathWithQuery = QueryHelpers.AddQueryString("groupmember", query!);
 
-            var deleteRequest = await _httpClient.DeleteAsync(uriWithQuery);
+            var deleteRequest = await _httpMethods.DeleteAsync(jsonWebToken, NamedHttpClients.PrivateGroupApi, pathWithQuery);
 
             if (!deleteRequest.IsSuccessStatusCode)
             {
                 string jsonContent = await deleteRequest.Content.ReadAsStringAsync();
+
                 ApiResponse<PrivateGroupMembers> apiResponse = JsonConvert
                     .DeserializeObject<ApiResponse<PrivateGroupMembers>>(jsonContent)!;
+
                 return apiResponse;
             }
 
             return new() { Success = true, Message = "ok" };
         }
-
-        #region PRIVATE METHODS
-
-        private string BaseUri()
-        {
-            return _configuration["ApiEndpointsConfig:PrivateChatGroupsUri"]!;
-        }
-
-        private HttpClient GetNewHttpClient(HttpClient httpClient, string jsonWebToken)
-        {
-            httpClient = HttpClientFactory.Create();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonWebToken);
-            return httpClient;
-        }
-
-        #endregion
     }
 }

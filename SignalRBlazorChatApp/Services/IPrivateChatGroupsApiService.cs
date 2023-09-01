@@ -11,5 +11,6 @@ namespace SignalRBlazorChatApp.Services
         Task<ApiResponse<PrivateChatGroupsDto>> PostNewGroup(CreatePrivateChatGroupDto createDto, string jsonWebToken);
         Task<ApiResponse<PrivateGroupMembers>> PostGroupMember(int groupId, string userId, string jsonWebToken);
         Task<ApiResponse<PrivateChatGroupsDto>> UpdateGroup(ModifyPrivateChatGroupDto modifyDto, string jsonWebToken);
-    }
+		Task<ApiResponse<PrivateGroupMembers>> DeleteGroupMember(int groupId, string userId, string jsonWebToken);
+	}
 }

@@ -13,7 +13,7 @@ namespace SignalRBlazorChatApp.Services
 
         public PublicChatGroupsApiService(IChatHttpMethods httpMethods)
         {
-            _httpMethods = httpMethods;
+            _httpMethods = httpMethods ?? throw new Exception(nameof(httpMethods));
         }
 
         public async Task<ApiResponse<List<PublicChatGroupsDto>>> GetPublicChatGroupsAsync(string jsonWebToken)

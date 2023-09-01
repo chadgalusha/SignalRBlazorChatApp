@@ -29,6 +29,12 @@ namespace SignalRBlazorChatApp.HttpMethods
 			return await client.PostAsync("", bodyMessage);
 		}
 
+		public async Task<HttpResponseMessage> PostAsync(string jsonWebToken, string httpClient, StringContent bodyMessage, string path)
+		{
+			var client = GetClient(jsonWebToken, httpClient);
+			return await client.PostAsync(path, bodyMessage);
+		}
+
 		public async Task<HttpResponseMessage> PutAsync(string jsonWebToken, string httpClient, StringContent bodyMessage)
 		{
 			var client = GetClient(jsonWebToken, httpClient);
