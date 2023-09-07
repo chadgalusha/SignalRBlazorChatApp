@@ -6,7 +6,7 @@ using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Publ
 
 namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicChatGroups
 {
-    public class PublicChatGroupsDataAccess_UnitTests : IClassFixture<PublicChatGroupsDatabaseFixture>
+	public class PublicChatGroupsDataAccess_UnitTests : IClassFixture<PublicChatGroupsDatabaseFixture>
     {
         public PublicChatGroupsDatabaseFixture Fixture { get; }
         private readonly PublicChatGroupsDataAccess _dataAccess;
@@ -173,6 +173,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicC
             _context.ChangeTracker.Clear();
 
             bool chatGroupExists = _dataAccess.GroupExists(chatGroupId);
+
             Assert.Multiple(() =>
             {
                 Assert.True(resultOfDelete);

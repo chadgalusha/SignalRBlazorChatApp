@@ -3,9 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroupsTests.PrivateChatGroupsDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroups.PrivateChatGroupsDatabaseFixture;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroupsTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroups
 {
     public class PrivateChatGroupsDataAccess_UnitTests : IClassFixture<PrivateChatGroupsDatabaseFixture>
     {

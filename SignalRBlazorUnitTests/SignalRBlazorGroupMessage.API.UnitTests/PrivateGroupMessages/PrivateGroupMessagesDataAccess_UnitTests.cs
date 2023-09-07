@@ -1,14 +1,12 @@
-﻿using ChatApplicationModels;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateMessagesTests;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateMessagesTests.PrivateGroupMessagesDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateGroupMessages.PrivateGroupMessagesDatabaseFixture;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateGroupMessagesTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateGroupMessages
 {
-    public class PrivateGroupMessagesDataAccess_UnitTests : IClassFixture<PrivateGroupMessagesDatabaseFixture>
+	public class PrivateGroupMessagesDataAccess_UnitTests : IClassFixture<PrivateGroupMessagesDatabaseFixture>
     {
         public PrivateGroupMessagesDatabaseFixture Fixture { get; }
         private readonly PrivateGroupMessagesDataAccess _dataAccess;
@@ -93,7 +91,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
         {
             Guid messageId = _context.PrivateGroupMessages.First().PrivateMessageId;
             
-            PrivateGroupMessages result = await _dataAccess.GetByMessageIdAsync(messageId);
+            ChatApplicationModels.PrivateGroupMessages result = await _dataAccess.GetByMessageIdAsync(messageId);
 
             Assert.Equal(messageId, result.PrivateMessageId);
         }
@@ -117,7 +115,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
         [Fact]
         public async Task AddAsync_IsSuccess()
         {
-            PrivateGroupMessages newMessage = GetNewMessage();
+			ChatApplicationModels.PrivateGroupMessages newMessage = GetNewMessage();
             Guid newMessageId = newMessage.PrivateMessageId;
 
             _context.Database.BeginTransaction();
@@ -137,7 +135,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
         [Fact]
         public async Task ModifyAsync_IsSuccess()
         {
-            PrivateGroupMessages messageToModify = _context.PrivateGroupMessages.First();
+			ChatApplicationModels.PrivateGroupMessages messageToModify = _context.PrivateGroupMessages.First();
             string newMessage = "modified message";
             messageToModify.Text = newMessage;
 
@@ -158,7 +156,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
         [Fact]
         public async Task DeleteAsync_IsSuccess()
         {
-            PrivateGroupMessages messageToDelete = _context.PrivateGroupMessages.First();
+            ChatApplicationModels.PrivateGroupMessages messageToDelete = _context.PrivateGroupMessages.First();
 
             _context.Database.BeginTransaction();
             bool result = await _dataAccess.DeleteAsync(messageToDelete);
@@ -216,7 +214,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
 
         #region PRIVATE METHODS
 
-        private PrivateGroupMessages GetNewMessage()
+        private ChatApplicationModels.PrivateGroupMessages GetNewMessage()
         {
             return new()
             {

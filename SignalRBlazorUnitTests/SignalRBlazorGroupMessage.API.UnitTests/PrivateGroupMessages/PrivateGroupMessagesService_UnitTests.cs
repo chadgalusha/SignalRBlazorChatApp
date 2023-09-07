@@ -1,13 +1,12 @@
-﻿using ChatApplicationModels;
-using Moq;
+﻿using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateGroupMessagesTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateGroupMessages
 {
-    public class PrivateGroupMessagesService_UnitTests
+	public class PrivateGroupMessagesService_UnitTests
     {
         private readonly Mock<IPrivateGroupMessagesDataAccess> _mockDataAccess;
         private readonly Mock<ISerilogger> _mockSerilogger;
@@ -94,9 +93,9 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
         public async Task AddAsync_IsSuccess()
         {
             CreatePrivateGroupMessageDto createDto = GetCreateDto();
-            PrivateGroupMessages newMessage = GetNewModel(createDto);
+            ChatApplicationModels.PrivateGroupMessages newMessage = GetNewModel(createDto);
 
-            _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<PrivateGroupMessages>()))
+            _mockDataAccess.Setup(p => p.AddAsync(It.IsAny<ChatApplicationModels.PrivateGroupMessages>()))
                 .ReturnsAsync(true);
 
             PrivateGroupMessagesService _service = GetNewService();
@@ -117,7 +116,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
 
             _mockDataAccess.Setup(p => p.GetByMessageIdAsync(dtoToModify.PrivateMessageId))
                 .ReturnsAsync(DtoToModel(GetListPrivateMessagesDto().First()));
-            _mockDataAccess.Setup(p => p.ModifyAsync(It.IsAny<PrivateGroupMessages>()))
+            _mockDataAccess.Setup(p => p.ModifyAsync(It.IsAny<ChatApplicationModels.PrivateGroupMessages>()))
                 .ReturnsAsync(true);
             _mockDataAccess.Setup(p => p.GetDtoByMessageIdAsync(dtoToModify.PrivateMessageId))
                 .ReturnsAsync(returnDto);
@@ -145,7 +144,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
                         .Single(m => m.PrivateMessageId == messageId)));
             _mockDataAccess.Setup(p => p.DeleteMessagesByReplyMessageIdAsync(messageId))
                 .ReturnsAsync(true);
-            _mockDataAccess.Setup(p => p.DeleteAsync(It.IsAny<PrivateGroupMessages>()))
+            _mockDataAccess.Setup(p => p.DeleteAsync(It.IsAny<ChatApplicationModels.PrivateGroupMessages>()))
                 .ReturnsAsync(true);
 
             PrivateGroupMessagesService _service = GetNewService();
@@ -249,7 +248,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             };
         }
 
-        private PrivateGroupMessages GetNewModel(CreatePrivateGroupMessageDto createDto)
+        private ChatApplicationModels.PrivateGroupMessages GetNewModel(CreatePrivateGroupMessageDto createDto)
         {
             return new()
             {
@@ -263,7 +262,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
             };
         }
 
-        private PrivateGroupMessages DtoToModel(PrivateGroupMessageDto dto)
+        private ChatApplicationModels.PrivateGroupMessages DtoToModel(PrivateGroupMessageDto dto)
         {
             return new()
             {

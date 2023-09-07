@@ -1,11 +1,10 @@
-﻿using ChatApplicationModels;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateMessagesTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateGroupMessages
 {
-    public class PrivateGroupMessagesDatabaseFixture
+	public class PrivateGroupMessagesDatabaseFixture
     {
         private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=PublicMessagesTestSample;Trusted_Connection=True";
 
@@ -46,7 +45,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Private
                     .UseSqlServer(ConnectionString)
                     .Options);
 
-        private List<PrivateGroupMessages> GetListPrivateMessages()
+        private List<ChatApplicationModels.PrivateGroupMessages> GetListPrivateMessages()
         {
             return new()
             {

@@ -6,7 +6,7 @@ using SignalRBlazorGroupsMessages.API.Models;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 using SignalRBlazorGroupsMessages.API.Services;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
 {
     public class PublicGroupMessagesController_UnitTests
     {

@@ -6,7 +6,7 @@ using SignalRBlazorChatApp.Models;
 using ChatApplicationModels.Dtos;
 using SignalRBlazorChatApp.Services;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
+namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.Services
 {
 	public class PrivateChatGroupsApiService_UnitTests
 	{

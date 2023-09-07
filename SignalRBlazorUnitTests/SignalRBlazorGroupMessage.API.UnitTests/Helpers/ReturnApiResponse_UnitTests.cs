@@ -1,7 +1,7 @@
 ﻿using SignalRBlazorGroupsMessages.API.Helpers;
 using SignalRBlazorGroupsMessages.API.Models;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.HelperTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.Helpers
 {
     public class ReturnApiResponse_UnitTests
     {

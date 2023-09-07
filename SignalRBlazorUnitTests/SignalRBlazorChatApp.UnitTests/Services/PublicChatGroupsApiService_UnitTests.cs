@@ -6,7 +6,7 @@ using SignalRBlazorChatApp.Models;
 using ChatApplicationModels.Dtos;
 using System.Net.Http.Formatting;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
+namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.Services
 {
 	public class PublicChatGroupsApiService_UnitTests
 	{

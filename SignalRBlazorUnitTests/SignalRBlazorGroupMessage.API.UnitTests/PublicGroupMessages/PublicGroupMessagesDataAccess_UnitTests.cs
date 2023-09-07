@@ -3,9 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SignalRBlazorGroupsMessages.API.DataAccess;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
-using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests.PublicGroupMessagesDatabaseFixture;
+using static SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages.PublicGroupMessagesDatabaseFixture;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessagesTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PublicMessages
 {
     public class PublicGroupMessagesDataAccess_UnitTests : IClassFixture<PublicGroupMessagesDatabaseFixture>
     {

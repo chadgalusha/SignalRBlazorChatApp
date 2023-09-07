@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SignalRBlazorGroupsMessages.API.Data;
 using SignalRBlazorGroupsMessages.API.Models.Dtos;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroupsTests
+namespace SignalRBlazorUnitTests.SignalRBlazorGroupMessage.API.UnitTests.PrivateChatGroups
 {
     public class PrivateChatGroupsDatabaseFixture
     {

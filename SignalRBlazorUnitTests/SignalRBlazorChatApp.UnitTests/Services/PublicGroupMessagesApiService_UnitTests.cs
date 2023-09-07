@@ -6,13 +6,13 @@ using System.Net.Http.Formatting;
 using System.Net;
 using ChatApplicationModels.Dtos;
 
-namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
+namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.Services
 {
-	public class PrivateGroupMessagesApiService_UnitTests
+	public class PublicGroupMessagesApiService_UnitTests
 	{
 		private Mock<IChatHttpMethods> _mockChatHttpMethods;
 
-		public PrivateGroupMessagesApiService_UnitTests()
+		public PublicGroupMessagesApiService_UnitTests()
 		{
 			_mockChatHttpMethods = new Mock<IChatHttpMethods>();
 		}
@@ -20,17 +20,17 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task GetMessagesByGroupId_ReturnsTrue()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new();
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
 			string testToken = "";
 
 			HttpResponseMessage httpResponseMessage = new()
 			{
 				StatusCode = HttpStatusCode.OK,
-				Content = new ObjectContent<ApiResponse<List<PrivateGroupMessageDto>>>(
+				Content = new ObjectContent<ApiResponse<List<PublicGroupMessageDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
 
-			_mockChatHttpMethods.Setup(g => g.GetAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<string>()))
+			_mockChatHttpMethods.Setup(g => g.GetAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<string>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -43,7 +43,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task GetMessagesByGroupId_ReturnsFalse()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new()
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new()
 			{
 				Success = false,
 				Message = "bad"
@@ -53,11 +53,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 			HttpResponseMessage httpResponseMessage = new()
 			{
 				StatusCode = HttpStatusCode.BadRequest,
-				Content = new ObjectContent<ApiResponse<List<PrivateGroupMessageDto>>>(
+				Content = new ObjectContent<ApiResponse<List<PublicGroupMessageDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
 
-			_mockChatHttpMethods.Setup(g => g.GetAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<string>()))
+			_mockChatHttpMethods.Setup(g => g.GetAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<string>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -70,17 +70,17 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task PostNewMessage_ReturnsTrue()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new();
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
 			string testToken = "";
 
 			HttpResponseMessage httpResponseMessage = new()
 			{
 				StatusCode = HttpStatusCode.OK,
-				Content = new ObjectContent<ApiResponse<List<PrivateGroupMessageDto>>>(
+				Content = new ObjectContent<ApiResponse<List<PublicGroupMessageDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
 
-			_mockChatHttpMethods.Setup(p => p.PostAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<StringContent>()))
+			_mockChatHttpMethods.Setup(p => p.PostAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<StringContent>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -93,7 +93,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task PostNewMessage_ReturnsFalse()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new()
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new()
 			{
 				Success = false,
 				Message = "bad"
@@ -103,11 +103,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 			HttpResponseMessage httpResponseMessage = new()
 			{
 				StatusCode = HttpStatusCode.BadRequest,
-				Content = new ObjectContent<ApiResponse<List<PrivateGroupMessageDto>>>(
+				Content = new ObjectContent<ApiResponse<List<PublicGroupMessageDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
 
-			_mockChatHttpMethods.Setup(p => p.PostAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<StringContent>()))
+			_mockChatHttpMethods.Setup(p => p.PostAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<StringContent>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -120,17 +120,17 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task UpdateMessage_ReturnsTrue()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new();
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
 			string testToken = "";
 
 			HttpResponseMessage httpResponseMessage = new()
 			{
 				StatusCode = HttpStatusCode.OK,
-				Content = new ObjectContent<ApiResponse<List<PrivateGroupMessageDto>>>(
+				Content = new ObjectContent<ApiResponse<List<PublicGroupMessageDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
 
-			_mockChatHttpMethods.Setup(p => p.PutAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<StringContent>()))
+			_mockChatHttpMethods.Setup(p => p.PutAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<StringContent>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -143,7 +143,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task UpdateMessage_ReturnsFalse()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new()
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new()
 			{
 				Success = false,
 				Message = "bad"
@@ -153,11 +153,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 			HttpResponseMessage httpResponseMessage = new()
 			{
 				StatusCode = HttpStatusCode.NotFound,
-				Content = new ObjectContent<ApiResponse<List<PrivateGroupMessageDto>>>(
+				Content = new ObjectContent<ApiResponse<List<PublicGroupMessageDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
 
-			_mockChatHttpMethods.Setup(p => p.PutAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<StringContent>()))
+			_mockChatHttpMethods.Setup(p => p.PutAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<StringContent>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -170,7 +170,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task DeleteMessage_ReturnsTrue()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new();
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new();
 			string testToken = "";
 
 			HttpResponseMessage httpResponseMessage = new()
@@ -178,7 +178,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 				StatusCode = HttpStatusCode.NoContent
 			};
 
-			_mockChatHttpMethods.Setup(d => d.DeleteAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<string>()))
+			_mockChatHttpMethods.Setup(d => d.DeleteAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<string>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -191,7 +191,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 		[Fact]
 		public async Task DeleteMessage_ReturnsFalse()
 		{
-			ApiResponse<List<PrivateGroupMessageDto>> apiResponse = new()
+			ApiResponse<List<PublicGroupMessageDto>> apiResponse = new()
 			{
 				Success = false,
 				Message = "bad"
@@ -201,11 +201,11 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 			HttpResponseMessage httpResponseMessage = new()
 			{
 				StatusCode = HttpStatusCode.NotFound,
-				Content = new ObjectContent<ApiResponse<List<PrivateGroupMessageDto>>>(
+				Content = new ObjectContent<ApiResponse<List<PublicGroupMessageDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
 
-			_mockChatHttpMethods.Setup(d => d.DeleteAsync(testToken, NamedHttpClients.PrivateMessageApi, It.IsAny<string>()))
+			_mockChatHttpMethods.Setup(d => d.DeleteAsync(testToken, NamedHttpClients.PublicMessageApi, It.IsAny<string>()))
 				.ReturnsAsync(httpResponseMessage);
 
 			var service = GetNewService();
@@ -217,7 +217,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 
 		#region PRIVATE METHODS
 
-		private PrivateGroupMessagesApiService GetNewService()
+		private PublicGroupMessagesApiService GetNewService()
 		{
 			return new(_mockChatHttpMethods.Object);
 		}
