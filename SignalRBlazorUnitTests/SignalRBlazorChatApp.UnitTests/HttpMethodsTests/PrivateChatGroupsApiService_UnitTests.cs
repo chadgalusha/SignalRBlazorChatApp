@@ -103,7 +103,7 @@ namespace SignalRBlazorUnitTests.SignalRBlazorChatApp.UnitTests.HttpMethodsTests
 
 			HttpResponseMessage httpResponseMessage = new()
 			{
-				StatusCode = HttpStatusCode.NotFound,
+				StatusCode = HttpStatusCode.BadRequest,
 				Content = new ObjectContent<ApiResponse<List<PrivateChatGroupsDto>>>(
 					apiResponse, new JsonMediaTypeFormatter(), "application/json")
 			};
