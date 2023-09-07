@@ -38,7 +38,6 @@ namespace SignalRBlazorChatApp.HttpMethods
 		public async Task<HttpResponseMessage> PutAsync(string jsonWebToken, string httpClient, StringContent bodyMessage)
 		{
 			var client = GetClient(jsonWebToken, httpClient);
-			client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jsonWebToken);
 			return await client.PutAsync("", bodyMessage);
 		}
 
